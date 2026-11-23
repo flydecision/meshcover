@@ -29,7 +29,13 @@ La ayuda completa está dentro de la propia página (botón de ayuda).
 
 ## Desarrollo
 
-Es un único archivo, `index.html`, con todo dentro (HTML, CSS y JavaScript). Usa [Leaflet](https://leafletjs.com) desde CDN. Para probar cambios basta con abrirlo en Chrome; para el Bluetooth y el GPS hace falta servirlo por `https` o `localhost`.
+```
+src/index.html   la web completa (HTML, CSS y JavaScript en un solo archivo)
+```
+
+Usa [Leaflet](https://leafletjs.com) desde CDN. Para probar cambios basta con abrir `src/index.html` en Chrome; para el Bluetooth y el GPS hace falta servirlo por `https` o `localhost`.
+
+La carpeta `src/` es la que se publica en la web y la que usará la futura app Android.
 
 ## Licencia
 
