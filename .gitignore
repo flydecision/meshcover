@@ -1,0 +1,27 @@
+# Configuración de VS Code (aquí va sftp.json con la contraseña de Hostinger)
+.vscode/
+**/sftp.json
+.env
+
+# Dependencias y compilación (para la futura app Android)
+node_modules/
+package-lock.json
+dist/
+build/
+www/
+android/build/
+android/app/build/
+.gradle/
+local.properties
+*.keystore
+*.jks
+
+# Datos de pruebas de campo (pueden llevar tu ubicación)
+*.csv
+*.gpx
+
+# Sistema y logs
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
