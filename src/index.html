@@ -177,11 +177,7 @@
   </div>
   <div id="map"></div>
   <div class="legend">
-    <span><i style="background:#1fa64a"></i>SNR ≥ 5</span>
-    <span><i style="background:#9acd32"></i>0 <span data-i18n="to">to</span> 5</span>
-    <span><i style="background:#f2c230"></i>−5 <span data-i18n="to">to</span> 0</span>
-    <span><i style="background:#f07f2e"></i>−10 <span data-i18n="to">to</span> −5</span>
-    <span><i style="background:#d7352b"></i>&lt; −10</span>
+    <span id="lgScale" style="display:contents"></span>
     <span><i style="background:#2f7df6;border-radius:2px;height:4px;width:16px;vertical-align:3px;border:0"></i><span data-i18n="track">Track</span></span>
     <span id="lgNone" hidden><i style="background:rgba(26,29,34,.6);border-radius:1px;border:1px solid #555"></i><span data-i18n="noRx">No reception</span></span>
     <span id="lgRelay" hidden></span>
@@ -229,7 +225,7 @@
       </ol>
       <h3>📊 Qué obtienes</h3>
       <ul>
-        <li>Un punto por paquete recibido, de color según la señal: <b>verde</b> buena, <b>amarillo</b> justa, <b>rojo</b> al límite.</li>
+        <li>Un punto por paquete recibido, de color según la señal: <b>verde</b> buena, <b>amarillo</b> justa, <b>rojo</b> al límite. Si el registro trae el SF (lo vuelca la app al conectar), el color es el <b>margen</b>: cuántos dB sobran sobre el límite de ese SF (−7,5 dB a SF7 … −20 dB a SF12), así se pueden comparar pruebas con distinto SF.</li>
         <li>La vista <b>🔳 Cuadrícula</b>: la zona en celdas con la señal de cada una, y en <b>gris oscuro translúcido</b> las celdas por las que pasaste sin recibir nada. El color usa solo lo recibido en directo; una celda <b>gris con borde de color</b> es que allí solo llegó lo repetido por otro nodo (el borde es la señal del último salto).</li>
         <li>Puedes abrir varios registros a la vez (de varios días o de otras personas): se suman en el mapa.</li>
       </ul>
@@ -253,7 +249,7 @@
       </ol>
       <h3>Controles</h3>
       <ul>
-        <li><b>Nodo</b>: muestra solo los paquetes de un nodo.</li>
+        <li><b>Nodo</b>: en <b>📡 Enviado por</b>, los paquetes que envió un nodo. En <b>📶 Oído directamente</b>, lo que oíste directamente de un nodo, aunque fuera repitiendo paquetes de otros: su SNR sí es de ese nodo, así que es su cobertura real. «Mejor señal de cualquier nodo» pinta en cada celda el nodo que mejor se oye: la cobertura de la red.</li>
         <li><b>Saltos</b>: deslizador doble con mínimo y máximo. Al abrir la página empieza en 0–7 (todo). 0–0 = solo lo que llega <b>directo</b>, que es lo que mide la cobertura de cada nodo. Sube el máximo para ver también lo repetido por otros nodos, o el mínimo para ver <b>solo</b> lo repetido. Lo repetido sale como <b>cuadrado negro</b>: su SNR es el del último salto, no el del nodo de origen.</li>
         <li><b>🗑 Limpiar</b>: quita del mapa todo lo abierto.</li>
         <li>En el mapa: capas (topográfico, satélite, relieve…) y ⛶ pantalla completa.</li>
@@ -291,7 +287,7 @@
       </ol>
       <h3>📊 What you get</h3>
       <ul>
-        <li>One dot per received packet, coloured by signal: <b>green</b> good, <b>yellow</b> fair, <b>red</b> at the limit.</li>
+        <li>One dot per received packet, coloured by signal: <b>green</b> good, <b>yellow</b> fair, <b>red</b> at the limit. If the log includes the SF (the app writes it when it connects), the colour is the <b>margin</b>: how many dB are left above that SF's limit (−7.5 dB at SF7 … −20 dB at SF12), so tests with different SF can be compared.</li>
         <li>The <b>🔳 Grid</b> view: the area split into cells with the signal of each one, and in <b>translucent dark grey</b> the cells you passed through without receiving anything. The colour only uses packets received directly; a <b>grey cell with a coloured border</b> means only packets relayed by another node arrived there (the border is the signal of the last hop).</li>
         <li>You can open several logs at once (from different days or people): they add up on the map.</li>
       </ul>
@@ -315,7 +311,7 @@
       </ol>
       <h3>Controls</h3>
       <ul>
-        <li><b>Node</b>: shows only the packets of one node.</li>
+        <li><b>Node</b>: under <b>📡 Sent by</b>, the packets a node sent. Under <b>📶 Heard directly</b>, what you heard directly from a node, even when it was relaying other nodes' packets: that SNR does belong to that node, so it is its real coverage. «Best signal of any node» paints each cell with the node heard best: the coverage of the mesh.</li>
         <li><b>Hops</b>: double slider with minimum and maximum. It starts at 0–7 (everything). 0–0 = only what arrives <b>directly</b>, which is what measures each node's coverage. Raise the maximum to also see packets relayed by other nodes, or the minimum to see <b>only</b> relayed ones. Relayed packets show as a <b>black square</b>: their SNR is the last hop's, not the origin node's.</li>
         <li><b>🗑 Clear</b>: removes everything opened from the map.</li>
         <li>On the map: layers (topographic, satellite, hillshade…) and ⛶ full screen.</li>
@@ -406,6 +402,10 @@ const I18N = {
     errEmpty: "the file is empty", errCsv: "it does not look like a CSV from this page",
     errNoPkts: "there are no packets received over the radio in the file", errGpx: "the file is not a valid GPX",
     errNoTrack: "it has no track points", errOpen: (f, m) => "Could not open " + f + ": " + m,
+    grpHeard: "📶 Heard directly", grpSender: "📡 Sent by", bestAll: "Best signal of any node",
+    heardFrom: "Heard directly from", marginTxt: m => "margin " + m + " dB", lgMargin: "Margin",
+    medMargin: (m, w, b) => "Median margin " + m + " dB (worst " + w + ", best " + b + ")",
+    bestNode: n => "Best node: " + n, nNodes: n => n + " nodes heard", sfLimitTxt: (sf, l) => "SF" + sf + " limit " + l + " dB",
     restore: "Restore", maximize: "Maximize map",
     directPl: "direct", lastPos: "Last position", lastHeard: "Last heard", relayedWord: "relayed", maxDist: "Max distance"
   },
@@ -437,6 +437,10 @@ const I18N = {
     errEmpty: "el archivo está vacío", errCsv: "no parece un CSV de esta página",
     errNoPkts: "no hay paquetes recibidos por radio en el archivo", errGpx: "el archivo no es un GPX válido",
     errNoTrack: "no tiene puntos de recorrido", errOpen: (f, m) => "No se pudo abrir " + f + ": " + m,
+    grpHeard: "📶 Oído directamente", grpSender: "📡 Enviado por", bestAll: "Mejor señal de cualquier nodo",
+    heardFrom: "Oído directamente de", marginTxt: m => "margen " + m + " dB", lgMargin: "Margen",
+    medMargin: (m, w, b) => "Margen mediano " + m + " dB (peor " + w + ", mejor " + b + ")",
+    bestNode: n => "Mejor nodo: " + n, nNodes: n => n + " nodos oídos", sfLimitTxt: (sf, l) => "SF" + sf + " límite " + l + " dB",
     restore: "Volver", maximize: "Maximizar mapa",
     directPl: "directos", lastPos: "Última posición", lastHeard: "Último paquete", relayedWord: "con saltos", maxDist: "Distancia máxima"
   }
@@ -458,7 +462,7 @@ function applyLang() {
 function setLang(l) {
   lang = l === "es" ? "es" : "en";
   try { localStorage.setItem("meshtastic_lang", lang); } catch (e) {}
-  applyLang();
+  applyLang(); drawLegendScale(null);
   if (typeof showHelpPage === "function") showHelpPage(helpPage);
   if (map) { addLayersControl(); updateMaxBtn(); }
   $("selFrom").dataset.keys = "";
@@ -493,31 +497,78 @@ function say(t, ms) {
 }
 function fmtFecha(ms) { const d = new Date(ms), p = n => String(n).padStart(2, "0"); return p(d.getDate()) + "/" + p(d.getMonth() + 1) + "/" + String(d.getFullYear()).slice(2); }
 function hexId(n) { return "!" + (n >>> 0).toString(16).padStart(8, "0"); }
+// Filtro del selector: "" todos · "N" enviados por el nodo N · "h*" oídos directamente (mejor nodo) · "hN" oídos directamente de N
+function heardMode() { return selFrom.startsWith("h"); }
 function rowsView() {
+  const all = fileRows || [];
+  if (selFrom === "h*") return all.filter(r => r.heard != null && passHops(r));
+  if (heardMode()) { const h = Number(selFrom.slice(1)); return all.filter(r => r.heard === h && passHops(r)); }
   const f = selFrom ? Number(selFrom) : null;
-  return (fileRows || []).filter(r => (f === null || r.from === f) && passHops(r));
+  return all.filter(r => (f === null || r.from === f) && passHops(r));
 }
+// Margen sobre el límite de descodificación de LoRa, que depende del SF (SF7 −7,5 dB … SF12 −20 dB)
+function sfLimit(sf) { return -7.5 - 2.5 * (sf - 7); }
+function marginOf(r) { return (r.snr == null || isNaN(r.snr) || !r.sf) ? null : r.snr - sfLimit(r.sf); }
+function marginColor(m) {
+  if (m === null || m === undefined || isNaN(m)) return "#8a94a3";
+  if (m >= 10) return "#1fa64a";
+  if (m >= 6) return "#9acd32";
+  if (m >= 3) return "#f2c230";
+  if (m >= 0) return "#f07f2e";
+  return "#d7352b";
+}
+let useMargin = false;   // se colorea por margen si todo lo mostrado tiene SF conocido
+function sigOf(r) { return useMargin ? marginOf(r) : r.snr; }
+function sigColor(v) { return useMargin ? marginColor(v) : snrColor(v); }
+let nodePos = new Map();   // nodo → última posición conocida {lat, lon}
+function distFor(r) {
+  if (!heardMode()) return r.dist;
+  const p = nodePos.get(r.heard);
+  return (p && r.rxLat != null && !isNaN(r.rxLat)) ? RT.haversineM(p.lat, p.lon, r.rxLat, r.rxLon) : null;
+}
+// Leyenda de colores: por SNR, o por margen sobre el límite del SF (sfs = SF presentes)
+function drawLegendScale(sfs) {
+  const to = " " + esc(t("to")) + " ", sw = c => '<span><i style="background:' + c + '"></i>';
+  const minus = v => String(v).replace("-", "−");
+  $("lgScale").innerHTML = sfs
+    ? sw("#1fa64a") + esc(t("lgMargin")) + " ≥ 10 dB</span>" + sw("#9acd32") + "6" + to + "10</span>" + sw("#f2c230") + "3" + to + "6</span>" +
+      sw("#f07f2e") + "0" + to + "3</span>" + sw("#d7352b") + "&lt; 0</span>" +
+      '<span class="lgsf">(' + sfs.map(sf => esc(t("sfLimitTxt", sf, minus(sfLimit(sf))))).join(", ") + ")</span>"
+    : sw("#1fa64a") + "SNR ≥ 5</span>" + sw("#9acd32") + "0" + to + "5</span>" + sw("#f2c230") + "−5" + to + "0</span>" +
+      sw("#f07f2e") + "−10" + to + "−5</span>" + sw("#d7352b") + "&lt; −10</span>";
+}
+function fmtDist(d) { return d == null || isNaN(d) ? "—" : (d >= 1000 ? (d / 1000).toFixed(2) + " km" : Math.round(d) + " m"); }
 let bestNames = new Map();   // nodo → mejor nombre conocido (para tabla y popups)
 function nodeName(r) { return (r.from != null && bestNames.get(r.from)) || r.name || (r.from != null ? hexId(r.from) : ""); }
 function refreshFromSelect() {
   // Nodos de los archivos abiertos, los más oídos primero
-  const sel = $("selFrom"), seen = new Map(), count = new Map();
+  const sel = $("selFrom"), seen = new Map(), count = new Map(), heardCount = new Map();
   const all = fileRows || [];
+  nodePos = new Map();
   for (const r of all) {
     if (r.from === null || r.from === undefined) continue;
     // el mejor nombre conocido del nodo: «corto - largo» si lo hay
     const cur = seen.get(r.from);
     if (!seen.has(r.from) || (r.name && (!cur || (!cur.includes(" - ") && r.name.includes(" - "))))) seen.set(r.from, r.name || "");
     count.set(r.from, (count.get(r.from) || 0) + 1);
+    if (r.senderLat != null && !(r.senderLat === 0 && r.senderLon === 0)) nodePos.set(r.from, { lat: r.senderLat, lon: r.senderLon });
+    if (r.heard != null) heardCount.set(r.heard, (heardCount.get(r.heard) || 0) + 1);
   }
+  for (const r of all) if (r.heard != null && !seen.has(r.heard)) seen.set(r.heard, r.heardName || "");
   bestNames = seen;
-  const keys = [...seen.keys()].sort((a, b) => count.get(b) - count.get(a));
-  const want = [lang, ...keys.map(k => k + ":" + count.get(k))].join("|");
-  if (sel.dataset.keys === want) return;
-  sel.dataset.keys = want;
-  sel.innerHTML = '<option value="">' + esc(t("allNodes")) + '</option>' +
-    keys.map(n => { const name = seen.get(n); return '<option value="' + n + '">' + esc((name ? name + " " : "") + "(" + hexId(n) + ") · " + count.get(n) + (count.get(n) === 1 ? " packet" : " packets")) + "</option>"; }).join("");
-  sel.value = seen.has(Number(selFrom)) ? selFrom : "";
+  const label = (n, c) => { const name = seen.get(n); return esc((name ? name + " " : "") + "(" + hexId(n) + ") · " + c + (c === 1 ? " packet" : " packets")); };
+  const keys = [...count.keys()].sort((a, b) => count.get(b) - count.get(a));
+  const hkeys = [...heardCount.keys()].sort((a, b) => heardCount.get(b) - heardCount.get(a));
+  const want = [lang, ...keys.map(k => k + ":" + count.get(k)), "|h", ...hkeys.map(k => k + ":" + heardCount.get(k))].join("|");
+  if (sel.dataset.keys !== want) {
+    sel.dataset.keys = want;
+    sel.innerHTML = '<option value="">' + esc(t("allNodes")) + '</option>' +
+      (hkeys.length ? '<optgroup label="' + esc(t("grpHeard")) + '"><option value="h*">' + esc(t("bestAll")) + '</option>' +
+        hkeys.map(n => '<option value="h' + n + '">' + label(n, heardCount.get(n)) + "</option>").join("") + "</optgroup>" : "") +
+      '<optgroup label="' + esc(t("grpSender")) + '">' + keys.map(n => '<option value="' + n + '">' + label(n, count.get(n)) + "</option>").join("") + "</optgroup>";
+  }
+  const ok = selFrom === "" || (selFrom === "h*" && hkeys.length) || (heardMode() ? heardCount.has(Number(selFrom.slice(1))) : count.has(Number(selFrom)));
+  sel.value = ok ? selFrom : "";
   if (sel.value !== selFrom) { selFrom = sel.value; }
 }
 function render() {
@@ -527,7 +578,8 @@ function render() {
   let bestSnr = null, maxD = null;
   for (const r of rows) {
     if (r.snr !== null && (bestSnr === null || r.snr > bestSnr)) bestSnr = r.snr;
-    if (r.dist !== null && (maxD === null || r.dist > maxD)) maxD = r.dist;
+    const d = distFor(r);
+    if (d != null && !isNaN(d) && (maxD === null || d > maxD)) maxD = d;
   }
   $("sSnr").textContent = bestSnr === null ? "—" : bestSnr.toFixed(1);
   $("sDist").textContent = maxD === null ? "—" : (maxD / 1000).toFixed(1);
@@ -839,14 +891,20 @@ function buildGrid(rows, tracks, size) {
   const mLat = 111320, mLon = 111320 * Math.cos(latRef * Math.PI / 180);
   const key = (lat, lon) => Math.floor(lat * mLat / size) + ":" + Math.floor(lon * mLon / size);
   const cells = new Map();
-  const cell = k => { if (!cells.has(k)) cells.set(k, { k, snr: [], rssi: [], snrRelay: [], n: 0, nRelay: 0, ms: 0, visited: false }); return cells.get(k); };
+  const cell = k => { if (!cells.has(k)) cells.set(k, { k, snr: [], rssi: [], snrRelay: [], by: new Map(), n: 0, nRelay: 0, ms: 0, visited: false }); return cells.get(k); };
+  const heard = heardMode();
   for (const r of rows) {
     if (r.rxLat == null || r.rxLon == null || isNaN(r.rxLat)) continue;
     const c = cell(key(r.rxLat, r.rxLon));
     c.n++; c.visited = true;
     // repetido por otro nodo: cuenta como recibido, pero su SNR/RSSI es del último salto y no entra en la mediana
-    if (r.hops != null && r.hops > 0) { c.nRelay++; if (r.snr != null && !isNaN(r.snr)) c.snrRelay.push(r.snr); continue; }
-    if (r.snr != null && !isNaN(r.snr)) c.snr.push(r.snr);
+    // (en «oído directamente» sí vale: es la señal del nodo que se oyó)
+    const v = sigOf(r);
+    if (!heard && r.hops != null && r.hops > 0) { c.nRelay++; if (v != null && !isNaN(v)) c.snrRelay.push(v); continue; }
+    if (v != null && !isNaN(v)) {
+      c.snr.push(v);
+      if (r.heard != null) { if (!c.by.has(r.heard)) c.by.set(r.heard, []); c.by.get(r.heard).push(v); }
+    }
     if (r.rssi != null && !isNaN(r.rssi)) c.rssi.push(r.rssi);
   }
   for (const t of tracks) {
@@ -889,7 +947,10 @@ function drawMap(fit, fromZoom) {
   mapDirty = false;
   mapLayer.clearLayers();
   const rows = mapRows(), tracks = mapTracks(), pts = [];
-  const grid = mapView === "grid";
+  const grid = mapView === "grid", heard = heardMode(), best = selFrom === "h*";
+  const withSnr = rows.filter(r => r.snr != null && !isNaN(r.snr));
+  useMargin = withSnr.length > 0 && withSnr.every(r => r.sf);
+  drawLegendScale(useMargin ? [...new Set(withSnr.map(r => r.sf))].sort((a, b) => a - b) : null);
   showView();
   $("lgNone").hidden = !grid;
   $("lgRelay").innerHTML = grid
@@ -899,36 +960,40 @@ function drawMap(fit, fromZoom) {
   // cuadrícula (debajo de todo)
   let nCells = 0, nEmpty = 0;
   if (grid) {
-    const iv = typicalInterval(rows);
+    const iv = heard ? null : typicalInterval(rows);
     for (const c of buildGrid(rows, tracks, cellSize)) {
       if (!c.visited) continue;
       nCells++;
-      const has = c.n > 0, med = median(c.snr), onlyRelay = has && !c.snr.length;
+      // «mejor señal de cualquier nodo»: la mediana del nodo que mejor se oye en la celda
+      let vals = c.snr, bestNode = null;
+      if (best) for (const [h, a] of c.by) if (bestNode === null || median(a) > median(vals)) { bestNode = h; vals = a; }
+      const has = c.n > 0, med = median(vals), onlyRelay = has && !c.snr.length;
       if (!has) nEmpty++;
       const expected = (iv && c.ms) ? c.ms / iv : null;
       const pct = (expected && expected >= 1) ? Math.min(100, Math.round(100 * c.n / expected)) : null;
-      const sorted = c.snr.slice().sort((a, b) => a - b);
+      const sorted = vals.slice().sort((a, b) => a - b);
       // solo repetidos: gris con borde grueso del color de su señal (la del último salto)
       // sin nada recibido: gris oscuro translúcido, sin borde (se ve el mapa debajo)
       // el borde de color va por dentro de la celda: se dibuja en un rectángulo reducido medio grosor
       L.rectangle(c.bounds, onlyRelay
         ? { stroke: false, fillOpacity: 0 }
         : has
-        ? { color: "#0b0d10", weight: .5, fillColor: snrColor(med), fillOpacity: .65 }
+        ? { color: "#0b0d10", weight: .5, fillColor: sigColor(med), fillOpacity: .65 }
         : { stroke: false, fillColor: "#1a1d22", fillOpacity: .45 })
         .bindPopup(has
           ? "<b>" + t("cellOf", cellSize >= 1000 ? cellSize / 1000 + " km" : cellSize + " m") + "</b><br>" +
             t("pktsRx") + ": " + c.n + (c.nRelay ? " (" + t("byOther", c.nRelay) + ")" : "") + (pct !== null ? " · " + t("reception") + " ≈ " + pct + " %" : "") + "<br>" +
             (onlyRelay
               ? t("onlyRelay", fmtN(median(c.snrRelay), 1))
-              : t("medSnr", fmtN(med, 1), fmtN(sorted[0], 1), fmtN(sorted[sorted.length - 1], 1)) + "<br>" +
+              : (best && bestNode !== null ? t("bestNode", esc(bestNames.get(bestNode) || hexId(bestNode))) + (c.by.size > 1 ? " · " + t("nNodes", c.by.size) : "") + "<br>" : "") +
+                t(useMargin ? "medMargin" : "medSnr", fmtN(med, 1), fmtN(sorted[0], 1), fmtN(sorted[sorted.length - 1], 1)) + "<br>" +
                 t("medRssi", fmtN(median(c.rssi))) + (c.nRelay ? " <i>(" + t("directOnly") + ")</i>" : "")) + (c.ms ? "<br>" + t("timeInCell") + ": " + fmtDur(c.ms) : "")
           : "<b>" + t("noRx") + "</b><br>" + t("noRxText") + (c.ms ? "<br>" + t("timeInCell") + ": " + fmtDur(c.ms) : "") +
             (expected && expected >= 1 ? "<br>" + t("expected", Math.round(expected)) : ""))
         .addTo(mapLayer);
       // el gris solo dentro del borde: así el borde se ve sobre el mapa con el mismo tono que las celdas en directo
       if (onlyRelay) L.rectangle(insetBounds(c.bounds, RELAY_BORDER), { stroke: false, fillColor: "#2b2f36", fillOpacity: .6, interactive: false }).addTo(mapLayer);
-      if (onlyRelay) L.rectangle(insetBounds(c.bounds, RELAY_BORDER / 2), { color: snrColor(median(c.snrRelay)), weight: RELAY_BORDER, opacity: .65, fill: false, interactive: false }).addTo(mapLayer);
+      if (onlyRelay) L.rectangle(insetBounds(c.bounds, RELAY_BORDER / 2), { color: sigColor(median(c.snrRelay)), weight: RELAY_BORDER, opacity: .65, fill: false, interactive: false }).addTo(mapLayer);
       pts.push(c.bounds[0], c.bounds[1]);
     }
   }
@@ -947,12 +1012,17 @@ function drawMap(fit, fromZoom) {
   }
 
   // emisores
+  // emisores; en «oído directamente», los nodos oídos (aunque solo repitan)
   const senders = new Map();
-  for (const r of rows) if (r.senderLat != null && r.senderLon != null && !(r.senderLat === 0 && r.senderLon === 0))
+  if (heard) {
+    const hs = new Set(rows.map(r => r.heard));
+    for (const r of fileRows || []) if (hs.has(r.from) && r.senderLat != null && r.senderLon != null && !(r.senderLat === 0 && r.senderLon === 0))
+      senders.set(r.from, r);
+  } else for (const r of rows) if (r.senderLat != null && r.senderLon != null && !(r.senderLat === 0 && r.senderLon === 0))
     senders.set(r.from, r);
   for (const r of senders.values()) {
     L.marker([r.senderLat, r.senderLon], { icon: L.divIcon({ className: "", html: '<div style="font-size:24px;line-height:24px;filter:drop-shadow(0 0 1.5px #000) drop-shadow(0 0 3px rgba(0,0,0,.75))">📡</div>', iconSize: [24, 24], iconAnchor: [12, 12] }) })
-      .bindPopup(nodePopup(r, rows)).addTo(mapLayer);
+      .bindPopup(nodePopup(r, heard ? (fileRows || []) : rows)).addTo(mapLayer);
     pts.push([r.senderLat, r.senderLon]);
   }
 
@@ -963,24 +1033,26 @@ function drawMap(fit, fromZoom) {
     n++;
     pts.push([r.rxLat, r.rxLon]);
     if (grid) continue;
-    const relayed = r.hops != null && r.hops > 0;
+    const relayed = r.hops != null && r.hops > 0, square = relayed && !heard, v = sigOf(r);
     if (relayed) nRelay++;
     // repetido por otro nodo: cuadrado negro (su SNR es del último salto, no del nodo de origen)
-    (relayed
+    const hName = r.heard != null ? (bestNames.get(r.heard) || hexId(r.heard)) : null;
+    (square
       ? L.marker([r.rxLat, r.rxLon], { icon: relayIcon(), keyboard: false, pane: relayPane() })
-      : L.circleMarker([r.rxLat, r.rxLon], { radius: 7, color: "#0b0d10", weight: 1, fillColor: snrColor(r.snr), fillOpacity: .9 }))
+      : L.circleMarker([r.rxLat, r.rxLon], { radius: 7, color: "#0b0d10", weight: 1, fillColor: sigColor(v), fillOpacity: .9 }))
       .bindPopup("<b>" + RT.fmtDate(r.ms) + " " + RT.fmtTime(r.ms) + "</b><br>" +
-        (relayed ? "SNR " + fmtN(r.snr, 1) + " dB · RSSI " + fmtN(r.rssi) + " dBm <i>(" + t("lastHop") + ")</i><br>"
-                 : "SNR " + fmtN(r.snr, 1) + " dB · RSSI " + fmtN(r.rssi) + " dBm<br>") +
-        t("distance") + " " + (r.dist == null || isNaN(r.dist) ? "—" : (r.dist >= 1000 ? (r.dist / 1000).toFixed(2) + " km" : Math.round(r.dist) + " m")) +
+        "SNR " + fmtN(r.snr, 1) + " dB · RSSI " + fmtN(r.rssi) + " dBm" + (relayed && !heard ? " <i>(" + t("lastHop") + ")</i>" : "") + "<br>" +
+        (r.sf ? "SF" + r.sf + (r.bw ? " · BW " + r.bw : "") + " · " + t("marginTxt", (marginOf(r) >= 0 ? "+" : "") + fmtN(marginOf(r), 1)) + "<br>" : "") +
+        (relayed && hName ? t("heardFrom") + ": " + esc(hName) + "<br>" : "") +
+        t("distance") + " " + fmtDist(distFor(r)) +
         " · " + (r.hops == null ? t("hops").toLowerCase() + " —" : r.hops === 0 ? t("direct") : t("nHops", r.hops)) + "<br>" +
         esc(nodeName(r)) + " · " + esc(r.seq != null ? "seq " + r.seq : (r.kind || "")) +
         (r.rxSrc === "nodo" ? "<br>📟 " + t("routePos") : ""))
       .addTo(mapLayer);
   }
 
-  if (!fileRows && !fileTracks.length) { $("lgRelay").hidden = maxHops === 0; return; }
-  $("lgRelay").hidden = maxHops === 0;
+  if (!fileRows && !fileTracks.length) { $("lgRelay").hidden = maxHops === 0 || heard; return; }
+  $("lgRelay").hidden = maxHops === 0 || heard;
 
   if (pts.length && (fit || !mapFitted)) {
     if (pts.length === 1) map.flyTo(pts[0], 15, { duration: 0.8 });
@@ -1040,6 +1112,10 @@ async function openCsvFile(file) {
    horas sabemos dónde estabas cuando llegó cada paquete. */
 function isDebugTxt(head) { return /MeshPacket\{/.test(head) && /\[(Packet|MyInfo|NodeInfo)\]/.test(head); }
 const LS_NAMES = "meshtastic_names_v1";
+// SF y ancho de banda (kHz) de los presets de Meshtastic
+const MODEM_PRESETS = { LONG_FAST: { sf: 11, bw: 250 }, LONG_SLOW: { sf: 12, bw: 125 }, VERY_LONG_SLOW: { sf: 12, bw: 62.5 },
+  LONG_MODERATE: { sf: 11, bw: 125 }, LONG_TURBO: { sf: 11, bw: 500 }, MEDIUM_SLOW: { sf: 10, bw: 250 }, MEDIUM_FAST: { sf: 9, bw: 250 },
+  SHORT_SLOW: { sf: 8, bw: 250 }, SHORT_FAST: { sf: 7, bw: 250 }, SHORT_TURBO: { sf: 7, bw: 500 } };
 function debugTxtToRows(text) {
   const hexNum = h => parseInt(h, 16) >>> 0;
   const kv = (k, s) => { const m = s.match(new RegExp("\\b" + k + "=(-?[\\w.]+)")); return m ? m[1] : null; };
@@ -1063,7 +1139,16 @@ function debugTxtToRows(text) {
   // Cada bloque empieza por una línea con la fecha y «[Packet]»: «24 Nov, 08:13 [Packet]» o
   // «Nov 24, 14:16 [Packet]» según el idioma del móvil
   const parts = text.split(/(?=^[^\n]*\[Packet\][ \t\r]*$)/m);
+  // Ajustes de radio (SF y ancho de banda) que vuelca la app al conectar, con su posición en el texto
+  const loras = [];
+  for (const m of text.matchAll(/LoRaConfig\{use_preset=(true|false), modem_preset=(\w+), bandwidth=(\d+), spread_factor=(\d+)/g)) {
+    const pr = MODEM_PRESETS[m[2]], usePreset = m[1] === "true" || !Number(m[4]);
+    const sf = usePreset ? (pr ? pr.sf : null) : Number(m[4]), bw = usePreset ? (pr ? pr.bw : null) : (m[3] === "62" ? 62.5 : Number(m[3]));
+    if (sf >= 5 && sf <= 12) loras.push({ at: m.index, sf, bw });
+  }
+  let offset = 0;
   for (const b of parts) {
+    const at = offset; offset += b.length;
     const h = b.match(/MeshPacket\{from=-?\d+ \(!([0-9a-f]{8})\)([^\n]*)/);
     if (!h) continue;
     const from = hexNum(h[1]), s = h[2];
@@ -1083,6 +1168,8 @@ function debugTxtToRows(text) {
     const port = kv("portnum", b);
     const hs = Number(kv("hop_start", s)), hl = Number(kv("hop_limit", s));
     const rssi = kv("rx_rssi", s), snr = kv("rx_snr", s);
+    // Nodo del último salto («relay_node=VI - AL2 (!98f15ecb)»; firmware 2.6+). Puede venir solo su último byte (!000000cb)
+    const rm = s.match(/relay_node=[^,]*?\(!([0-9a-f]{8})\)/), relay = rm ? hexNum(rm[1]) : 0;
     // Posiciones precisas del emisor (para cuando el que se mueve es el emisor y el móvil va con el nodo fijo)
     const pb = Number(kv("precision_bits", b));
     if (pos && (isNaN(pb) || pb >= 24)) {
@@ -1090,9 +1177,32 @@ function debugTxtToRows(text) {
       senderTrack.get(from).push({ ms, lat: pos.lat, lon: pos.lon, alt: null });
     }
     pkts.push({ ms, from, pos, port, hops: (!isNaN(hs) && !isNaN(hl) && hs >= hl) ? hs - hl : null, hopLimit: isNaN(hl) ? null : hl,
-                snr: snr === null ? null : Number(snr), rssi: rssi === null ? null : Number(rssi) });
+                snr: snr === null ? null : Number(snr), rssi: rssi === null ? null : Number(rssi), relay, at });
   }
   if (!pkts.length) throw new Error(t("errNoPkts"));
+  // SF de cada paquete: el de la última conexión anterior a él. El registro suele ir del más nuevo
+  // al más antiguo, así que es el volcado que queda justo debajo (o encima, si va al revés)
+  const newestFirst = pkts.length > 1 && pkts[0].ms > pkts[pkts.length - 1].ms;
+  for (const p of pkts) {
+    let c = null;
+    for (const l of loras) {
+      const older = newestFirst ? l.at > p.at : l.at < p.at;
+      if (older && (!c || Math.abs(l.at - p.at) < Math.abs(c.at - p.at))) c = l;
+    }
+    if (!c) for (const l of loras) if (!c || Math.abs(l.at - p.at) < Math.abs(c.at - p.at)) c = l;
+    p.sf = c ? c.sf : null; p.bw = c ? c.bw : null;
+  }
+  // Nodo oído directamente: el emisor si llegó en directo; si llegó con saltos, el del último salto.
+  // Si solo se conoce el último byte del id, se busca entre los nodos conocidos (si hay uno solo)
+  const known8 = new Set([...names.keys(), ...pkts.map(p => p.from), ...pkts.map(p => p.relay).filter(r => r > 255)]);
+  const byByte = new Map();
+  for (const n of known8) { const k = n & 255; if (!byByte.has(k)) byByte.set(k, new Set()); byByte.get(k).add(n); }
+  for (const p of pkts) {
+    if (p.hops === 0) p.heard = p.from;
+    else if (p.hops > 0 && p.relay > 255) p.heard = p.relay;
+    else if (p.hops > 0 && p.relay > 0) { const c = byByte.get(p.relay); p.heard = c && c.size === 1 ? [...c][0] : null; }
+    else p.heard = p.hops === null ? p.from : null;
+  }
   own.sort((a, b) => a.ms - b.ms); pkts.sort((a, b) => a.ms - b.ms);
   for (const t of senderTrack.values()) t.sort((a, b) => a.ms - b.ms);
   // Solo cuenta como «nodo que se mueve» el emisor cuyas posiciones se separan más de 100 m
@@ -1129,7 +1239,8 @@ function debugTxtToRows(text) {
       rxLat: rx ? rx.lat : null, rxLon: rx ? rx.lon : null, rxAlt: rx ? rx.alt : null, rxAcc: null,
       rxSrc, snr: p.snr, rssi: p.rssi,
       dist: (rx && sp) ? RT.haversineM(sp.lat, sp.lon, rx.lat, rx.lon) : null,
-      hopLimit: p.hopLimit, hops: p.hops, port: null, kind: fixKind(kind), payload: "" });
+      hopLimit: p.hopLimit, hops: p.hops, port: null, kind: fixKind(kind), payload: "",
+      heard: p.heard, heardName: p.heard != null ? (names.get(p.heard) || "") : "", sf: p.sf, bw: p.bw });
   }
   // Recorrido: el del nodo propio; si no lo hay, el de los emisores que se han movido
   const tracks = [];
@@ -1292,7 +1403,7 @@ $("rngHopsMin").addEventListener("input", e => {
   showHops(); saveMapPrefs(); mapDirty = true; dirtyRender = true;
 });
 loadMapPrefs();
-$("selLang").value = lang; applyLang();
+$("selLang").value = lang; applyLang(); drawLegendScale(null);
 $("selLang").addEventListener("change", e => setLang(e.target.value));
 function setVw() { document.documentElement.style.setProperty("--vw", document.documentElement.clientWidth + "px"); }
 setVw(); window.addEventListener("resize", setVw);
