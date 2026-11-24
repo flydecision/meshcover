@@ -28,6 +28,16 @@
   th, td { padding:5px 8px; text-align:right; border-bottom:1px solid #232b36; white-space:nowrap; }
   th { background:#1a2029; color:#9aa4b2; position:sticky; top:0; text-align:left; }
   td.tl { text-align:left; }
+  td.nodo { max-width:100px; overflow:hidden; text-overflow:ellipsis; }
+  /* barra de desplazamiento visible y sombra a la derecha si hay más columnas */
+  .tblwrap { scrollbar-width:auto; scrollbar-color:#4a5668 #1a2029;
+    background: linear-gradient(to right, #0e1116 30%, transparent) left / 24px 100% no-repeat local,
+                linear-gradient(to left, #0e1116 30%, transparent) right / 24px 100% no-repeat local,
+                linear-gradient(to right, rgba(0,0,0,.55), transparent) left / 14px 100% no-repeat scroll,
+                linear-gradient(to left, rgba(0,0,0,.55), transparent) right / 14px 100% no-repeat scroll; }
+  .tblwrap::-webkit-scrollbar { height:12px; }
+  .tblwrap::-webkit-scrollbar-track { background:#1a2029; border-radius:6px; }
+  .tblwrap::-webkit-scrollbar-thumb { background:#4a5668; border-radius:6px; border:2px solid #1a2029; }
   tr.new td { animation: fadein .8s; }
   @keyframes fadein { from { background:#23456e55; } to { background:transparent; } }
   details { background:#1a2029; border:1px solid #2a3340; border-radius:10px; padding:10px 12px; margin:10px 0; font-size:.85rem; }
@@ -87,7 +97,9 @@
   .filt .dual { position:relative; flex:1 1 140px; min-width:80px; max-width:170px; height:29px; }
   /* anchos fijos para que el deslizador no cambie de tamaño mientras se arrastra */
   #hopsVal { min-width:2.4em; }
-  #hopsHint { flex:0 0 12.6em; white-space:nowrap; font-size:.78rem; }
+  .filt.hops { display:inline-flex; margin:0; gap:6px; flex:1 1 100px; min-width:0; max-width:280px; }
+  .filt.hops .dual { min-width:60px; }
+  @media (max-width:380px) { .seg button { padding:0 7px; } .filt.hops { gap:4px; } .filt.hops .lbl { display:none; } }
   .filt .dual input[type=range] { position:absolute; left:0; top:0; width:100%; height:29px; margin:0; background:none;
     pointer-events:none; -webkit-appearance:none; appearance:none; }
   .filt .dual input[type=range]::-webkit-slider-runnable-track { background:none; }
@@ -100,7 +112,6 @@
   .filt .dual-track, .filt .dual-fill { position:absolute; top:12.5px; height:4px; border-radius:2px; }
   .filt .dual-track { left:8px; right:8px; background:#3a4150; }
   .filt .dual-fill { background:#2f7df6; }
-  .filt .hint { font-size:.75rem; color:#6d7684; }
   .seg { display:inline-flex; border-radius:10px; overflow:hidden; border:1px solid #2a3340; }
   .seg button { box-sizing:border-box; height:27px; display:inline-flex; align-items:center; border-radius:0; padding:0 11px; font-size:.82rem; background:#1a2029; }
   .seg button.on { background:#23456e; }
@@ -138,21 +149,20 @@
 </div>
 
 <div class="filt">Nodo: <select id="selFrom"><option value="">Todos los nodos</option></select></div>
-<div class="filt" title="0 = recibido en directo; 1, 2… = llegó repetido por otros nodos. Mueve los dos extremos para elegir un mínimo y un máximo">
-  Saltos: <span class="hv" id="hopsVal">0</span>
-  <span class="dual" id="hopsDual">
-    <span class="dual-track"></span><span class="dual-fill" id="hopsFill"></span>
-    <input type="range" id="rngHopsMin" min="0" max="7" step="1" value="0" aria-label="Saltos mínimos">
-    <input type="range" id="rngHops" min="0" max="7" step="1" value="7" aria-label="Saltos máximos">
-  </span>
-  <span class="hint" id="hopsHint">solo directos</span>
-</div>
 
 <div id="mapBox">
   <div class="mapopts">
     <span class="seg" role="group" aria-label="Vista">
       <button id="vDots" title="Ver cada recepción como un punto">🔵 Puntos</button>
       <button id="vGrid" title="Ver la cobertura por celdas">🔳 Cuadrícula</button>
+    </span>
+    <span class="filt hops" title="Saltos. 0 = recibido en directo; 1, 2… = llegó repetido por otros nodos. Mueve los dos extremos para elegir un mínimo y un máximo">
+      <span class="lbl">Saltos:</span> <span class="hv" id="hopsVal">0–7</span>
+      <span class="dual" id="hopsDual">
+        <span class="dual-track"></span><span class="dual-fill" id="hopsFill"></span>
+        <input type="range" id="rngHopsMin" min="0" max="7" step="1" value="0" aria-label="Saltos mínimos">
+        <input type="range" id="rngHops" min="0" max="7" step="1" value="7" aria-label="Saltos máximos">
+      </span>
     </span>
     <span id="cellWrap" hidden>Celda: <input type="range" id="rngCell" min="0" max="4" step="1" value="2" aria-label="Tamaño de celda"><b id="cellVal">250 m</b></span>
   </div>
@@ -359,7 +369,7 @@ function render() {
   } else $("sDur").textContent = "0m";
   const tb = $("tbody");
   const view = rows.slice(-100).reverse();
-  tb.innerHTML = view.map(r => "<tr><td>" + fmtFecha(r.ms) + "</td><td>" + RT.fmtTime(r.ms) + "</td><td class=\"tl\">" +
+  tb.innerHTML = view.map(r => "<tr><td>" + fmtFecha(r.ms) + "</td><td>" + RT.fmtTime(r.ms) + "</td><td class=\"tl nodo\" title=\"" + esc(nodeName(r) || "") + "\">" +
     esc(nodeName(r) || "—") + "</td><td class=\"tl\"><b>" + esc(r.seq != null ? "seq " + r.seq : (r.kind || "—")) + "</b></td><td>" +
     (r.snr === null ? "—" : r.snr.toFixed(1)) + "</td><td>" + (r.rssi === null ? "—" : r.rssi) + "</td><td>" +
     (r.dist == null || isNaN(r.dist) ? "—" : (r.dist / 1000).toFixed(2) + " km") + "</td><td>" + (r.hops ?? "—") + "</td><td>" +
@@ -485,6 +495,7 @@ async function initMap() {
   L.control.scale({ imperial: false, position: "bottomleft", maxWidth: 140 }).addTo(map);
   addMaxControl();
   L.control.layers(baseLayers, null, { position: "topright", collapsed: true }).addTo(map);
+  map.on("zoomend", () => { if (mapView === "grid") { mapDirty = true; drawMap(false); } });
   map.on("popupclose", () => { if (pendingRedraw) setTimeout(() => { mapDirty = true; drawMap(false); }, 0); });
   map.setView([40.4, -3.7], 6);
 }
@@ -607,6 +618,15 @@ function fmtDur(ms) { const s = Math.round(ms / 1000); return s >= 60 ? Math.flo
 
 // Cuadrícula de cobertura: celdas de cellSize metros con el SNR mediano recibido;
 // las celdas por las que pasa el recorrido sin recibir nada salen en gris.
+// Reduce unos límites [[lat,lon],[lat,lon]] en «px» píxeles de pantalla por cada lado (al zoom actual)
+const RELAY_BORDER = 6;
+function insetBounds(b, px) {
+  const lat = (b[0][0] + b[1][0]) / 2, z = map.getZoom();
+  const mpp = 40075016.686 * Math.cos(lat * Math.PI / 180) / Math.pow(2, z + 8);   // metros por píxel
+  let dLat = px * mpp / 111320, dLon = px * mpp / (111320 * Math.cos(lat * Math.PI / 180));
+  dLat = Math.min(dLat, (b[1][0] - b[0][0]) / 4); dLon = Math.min(dLon, (b[1][1] - b[0][1]) / 4);
+  return [[b[0][0] + dLat, b[0][1] + dLon], [b[1][0] - dLat, b[1][1] - dLon]];
+}
 function buildGrid(rows, tracks, size) {
   const all = [];
   for (const r of rows) if (r.rxLat != null && !isNaN(r.rxLat)) all.push(r.rxLat);
@@ -686,8 +706,9 @@ function drawMap(fit) {
       const sorted = c.snr.slice().sort((a, b) => a - b);
       // solo repetidos: gris con borde grueso del color de su señal (la del último salto)
       // sin nada recibido: negra con borde blanco
+      // el borde de color va por dentro de la celda: se dibuja en un rectángulo reducido medio grosor
       L.rectangle(c.bounds, onlyRelay
-        ? { color: snrColor(median(c.snrRelay)), weight: 6, opacity: 1, fillColor: "#2b2f36", fillOpacity: .6 }
+        ? { stroke: false, fillColor: "#2b2f36", fillOpacity: .6 }
         : has
         ? { color: "#0b0d10", weight: .5, fillColor: snrColor(med), fillOpacity: .65 }
         : { color: "#ffffff", weight: 1, fillColor: "#000000", fillOpacity: .7 })
@@ -701,6 +722,7 @@ function drawMap(fit) {
           : "<b>Sin recepción</b><br>Pasaste por aquí y no llegó ningún paquete." + (c.ms ? "<br>Tiempo en la celda: " + fmtDur(c.ms) : "") +
             (expected && expected >= 1 ? "<br>Se esperaban ≈ " + Math.round(expected) + " paquetes" : ""))
         .addTo(mapLayer);
+      if (onlyRelay) L.rectangle(insetBounds(c.bounds, RELAY_BORDER / 2), { color: snrColor(median(c.snrRelay)), weight: RELAY_BORDER, opacity: 1, fill: false, interactive: false }).addTo(mapLayer);
       pts.push(c.bounds[0], c.bounds[1]);
     }
   }
@@ -1052,12 +1074,6 @@ $("vGrid").addEventListener("click", () => setView("grid"));
 $("rngCell").addEventListener("input", e => { cellSize = CELL_SIZES[Number(e.target.value)] || 250; showCell(); saveMapPrefs(); mapDirty = true; dirtyRender = true; });
 function showHops() {
   $("hopsVal").textContent = minHops === maxHops ? String(maxHops) : minHops + "–" + maxHops;
-  let hint;
-  if (maxHops === 0) hint = "solo directos";
-  else if (minHops === 0) hint = "directos + hasta " + maxHops + (maxHops === 1 ? " salto" : " saltos");
-  else if (minHops === maxHops) hint = "solo con " + maxHops + (maxHops === 1 ? " salto" : " saltos");
-  else hint = "de " + minHops + " a " + maxHops + " saltos";
-  $("hopsHint").textContent = hint;
   // franja azul entre los dos extremos (los 8 px son medio botón)
   const f = $("hopsFill"), pct = v => v / 7;
   f.style.left = "calc(8px + (100% - 16px) * " + pct(minHops) + ")";
