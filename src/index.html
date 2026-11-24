@@ -35,7 +35,12 @@
                 linear-gradient(to left, #0e1116 30%, transparent) right / 24px 100% no-repeat local,
                 linear-gradient(to right, rgba(0,0,0,.55), transparent) left / 14px 100% no-repeat scroll,
                 linear-gradient(to left, rgba(0,0,0,.55), transparent) right / 14px 100% no-repeat scroll; }
-  .tblwrap::-webkit-scrollbar { height:12px; }
+  .tblwrap::-webkit-scrollbar, .tbltop::-webkit-scrollbar { height:12px; }
+  .tbltop { overflow-x:auto; overflow-y:hidden; margin-bottom:2px; scrollbar-width:auto; scrollbar-color:#4a5668 #1a2029; }
+  .tbltop[hidden] { display:none; }
+  #tblTopIn { height:1px; }
+  .tbltop::-webkit-scrollbar-track { background:#1a2029; border-radius:6px; }
+  .tbltop::-webkit-scrollbar-thumb { background:#4a5668; border-radius:6px; border:2px solid #1a2029; }
   .tblwrap::-webkit-scrollbar-track { background:#1a2029; border-radius:6px; }
   .tblwrap::-webkit-scrollbar-thumb { background:#4a5668; border-radius:6px; border:2px solid #1a2029; }
   tr.new td { animation: fadein .8s; }
@@ -174,16 +179,17 @@
     <span><i style="background:#f07f2e"></i>−10 a −5</span>
     <span><i style="background:#d7352b"></i>&lt; −10</span>
     <span><i style="background:#2f7df6;border-radius:2px;height:4px;width:16px;vertical-align:3px;border:0"></i>Recorrido</span>
-    <span id="lgNone" hidden><i style="background:#000;border-radius:1px;border:1.5px solid #fff"></i>Sin recepción</span>
+    <span id="lgNone" hidden><i style="background:rgba(26,29,34,.6);border-radius:1px;border:1px solid #555"></i>Sin recepción</span>
     <span id="lgRelay" hidden><i style="background:#000;border:1.5px solid #fff;border-radius:1px"></i>llegó por otro nodo (saltos ≥ 1, sin SNR útil)</span>
     <span>📡 Nodo</span>
   </div>
   <div id="mapInfo"></div>
 </div>
 
-<div class="tblwrap">
+<div class="tbltop" id="tblTop" hidden><div id="tblTopIn"></div></div>
+<div class="tblwrap" id="tblWrap">
 <table id="tbl">
-  <thead><tr><th>Fecha</th><th>Hora</th><th>Nodo</th><th>Tipo</th><th>SNR</th><th>RSSI</th><th>Dist</th><th>Hops</th><th>Tx_lat</th><th>Tx_lon</th><th>Rx_lat</th><th>Rx_lon</th></tr></thead>
+  <thead><tr><th>Fecha y hora</th><th>Nodo</th><th>Tipo</th><th>SNR</th><th>RSSI</th><th>Dist</th><th>Saltos</th></tr></thead>
   <tbody id="tbody"></tbody>
 </table>
 </div>
@@ -214,7 +220,7 @@
       <h3>📊 Qué obtienes</h3>
       <ul>
         <li>Un punto por paquete recibido, de color según la señal: <b>verde</b> buena, <b>amarillo</b> justa, <b>rojo</b> al límite.</li>
-        <li>La vista <b>🔳 Cuadrícula</b>: la zona en celdas con la señal de cada una, y en <b>negro con borde blanco</b> las celdas por las que pasaste sin recibir nada. El color usa solo lo recibido en directo; una celda <b>gris con borde de color</b> es que allí solo llegó lo repetido por otro nodo (el borde es la señal del último salto).</li>
+        <li>La vista <b>🔳 Cuadrícula</b>: la zona en celdas con la señal de cada una, y en <b>gris oscuro translúcido</b> las celdas por las que pasaste sin recibir nada. El color usa solo lo recibido en directo; una celda <b>gris con borde de color</b> es que allí solo llegó lo repetido por otro nodo (el borde es la señal del último salto).</li>
         <li>Puedes abrir varios registros a la vez (de varios días o de otras personas): se suman en el mapa.</li>
       </ul>
     </div>
@@ -258,7 +264,7 @@
         <li>Con SF altos, envía con menos frecuencia: en Europa solo se puede transmitir el 10 % del tiempo.</li>
         <li>El nodo de ruta en <b>CLIENT_MUTE</b>, no TRACKER (TRACKER duerme y deja de escuchar).</li>
       </ul>
-      <h3>🔳 En la cuadrícula salen celdas negras sueltas</h3>
+      <h3>🔳 En la cuadrícula salen celdas «sin recepción» sueltas</h3>
       <div>La celda es más pequeña que lo que avanzas entre dos paquetes: súbele el tamaño.</div>
     </div>
     </div>
@@ -369,20 +375,24 @@ function render() {
   } else $("sDur").textContent = "0m";
   const tb = $("tbody");
   const view = rows.slice(-100).reverse();
-  tb.innerHTML = view.map(r => "<tr><td>" + fmtFecha(r.ms) + "</td><td>" + RT.fmtTime(r.ms) + "</td><td class=\"tl nodo\" title=\"" + esc(nodeName(r) || "") + "\">" +
+  tb.innerHTML = view.map(r => "<tr><td class=\"tl\">" + fmtFecha(r.ms).slice(0, 5) + " " + RT.fmtTime(r.ms) + "</td><td class=\"tl nodo\" title=\"" + esc(nodeName(r) || "") + "\">" +
     esc(nodeName(r) || "—") + "</td><td class=\"tl\"><b>" + esc(r.seq != null ? "seq " + r.seq : (r.kind || "—")) + "</b></td><td>" +
     (r.snr === null ? "—" : r.snr.toFixed(1)) + "</td><td>" + (r.rssi === null ? "—" : r.rssi) + "</td><td>" +
-    (r.dist == null || isNaN(r.dist) ? "—" : (r.dist / 1000).toFixed(2) + " km") + "</td><td>" + (r.hops ?? "—") + "</td><td>" +
-    (r.senderLat == null ? "—" : r.senderLat.toFixed(5)) + "</td><td>" +
-    (r.senderLon == null ? "—" : r.senderLon.toFixed(5)) + "</td><td>" +
-    (r.rxLat === null ? "—" : r.rxLat.toFixed(5)) + "</td><td>" +
-    (r.rxLon === null ? "—" : r.rxLon.toFixed(5)) + (r.rxSrc === "nodo" ? " 📟" : r.rxSrc === "movil" ? " 📱" : "") + "</td></tr>").join("");
+    (r.dist == null || isNaN(r.dist) ? "—" : (r.dist / 1000).toFixed(2) + " km") + "</td><td>" + (r.hops ?? "—") + "</td></tr>").join("");
+  syncTopScroll();
   // solo se redibuja el mapa si cambian los datos (si no, se cerraría el popup abierto)
   const sig = [rows.length, fileRows ? fileRows.length : 0,
                fileTracks.length, selFrom, minHops, maxHops, mapView, cellSize].join("|");
   if (sig !== lastMapSig) { lastMapSig = sig; mapDirty = true; }
   if (map) drawMap(false);
 }
+// Barra de desplazamiento también encima de la tabla (sincronizada con la de abajo)
+function syncTopScroll() {
+  const w = $("tblWrap"), t = $("tblTop");
+  t.hidden = w.scrollWidth <= w.clientWidth + 1;
+  $("tblTopIn").style.width = w.scrollWidth + "px";
+}
+function linkScroll(a, b) { a.addEventListener("scroll", () => { if (b.scrollLeft !== a.scrollLeft) b.scrollLeft = a.scrollLeft; }); }
 function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;"); }
 
 async function openFiles(list) {
@@ -495,7 +505,7 @@ async function initMap() {
   L.control.scale({ imperial: false, position: "bottomleft", maxWidth: 140 }).addTo(map);
   addMaxControl();
   L.control.layers(baseLayers, null, { position: "topright", collapsed: true }).addTo(map);
-  map.on("zoomend", () => { if (mapView === "grid") { mapDirty = true; drawMap(false); } });
+  map.on("zoomend", () => { if (mapView === "grid") { mapDirty = true; drawMap(false, true); } });
   map.on("popupclose", () => { if (pendingRedraw) setTimeout(() => { mapDirty = true; drawMap(false); }, 0); });
   map.setView([40.4, -3.7], 6);
 }
@@ -676,11 +686,12 @@ function buildGrid(rows, tracks, size) {
 }
 
 let pendingRedraw = false;
-function drawMap(fit) {
+// Si cambias un filtro o la vista con un popup abierto, se cierra y se redibuja al momento.
+// Solo el redibujo por zoom (bordes de la cuadrícula) espera a que cierres el popup.
+function drawMap(fit, fromZoom) {
   if (!map || !mapOn) return;
   if (!mapDirty && !fit) return;
-  // con un popup abierto se espera a que se cierre para redibujar
-  if (!fit && map._popup && map.hasLayer(map._popup)) { pendingRedraw = true; return; }
+  if (fromZoom && map._popup && map.hasLayer(map._popup)) { pendingRedraw = true; return; }
   pendingRedraw = false;
   mapDirty = false;
   mapLayer.clearLayers();
@@ -689,7 +700,7 @@ function drawMap(fit) {
   showView();
   $("lgNone").hidden = !grid;
   $("lgRelay").innerHTML = grid
-    ? '<i style="background:#2b2f36;border-radius:1px;border:3px solid #9acd32"></i>Recibido con saltos'
+    ? '<i style="background:#2b2f36;border-radius:1px;border:3px solid rgba(154,205,50,.65)"></i>Recibido con saltos'
     : '<i style="background:#000;border:1.5px solid #fff;border-radius:1px"></i>llegó por otro nodo (saltos ≥ 1, sin SNR útil)';
 
   // cuadrícula (debajo de todo)
@@ -705,13 +716,13 @@ function drawMap(fit) {
       const pct = (expected && expected >= 1) ? Math.min(100, Math.round(100 * c.n / expected)) : null;
       const sorted = c.snr.slice().sort((a, b) => a - b);
       // solo repetidos: gris con borde grueso del color de su señal (la del último salto)
-      // sin nada recibido: negra con borde blanco
+      // sin nada recibido: gris oscuro translúcido, sin borde (se ve el mapa debajo)
       // el borde de color va por dentro de la celda: se dibuja en un rectángulo reducido medio grosor
       L.rectangle(c.bounds, onlyRelay
         ? { stroke: false, fillColor: "#2b2f36", fillOpacity: .6 }
         : has
         ? { color: "#0b0d10", weight: .5, fillColor: snrColor(med), fillOpacity: .65 }
-        : { color: "#ffffff", weight: 1, fillColor: "#000000", fillOpacity: .7 })
+        : { stroke: false, fillColor: "#1a1d22", fillOpacity: .45 })
         .bindPopup(has
           ? "<b>Celda de " + (cellSize >= 1000 ? cellSize / 1000 + " km" : cellSize + " m") + "</b><br>" +
             "Paquetes recibidos: " + c.n + (c.nRelay ? " (" + c.nRelay + " por otro nodo)" : "") + (pct !== null ? " · recepción ≈ " + pct + " %" : "") + "<br>" +
@@ -722,7 +733,7 @@ function drawMap(fit) {
           : "<b>Sin recepción</b><br>Pasaste por aquí y no llegó ningún paquete." + (c.ms ? "<br>Tiempo en la celda: " + fmtDur(c.ms) : "") +
             (expected && expected >= 1 ? "<br>Se esperaban ≈ " + Math.round(expected) + " paquetes" : ""))
         .addTo(mapLayer);
-      if (onlyRelay) L.rectangle(insetBounds(c.bounds, RELAY_BORDER / 2), { color: snrColor(median(c.snrRelay)), weight: RELAY_BORDER, opacity: 1, fill: false, interactive: false }).addTo(mapLayer);
+      if (onlyRelay) L.rectangle(insetBounds(c.bounds, RELAY_BORDER / 2), { color: snrColor(median(c.snrRelay)), weight: RELAY_BORDER, opacity: .65, fill: false, interactive: false }).addTo(mapLayer);
       pts.push(c.bounds[0], c.bounds[1]);
     }
   }
@@ -1091,6 +1102,8 @@ $("rngHopsMin").addEventListener("input", e => {
   showHops(); saveMapPrefs(); mapDirty = true; dirtyRender = true;
 });
 loadMapPrefs();
+linkScroll($("tblWrap"), $("tblTop")); linkScroll($("tblTop"), $("tblWrap"));
+window.addEventListener("resize", syncTopScroll);
 $("selFrom").addEventListener("change", e => { selFrom = e.target.value; mapDirty = true; mapFitted = false; dirtyRender = true; if (mapOn) setTimeout(() => drawMap(true), 0); });
 render();
 startMap();
