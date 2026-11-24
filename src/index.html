@@ -153,7 +153,10 @@
   .seg button.on { background:#23456e; }
   #cellWrap { display:inline-flex; align-items:center; gap:6px; }
   #cellWrap[hidden] { display:none; }
-  #cellWrap input { width:110px; accent-color:#2f7df6; }
+  /* deslizador de celda con el mismo aspecto que el de saltos (un solo botón) */
+  .filt.cellf { margin:0; gap:6px; }
+  .filt.cellf .dual { flex:0 0 110px; width:110px; min-width:0; }
+  .filt .dual.single input[type=range] { pointer-events:auto; cursor:pointer; }
   #cellVal { color:#e6e9ee; min-width:3.6em; }
   .mapbtns { margin:6px 0; }
   .leaflet-control-layers-toggle, .leaflet-touch .leaflet-control-layers-toggle { width:30px !important; height:30px !important; background-size:18px 18px; background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMjIyIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0xMiAzIDIgOGwxMCA1IDEwLTV6Ii8+PHBhdGggZD0ibTIgMTIuNSAxMCA1IDEwLTUiLz48cGF0aCBkPSJtMiAxNyAxMCA1IDEwLTUiLz48L3N2Zz4=") !important; }
@@ -197,7 +200,7 @@
         <input type="range" id="rngHops" min="0" max="7" step="1" value="7" data-i18n-aria="hopsMax">
       </span>
     </span>
-    <span id="cellWrap" hidden><span class="colon" data-i18n="cell">Cell</span> <input type="range" id="rngCell" min="0" max="4" step="1" value="2" data-i18n-aria="cellSize"><b id="cellVal">250 m</b></span>
+    <span id="cellWrap" class="filt cellf" hidden><span class="colon" data-i18n="cell">Cell</span> <span class="dual single"><span class="dual-track"></span><span class="dual-fill" id="cellFill"></span><input type="range" id="rngCell" min="0" max="4" step="1" value="2" data-i18n-aria="cellSize"></span><b id="cellVal">250 m</b></span>
   </div>
   <div id="expPanel" class="exppanel" hidden>
     <div class="exphead"><b>📤 <span data-i18n="expTitle">Export anonymous coverage</span></b><button id="btnExpClose" class="sec" data-i18n-aria="close">✕</button></div>
@@ -780,6 +783,9 @@ function showView() {
 function showCell() {
   $("rngCell").value = String(Math.max(0, CELL_SIZES.indexOf(cellSize)));
   $("cellVal").textContent = cellSize >= 1000 ? cellSize / 1000 + " km" : cellSize + " m";
+  // franja azul desde el principio hasta el botón (los 8 px son medio botón)
+  $("cellFill").style.left = "8px";
+  $("cellFill").style.width = "calc((100% - 16px) * " + Math.max(0, CELL_SIZES.indexOf(cellSize)) / (CELL_SIZES.length - 1) + ")";
 }
 function setView(v) { mapView = v; showView(); saveMapPrefs(); mapDirty = true; dirtyRender = true; }
 let leafletPromise = null;
