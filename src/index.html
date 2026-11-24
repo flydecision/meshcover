@@ -108,8 +108,8 @@
   .filt .dual { position:relative; flex:1 1 140px; min-width:80px; max-width:170px; height:29px; }
   /* anchos fijos para que el deslizador no cambie de tamaño mientras se arrastra */
   #hopsVal { min-width:2.4em; }
-  .filt.nodesel { display:inline-flex; margin:0; gap:6px; flex:2 1 200px; min-width:0; }
-  .filt.nodesel select { flex:1 1 auto; min-width:0; width:100%; padding:5px 8px; height:29px; box-sizing:border-box; }
+  .filt.nodesel { display:inline-flex; margin:0; gap:6px; flex:0 1 auto; min-width:0; }
+  .filt.nodesel select { flex:1 1 auto; min-width:0; max-width:200px; width:100%; padding:5px 8px; height:29px; box-sizing:border-box; }
   .filt.hops { display:inline-flex; margin:0; gap:6px; flex:1 1 100px; min-width:max-content; max-width:280px; }
   .filt.hops .dual { min-width:60px; }
   @media (max-width:380px) { .seg button { padding:0 7px; } .filt.hops { gap:4px; } .filt.hops .lbl { display:none; } }
