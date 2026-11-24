@@ -164,7 +164,7 @@
     <span><i style="background:#f07f2e"></i>−10 a −5</span>
     <span><i style="background:#d7352b"></i>&lt; −10</span>
     <span><i style="background:#2f7df6;border-radius:2px;height:4px;width:16px;vertical-align:3px;border:0"></i>Recorrido</span>
-    <span id="lgNone" hidden><i style="background:#000;border-radius:1px;border:1.5px solid #fff"></i>sin recepción</span>
+    <span id="lgNone" hidden><i style="background:#000;border-radius:1px;border:1.5px solid #fff"></i>Sin recepción</span>
     <span id="lgRelay" hidden><i style="background:#000;border:1.5px solid #fff;border-radius:1px"></i>llegó por otro nodo (saltos ≥ 1, sin SNR útil)</span>
     <span>📡 Nodo</span>
   </div>
@@ -319,21 +319,26 @@ function rowsView() {
   const f = selFrom ? Number(selFrom) : null;
   return (fileRows || []).filter(r => (f === null || r.from === f) && passHops(r));
 }
+let bestNames = new Map();   // nodo → mejor nombre conocido (para tabla y popups)
+function nodeName(r) { return (r.from != null && bestNames.get(r.from)) || r.name || (r.from != null ? hexId(r.from) : ""); }
 function refreshFromSelect() {
   // Nodos de los archivos abiertos, los más oídos primero
   const sel = $("selFrom"), seen = new Map(), count = new Map();
   const all = fileRows || [];
   for (const r of all) {
     if (r.from === null || r.from === undefined) continue;
-    if (!seen.has(r.from) || (r.name && !seen.get(r.from))) seen.set(r.from, r.name || "");
+    // el mejor nombre conocido del nodo: «corto - largo» si lo hay
+    const cur = seen.get(r.from);
+    if (!seen.has(r.from) || (r.name && (!cur || (!cur.includes(" - ") && r.name.includes(" - "))))) seen.set(r.from, r.name || "");
     count.set(r.from, (count.get(r.from) || 0) + 1);
   }
+  bestNames = seen;
   const keys = [...seen.keys()].sort((a, b) => count.get(b) - count.get(a));
   const want = ["", ...keys.map(k => k + ":" + count.get(k))].join("|");
   if (sel.dataset.keys === want) return;
   sel.dataset.keys = want;
   sel.innerHTML = '<option value="">Todos los nodos</option>' +
-    keys.map(n => { const name = seen.get(n); return '<option value="' + n + '">' + esc((name ? name + " " : "") + "(" + hexId(n) + ") · " + count.get(n) + (count.get(n) === 1 ? " paquete" : " paquetes")) + "</option>"; }).join("");
+    keys.map(n => { const name = seen.get(n); return '<option value="' + n + '">' + esc((name ? name + " " : "") + "(" + hexId(n) + ") · " + count.get(n) + (count.get(n) === 1 ? " packet" : " packets")) + "</option>"; }).join("");
   sel.value = seen.has(Number(selFrom)) ? selFrom : "";
   if (sel.value !== selFrom) { selFrom = sel.value; }
 }
@@ -355,7 +360,7 @@ function render() {
   const tb = $("tbody");
   const view = rows.slice(-100).reverse();
   tb.innerHTML = view.map(r => "<tr><td>" + fmtFecha(r.ms) + "</td><td>" + RT.fmtTime(r.ms) + "</td><td class=\"tl\">" +
-    esc(r.name || (r.from != null ? hexId(r.from) : "—")) + "</td><td class=\"tl\"><b>" + esc(r.seq != null ? "seq " + r.seq : (r.kind || "—")) + "</b></td><td>" +
+    esc(nodeName(r) || "—") + "</td><td class=\"tl\"><b>" + esc(r.seq != null ? "seq " + r.seq : (r.kind || "—")) + "</b></td><td>" +
     (r.snr === null ? "—" : r.snr.toFixed(1)) + "</td><td>" + (r.rssi === null ? "—" : r.rssi) + "</td><td>" +
     (r.dist == null || isNaN(r.dist) ? "—" : (r.dist / 1000).toFixed(2) + " km") + "</td><td>" + (r.hops ?? "—") + "</td><td>" +
     (r.senderLat == null ? "—" : r.senderLat.toFixed(5)) + "</td><td>" +
@@ -664,7 +669,7 @@ function drawMap(fit) {
   showView();
   $("lgNone").hidden = !grid;
   $("lgRelay").innerHTML = grid
-    ? '<i style="background:#2b2f36;border-radius:1px;border:2.5px solid #9acd32"></i>solo llegó por otro nodo (borde = señal del último salto)'
+    ? '<i style="background:#2b2f36;border-radius:1px;border:3px solid #9acd32"></i>Recibido con saltos'
     : '<i style="background:#000;border:1.5px solid #fff;border-radius:1px"></i>llegó por otro nodo (saltos ≥ 1, sin SNR útil)';
 
   // cuadrícula (debajo de todo)
@@ -682,7 +687,7 @@ function drawMap(fit) {
       // solo repetidos: gris con borde grueso del color de su señal (la del último salto)
       // sin nada recibido: negra con borde blanco
       L.rectangle(c.bounds, onlyRelay
-        ? { color: snrColor(median(c.snrRelay)), weight: 3, fillColor: "#2b2f36", fillOpacity: .6 }
+        ? { color: snrColor(median(c.snrRelay)), weight: 6, opacity: 1, fillColor: "#2b2f36", fillOpacity: .6 }
         : has
         ? { color: "#0b0d10", weight: .5, fillColor: snrColor(med), fillOpacity: .65 }
         : { color: "#ffffff", weight: 1, fillColor: "#000000", fillOpacity: .7 })
@@ -737,7 +742,7 @@ function drawMap(fit) {
                  : "SNR " + fmtN(r.snr, 1) + " dB · RSSI " + fmtN(r.rssi) + " dBm<br>") +
         "distancia " + (r.dist == null || isNaN(r.dist) ? "—" : (r.dist >= 1000 ? (r.dist / 1000).toFixed(2) + " km" : Math.round(r.dist) + " m")) +
         " · " + (r.hops == null ? "saltos —" : r.hops === 0 ? "directo" : r.hops + (r.hops === 1 ? " salto" : " saltos")) + "<br>" +
-        esc(r.name || (r.from != null ? hexId(r.from) : "")) + " · " + esc(r.seq != null ? "seq " + r.seq : (r.kind || "")) +
+        esc(nodeName(r)) + " · " + esc(r.seq != null ? "seq " + r.seq : (r.kind || "")) +
         (r.rxSrc === "nodo" ? "<br>📟 posición del nodo de ruta" : ""))
       .addTo(mapLayer);
   }
@@ -809,6 +814,7 @@ async function openCsvFile(file) {
    y las posiciones GPS de tu propio nodo (TRANSPORT_INTERNAL) cada ~60 s. Cruzando las
    horas sabemos dónde estabas cuando llegó cada paquete. */
 function isDebugTxt(head) { return /MeshPacket\{/.test(head) && /\[(Packet|MyInfo|NodeInfo)\]/.test(head); }
+const LS_NAMES = "meshtastic_names_v1";
 function debugTxtToRows(text) {
   const hexNum = h => parseInt(h, 16) >>> 0;
   const kv = (k, s) => { const m = s.match(new RegExp("\\b" + k + "=(-?[\\w.]+)")); return m ? m[1] : null; };
@@ -818,6 +824,13 @@ function debugTxtToRows(text) {
   for (const m of text.matchAll(/User\{id=!([0-9a-f]{8}), long_name=([^,]*), short_name=([^,]*)/g)) {
     const n = hexNum(m[1]), label = RT.nodeLabel(m[3].trim(), m[2].trim()); if (label && !names.has(n)) names.set(n, label);
   }
+  // Nombres «corto - largo» recordados de registros anteriores: un registro corto a veces
+  // no trae la ficha del nodo (NodeInfo) y solo conoce el nombre largo
+  let known = {};
+  try { known = JSON.parse(localStorage.getItem(LS_NAMES) || "{}") || {}; } catch (e) {}
+  for (const [n, label] of names) if (label.includes(" - ")) known[hexId(n)] = label;
+  try { localStorage.setItem(LS_NAMES, JSON.stringify(known)); } catch (e) {}
+  for (const [h, label] of Object.entries(known)) { const n = hexNum(h.slice(1)); if (!names.has(n)) names.set(n, label); }
   // Nombres también del campo relay_node («relay_node=VI - AL2 (!98f15ecb)»), por si el registro es corto y no trae NodeInfo
   for (const m of text.matchAll(/relay_node=([^,(]*[^\s,(][^,(]*) \(!([0-9a-f]{8})\)/g)) {
     const n = hexNum(m[2]), nm = m[1].trim(); if (nm && !/^\d+$/.test(nm) && !names.has(n)) names.set(n, nm);
