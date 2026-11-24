@@ -100,6 +100,7 @@
   #mapBox.max #map { flex:1; height:auto; min-height:0; }
   #mapBox.max #mapInfo, #mapBox.max .legend { margin:4px 2px; }
   #mapBox.max .btns { margin:6px 0 0; }
+  #mapBox.max > .filt { margin:4px 0 6px; }
   body.noscroll { overflow:hidden; }
   .mapopts { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:0 0 6px; font-size:.82rem; color:#9aa4b2; }
   .mapopts select { flex:none; padding:6px 8px; font-size:.82rem; }
@@ -156,9 +157,8 @@
 </div>
 <div id="toast" hidden role="alert"></div>
 
-<div class="filt"><span class="colon" data-i18n="node">Node</span> <select id="selFrom"><option value="" data-i18n="allNodes">All nodes</option></select></div>
-
 <div id="mapBox">
+  <div class="filt"><span class="colon" data-i18n="node">Node</span> <select id="selFrom"><option value="" data-i18n="allNodes">All nodes</option></select></div>
   <div class="mapopts">
     <span class="seg" role="group" data-i18n-aria="view">
       <button id="vDots" data-i18n-title="dotsTitle">🔵 <span data-i18n="dots">Dots</span></button>
@@ -248,7 +248,7 @@
       <h3>3. Al volver</h3>
       <ol>
         <li>En la app: Ajustes → panel de depuración → <b>exportar</b>. Mejor sin filtros.</li>
-        <li>Aquí, <b>📂 Open Logs</b> y elige el <code>.txt</code>. También abre CSV y GPX de versiones anteriores de esta página.</li>
+        <li>Aquí, <b>📂 Abrir registros</b> y elige el <code>.txt</code>. También abre CSV y GPX de versiones anteriores de esta página.</li>
         <li>En <b>Nodo</b>, elige el nodo fijo y pulsa <b>🔳 Cuadrícula</b> para ver la cobertura por zonas.</li>
       </ol>
       <h3>Controles</h3>
@@ -410,10 +410,11 @@ const I18N = {
     errEmpty: "the file is empty", errCsv: "it does not look like a CSV from this page",
     errNoPkts: "there are no packets received over the radio in the file", errGpx: "the file is not a valid GPX",
     errNoTrack: "it has no track points", errOpen: (f, m) => "Could not open " + f + ": " + m,
-    restore: "Restore", maximize: "Maximize map"
+    restore: "Restore", maximize: "Maximize map",
+    directPl: "direct", lastPos: "Last position", lastHeard: "Last heard", relayedWord: "relayed", maxDist: "Max distance"
   },
   es: {
-    appTitle: "Analizador Cobertura Meshtastic", help: "Ayuda", close: "Cerrar", open: "Open Logs", clear: "Limpiar",
+    appTitle: "Analizador Cobertura Meshtastic", help: "Ayuda", close: "Cerrar", open: "Abrir registros", clear: "Limpiar",
     openTitle: "Abrir el registro de paquetes exportado de la app Meshtastic (.txt), o CSV y GPX",
     clearTitle: "Quitar del mapa todo lo abierto",
     node: "Nodo", allNodes: "Todos los nodos", view: "Vista",
@@ -437,14 +438,15 @@ const I18N = {
     noRxText: "Pasaste por aquí y no llegó ningún paquete.", expected: n => "Se esperaban ≈ " + n + " paquetes",
     gpsPos: "Posición GPS", lastHop: "del último salto, no del nodo de origen", distance: "distancia",
     direct: "directo", nHops: n => n + (n === 1 ? " salto" : " saltos"), routePos: "posición del nodo de ruta",
-    emptyInfo: "Abre con 📂 Open Logs el registro exportado de la app Meshtastic (.txt).",
+    emptyInfo: "Abre con 📂 Abrir registros el registro exportado de la app Meshtastic (.txt).",
     file: "Archivo", nFiles: n => n + " archivos abiertos", rxWithGps: n => n + " recepciones con GPS",
     cellsInfo: (c, e) => c + " celdas, " + e + " sin recepción", noGps: n => n + " sin GPS (no se pintan)",
     nTracks: n => n + (n === 1 ? " recorrido" : " recorridos"),
     errEmpty: "el archivo está vacío", errCsv: "no parece un CSV de esta página",
     errNoPkts: "no hay paquetes recibidos por radio en el archivo", errGpx: "el archivo no es un GPX válido",
     errNoTrack: "no tiene puntos de recorrido", errOpen: (f, m) => "No se pudo abrir " + f + ": " + m,
-    restore: "Volver", maximize: "Maximizar mapa"
+    restore: "Volver", maximize: "Maximizar mapa",
+    directPl: "directos", lastPos: "Última posición", lastHeard: "Último paquete", relayedWord: "con saltos", maxDist: "Distancia máxima"
   }
 };
 let lang = "en";
@@ -798,6 +800,21 @@ function typicalInterval(rows) {
   return gaps[Math.floor(gaps.length / 2)];
 }
 let RELAY_ICON = null;
+// Ficha del nodo emisor: nombre «corto - largo», id, última posición y resumen de lo recibido de él
+function nodePopup(r, rows) {
+  const mine = rows.filter(x => x.from === r.from), direct = mine.filter(x => !(x.hops > 0));
+  const snrs = direct.map(x => x.snr).filter(v => v != null && !isNaN(v));
+  const dists = mine.map(x => x.dist).filter(v => v != null && !isNaN(v));
+  const last = mine.filter(x => x.senderLat != null).reduce((a, x) => (!a || x.ms > a.ms) ? x : a, null) || r;
+  const maxD = dists.length ? Math.max(...dists) : null;
+  return "<b>📡 " + t("nodeIcon") + ": " + esc(nodeName(r)) + "</b><br>" +
+    "ID " + hexId(r.from) + "<br>" +
+    t("lastPos") + ": " + last.senderLat.toFixed(5) + ", " + last.senderLon.toFixed(5) + "<br>" +
+    t("lastHeard") + ": " + RT.fmtDate(last.ms) + " " + RT.fmtTime(last.ms) + "<br>" +
+    t("pktsRx") + ": " + mine.length + " (" + direct.length + " " + t("directPl") + ", " + (mine.length - direct.length) + " " + t("relayedWord") + ")" +
+    (snrs.length ? "<br>" + t("medSnr", fmtN(median(snrs), 1), fmtN(Math.min(...snrs), 1), fmtN(Math.max(...snrs), 1)) + " <i>(" + t("directOnly") + ")</i>" : "") +
+    (maxD != null ? "<br>" + t("maxDist") + ": " + (maxD >= 1000 ? (maxD / 1000).toFixed(2) + " km" : Math.round(maxD) + " m") : "");
+}
 function relayIcon() { return RELAY_ICON || (RELAY_ICON = L.divIcon({ className: "relay-sq", iconSize: [12, 12], iconAnchor: [6, 6], popupAnchor: [0, -6] })); }
 // los cuadrados van debajo de los círculos de recepción directa, para no taparlos
 function relayPane() { if (!map.getPane("relay")) map.createPane("relay").style.zIndex = 390; return "relay"; }
@@ -937,7 +954,7 @@ function drawMap(fit, fromZoom) {
     senders.set(r.from, r);
   for (const r of senders.values()) {
     L.marker([r.senderLat, r.senderLon], { icon: L.divIcon({ className: "", html: '<div style="font-size:24px;line-height:24px;filter:drop-shadow(0 0 1.5px #000) drop-shadow(0 0 3px rgba(0,0,0,.75))">📡</div>', iconSize: [24, 24], iconAnchor: [12, 12] }) })
-      .bindPopup("<b>" + esc(r.name || hexId(r.from)) + "</b><br>" + t("nodeIcon").toLowerCase()).addTo(mapLayer);
+      .bindPopup(nodePopup(r, rows)).addTo(mapLayer);
     pts.push([r.senderLat, r.senderLon]);
   }
 
