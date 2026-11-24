@@ -166,7 +166,7 @@
     <button id="btnSave" class="sec" title="Guardar señal (CSV) y track (GPX)">💾 Guardar</button>
     <button id="btnClear" class="sec" title="Limpiar registros de señal y track del mapa">🗑 Limpiar</button>
     <button id="btnAuto" class="sec" title="Centrar el mapa en tu posición continuamente, sin cambiar el zoom"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="vertical-align:-4px;margin-right:6px"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>Automático</button>
-    <input type="file" id="fileAny" accept=".csv,.gpx,text/csv,text/plain,application/gpx+xml,application/xml,text/xml" multiple hidden>
+    <input type="file" id="fileAny" accept=".csv,.gpx,.txt,text/csv,text/plain,application/gpx+xml,application/xml,text/xml" multiple hidden>
   </div>
   <div id="map"></div>
   <div class="legend">
@@ -1139,8 +1139,11 @@ async function saveAll() {
 }
 async function openFiles(list) {
   for (const f of list) {
-    const isGpx = /\.gpx$/i.test(f.name) || (!/\.csv$/i.test(f.name) && /^\s*</.test(await f.slice(0, 200).text()));
-    if (isGpx) await importTrack(f); else await openCsvFile(f);
+    const head = await f.slice(0, 2000).text();
+    const isGpx = /\.gpx$/i.test(f.name) || (!/\.csv$/i.test(f.name) && /^\s*</.test(head));
+    if (isGpx) await importTrack(f);
+    else if (isDebugTxt(head)) await openDebugTxt(f);
+    else await openCsvFile(f);
   }
 }
 // «🗑 Limpiar»: quita del mapa todo (registros en vivo, tracks y archivos abiertos).
@@ -1574,6 +1577,90 @@ async function openCsvFile(file) {
   } catch (e) { say("No se pudo abrir " + file.name + ": " + e.message); }
 }
 
+
+/* ---------- abrir el registro de la app oficial (panel de depuración → exportar) ----------
+   El .txt trae cada paquete recibido por radio (TRANSPORT_LORA) con SNR, RSSI y saltos,
+   y las posiciones GPS de tu propio nodo (TRANSPORT_INTERNAL) cada ~60 s. Cruzando las
+   horas sabemos dónde estabas cuando llegó cada paquete. */
+function isDebugTxt(head) { return /MeshPacket\{/.test(head) && /\[(Packet|MyInfo|NodeInfo)\]/.test(head); }
+function debugTxtToRows(text) {
+  const hexNum = h => parseInt(h, 16) >>> 0;
+  const kv = (k, s) => { const m = s.match(new RegExp("\\b" + k + "=(-?[\\w.]+)")); return m ? m[1] : null; };
+  const names = new Map(), senderPos = new Map(), own = [], pkts = [], seen = new Set();
+  let myNum = null;
+  const mi = text.match(/my_node_num=(-?\d+)/); if (mi) myNum = Number(mi[1]) >>> 0;
+  for (const m of text.matchAll(/User\{id=!([0-9a-f]{8}), long_name=([^,]*), short_name=([^,]*)/g)) {
+    const n = hexNum(m[1]); if (m[2] && !names.has(n)) names.set(n, m[2]);
+  }
+  // Cada bloque empieza por «24 Nov, 08:13 [Packet]»
+  const parts = text.split(/(?=\d{1,2} [^\s,]{3,5}, \d\d:\d\d \[Packet\])/);
+  for (const b of parts) {
+    const h = b.match(/MeshPacket\{from=-?\d+ \(!([0-9a-f]{8})\)([^\n]*)/);
+    if (!h) continue;
+    const from = hexNum(h[1]), s = h[2];
+    const t = Number(kv("rx_time", s)); if (!t) continue;
+    const ms = t * 1000, tr = kv("transport_mechanism", s);
+    const pm = b.match(/latitude_i=(-?\d+), longitude_i=(-?\d+)/);
+    const pos = pm && !(pm[1] === "0" && pm[2] === "0") ? { lat: Number(pm[1]) / 1e7, lon: Number(pm[2]) / 1e7 } : null;
+    const alt = pos ? Number(kv("altitude", b.slice(b.indexOf("Position{")))) : NaN;
+    if (tr === "TRANSPORT_INTERNAL") {
+      if (myNum === null) myNum = from;
+      if (from === myNum && pos) own.push({ ms, lat: pos.lat, lon: pos.lon, alt: isNaN(alt) ? null : alt });
+      continue;
+    }
+    if (tr !== "TRANSPORT_LORA") continue;
+    const id = kv("id", s), key = from + ":" + id;
+    if (seen.has(key)) continue; seen.add(key);
+    const port = kv("portnum", b);
+    const hs = Number(kv("hop_start", s)), hl = Number(kv("hop_limit", s));
+    const rssi = kv("rx_rssi", s), snr = kv("rx_snr", s);
+    pkts.push({ ms, from, pos, port, hops: (!isNaN(hs) && !isNaN(hl) && hs >= hl) ? hs - hl : null, hopLimit: isNaN(hl) ? null : hl,
+                snr: snr === null ? null : Number(snr), rssi: rssi === null ? null : Number(rssi) });
+  }
+  if (!pkts.length) throw new Error("no hay paquetes recibidos por radio en el archivo");
+  own.sort((a, b) => a.ms - b.ms); pkts.sort((a, b) => a.ms - b.ms);
+  // Posición propia a una hora dada: interpola entre dos puntos cercanos o usa el más próximo (< 2 min)
+  const ownAt = ms => {
+    let lo = 0, hi = own.length;
+    while (lo < hi) { const mid = (lo + hi) >> 1; if (own[mid].ms < ms) lo = mid + 1; else hi = mid; }
+    const a = own[lo - 1], b = own[lo];
+    if (a && b && b.ms - a.ms <= 180000) {
+      const f = b.ms === a.ms ? 0 : (ms - a.ms) / (b.ms - a.ms);
+      return { lat: a.lat + (b.lat - a.lat) * f, lon: a.lon + (b.lon - a.lon) * f, alt: a.alt };
+    }
+    const c = [a, b].filter(p => p && Math.abs(p.ms - ms) <= 120000).sort((x, y) => Math.abs(x.ms - ms) - Math.abs(y.ms - ms))[0];
+    return c || null;
+  };
+  const rows = [];
+  for (const p of pkts) {
+    if (p.pos) senderPos.set(p.from, p.pos);
+    const sp = senderPos.get(p.from) || null, rx = ownAt(p.ms);
+    const DBG_KIND = { TEXT_MESSAGE_APP: "text", RANGE_TEST_APP: "rangetest" };
+    const kind = DBG_KIND[p.port] || (p.port || "").replace(/_APP$/, "").toLowerCase();
+    rows.push({ ms: p.ms, seq: null, from: p.from, name: names.get(p.from) || "",
+      senderLat: sp ? sp.lat : null, senderLon: sp ? sp.lon : null,
+      rxLat: rx ? rx.lat : null, rxLon: rx ? rx.lon : null, rxAlt: rx ? rx.alt : null, rxAcc: null,
+      rxSrc: rx ? "nodo" : "", snr: p.snr, rssi: p.rssi,
+      dist: (rx && sp) ? RT.haversineM(sp.lat, sp.lon, rx.lat, rx.lon) : null,
+      hopLimit: p.hopLimit, hops: p.hops, port: null, kind: fixKind(kind), payload: "" });
+  }
+  return { rows, own, myNum, myName: names.get(myNum) || "" };
+}
+async function openDebugTxt(file) {
+  try {
+    const r = debugTxtToRows(await file.text());
+    fileRows = (fileRows || []).concat(r.rows); fileNames.push(file.name);
+    if (r.own.length) {
+      const segs = trackSegments(r.own).map(seg => seg.map(p => ({ lat: p.lat, lon: p.lon, ms: p.ms })));
+      fileTracks.push({ name: file.name, segs }); $("lgImp").hidden = false;
+    }
+    if (!map) await startMap();
+    mapDirty = true; drawMap(true);
+    const conPos = r.rows.filter(x => x.rxLat !== null).length;
+    say("Abierto registro de la app " + file.name + ": " + r.rows.length + " paquetes por radio (" + conPos +
+        " con tu posición), " + r.own.length + " puntos de tu recorrido" + (r.myName ? " (nodo " + r.myName + ")" : "") + ".");
+  } catch (e) { say("No se pudo abrir " + file.name + ": " + e.message); }
+}
 
 /* ---------- track: exportar / importar GPX ---------- */
 function downloadText(name, text, mime) {
