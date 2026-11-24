@@ -25,3 +25,6 @@ local.properties
 Thumbs.db
 desktop.ini
 *.log
+
+# Registros exportados de la app oficial (llevan posiciones de tus nodos)
+meshtastic_debug_*.txt
