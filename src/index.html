@@ -11,15 +11,9 @@
   body { font-family: system-ui, sans-serif; background:#0e1116; color:#e6e9ee; margin:0; padding:14px; max-width:760px; margin-inline:auto; }
   h1 { font-size:1.15rem; margin:0 0 4px; }
   .sub { color:#9aa4b2; font-size:.82rem; margin-bottom:12px; }
-  .chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
-  .chip { background:#1a2029; border:1px solid #2a3340; border-radius:999px; padding:4px 10px; font-size:.8rem; }
-  .chip b { font-weight:600; }
-  .dot { display:inline-block; width:9px; height:9px; border-radius:50%; background:#555; margin-right:5px; vertical-align:middle; }
-  .dot.ok { background:#39c26d; } .dot.warn { background:#e0a63a; } .dot.bad { background:#e05a4b; }
   .btns { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0; }
   button { background:#23456e; color:#fff; border:0; border-radius:10px; padding:11px 14px; font-size:.92rem; font-weight:600; }
   button.sec { background:#2a3340; }
-  .bt { color:#4aa8ff; font-size:1.35em; font-weight:700; line-height:1; vertical-align:-0.08em; text-shadow:0 0 2px #0b2a4a; }
   button.danger { background:#5e2620; }
   button:disabled { opacity:.45; }
   .btns button { box-sizing:border-box; height:29px; padding:0 11px; font-size:.82rem; display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
@@ -42,7 +36,6 @@
   details li { margin:6px 0; }
   code { background:#242c38; border-radius:4px; padding:1px 5px; font-size:.8em; }
   .foot { color:#6d7684; font-size:.72rem; margin-top:14px; line-height:1.5; }
-  #dbgList { font-family:ui-monospace,monospace; font-size:.7rem; color:#e0a63a; white-space:pre-wrap; word-break:break-all; }
   .filt { display:flex; align-items:center; gap:8px; margin:6px 0 10px; font-size:.85rem; color:#9aa4b2; }
   select { background:#1a2029; color:#e6e9ee; border:1px solid #2a3340; border-radius:8px; padding:8px; font-size:.88rem; flex:1; min-width:0; }
   #mapBox { margin:10px 0; }
@@ -78,7 +71,6 @@
   .mfoot span { color:#9aa4b2; font-size:.8rem; }
   .mfoot button { padding:9px 12px; font-size:.85rem; }
   .page[hidden] { display:none; }
-  #chipGpsWrap { cursor:pointer; }
   button.on { background:#1f6b45; }
   /* mapa maximizado */
   #mapBox.max { position:fixed; inset:0; z-index:2000; margin:0; background:#0e1116; display:flex; flex-direction:column;
@@ -131,37 +123,12 @@
 </div>
 
 
-<div id="bannerNoBt" hidden style="background:#5e2620;border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:.85rem">
-  ⚠️ Este navegador no soporta <b>Web Bluetooth</b>. Abre esta página con <b>Chrome en Android</b> (Safari/iOS no sirve).
-</div>
-
-<div id="bannerHttps" hidden style="background:#5e2620;border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:.85rem;line-height:1.55">
-  ⚠️ <b>Página abierta como archivo local</b> (<code id="bannerProto"></code>). Así Chrome <b>no deja usar el GPS</b> (el Bluetooth sí funciona).<br>
-  Ábrela desde una dirección <b>https://</b>, por ejemplo la que tengas subida en tu web. Mientras tanto, si el nodo de ruta tiene GPS, se usará <b>la posición del propio nodo</b>.
-</div>
-
-<div class="chips">
-  <span class="chip"><span class="dot" id="dotBle"></span>BLE: <b id="chipBle">desconectado</b></span>
-  <span class="chip"><span class="dot" id="dotCfg"></span>Config: <b id="chipCfg">—</b></span>
-  <span class="chip" id="chipGpsWrap" title="Ayuda del GPS"><span class="dot" id="dotGps"></span>GPS móvil: <b id="chipGps">…</b></span>
-  <span class="chip"><span class="dot" id="dotNodeGps"></span>GPS nodo: <b id="chipNodeGps">—</b></span>
-</div>
-
-<div class="btns">
-  <button id="btnCon" class="sec"><span class="bt">ᛒ</span> Conectar</button>
-  <button id="btnWake" class="sec">🔅 Pantalla OFF</button>
-  <button id="btnGpsRetry" class="sec">🛰️ Activar GPS</button>
-</div>
 <div id="msg"></div>
 
 <div class="stats">
   <div class="stat"><div class="v" id="sReg">0</div><div class="l">Registros</div></div>
-  <div class="stat"><div class="v" id="sSeq">—</div><div class="l">Último paquete</div></div>
-  <div class="stat"><div class="v" id="sMiss">0</div><div class="l">Perdidos (aprox.)</div></div>
-  <div class="stat"><div class="v" id="sDup">0</div><div class="l">Duplicados</div></div>
   <div class="stat"><div class="v" id="sSnr">—</div><div class="l">Mejor SNR dB</div></div>
   <div class="stat"><div class="v" id="sDist">—</div><div class="l">Dist. máx km</div></div>
-  <div class="stat"><div class="v" id="sRssi">—</div><div class="l">RSSI últ. dBm</div></div>
   <div class="stat"><div class="v" id="sDur">0m</div><div class="l">Duración</div></div>
 </div>
 
@@ -185,10 +152,8 @@
     <span id="cellWrap" hidden>Celda: <input type="range" id="rngCell" min="0" max="4" step="1" value="2" aria-label="Tamaño de celda"><b id="cellVal">250 m</b></span>
   </div>
   <div class="btns mapbtns">
-    <button id="btnOpen" class="sec" title="Abrir CSV y/o GPX en el mapa">📂 Abrir</button>
-    <button id="btnSave" class="sec" title="Guardar señal (CSV) y track (GPX)">💾 Guardar</button>
-    <button id="btnClear" class="sec" title="Limpiar registros de señal y track del mapa">🗑 Limpiar</button>
-    <button id="btnAuto" class="sec" title="Centrar el mapa en tu posición continuamente, sin cambiar el zoom"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style=""><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>Automático</button>
+    <button id="btnOpen" class="sec" title="Abrir el registro de la app Meshtastic (.txt), o CSV y GPX">📂 Abrir</button>
+    <button id="btnClear" class="sec" title="Quitar del mapa todo lo abierto">🗑 Limpiar</button>
     <input type="file" id="fileAny" accept=".csv,.gpx,.txt,text/csv,text/plain,application/gpx+xml,application/xml,text/xml" multiple hidden>
   </div>
   <div id="map"></div>
@@ -198,11 +163,9 @@
     <span><i style="background:#f2c230"></i>−5 a 0</span>
     <span><i style="background:#f07f2e"></i>−10 a −5</span>
     <span><i style="background:#d7352b"></i>&lt; −10</span>
-    <span><i style="background:#2f7df6;border-radius:2px;height:4px;width:16px;vertical-align:3px;border:0"></i>Track</span>
+    <span><i style="background:#2f7df6;border-radius:2px;height:4px;width:16px;vertical-align:3px;border:0"></i>Recorrido</span>
     <span id="lgNone" hidden><i style="background:#2b2f36;border-radius:2px;border:1px solid #d7352b"></i>No info</span>
-    <span id="lgImp" hidden><i style="background:#b45cf0;border-radius:2px;height:4px;width:16px;vertical-align:3px;border:0"></i>track importado</span>
     <span id="lgRelay" hidden><i style="background:#000;border:1.5px solid #fff;border-radius:1px"></i>llegó por otro nodo (saltos ≥ 1, sin SNR útil)</span>
-    <span><i style="background:#2f7df6;border:2px solid #fff"></i>Mi posición</span>
     <span>📡 Nodo</span>
   </div>
   <div id="mapInfo"></div>
@@ -225,86 +188,60 @@
       <button data-p="0">Para qué</button>
       <button data-p="1">Cómo usar</button>
       <button data-p="2">Soluciones</button>
-      <button data-p="3">Diagnóstico</button>
     </div>
     <div class="mbody" id="helpBody">
     <div class="page" data-p="0">
       <h3>🎯 Para qué sirve</h3>
-      <div>Para dibujar un <b>mapa de cobertura</b> Meshtastic: saber <b>hasta dónde llega la señal de un nodo concreto</b> (uno tuyo puesto a propósito o cualquier otro de la red) o analizar la <b>cobertura general</b> de la red en tu zona con todos los nodos que oigas.</div>
-      <div style="margin-top:6px">Con el filtro <b>«Nodo»</b> eliges entre un nodo concreto o todos; con <b>«Saltos»</b> (deslizador doble), el mínimo y el máximo de saltos: solo directos, solo repetidos, o un rango.</div>
+      <div>Para dibujar un <b>mapa de cobertura</b> Meshtastic a partir del registro que exporta la <b>app oficial de Android</b>: saber <b>hasta dónde llega la señal de un nodo concreto</b> o ver la cobertura general de la red con todos los nodos que oíste.</div>
+      <div style="margin-top:6px">La app graba en segundo plano, con la pantalla apagada. Esta página solo analiza ese registro después, así que funciona en <b>cualquier navegador</b>, en el móvil o en el PC.</div>
       <h3>⚙️ Cómo funciona</h3>
       <ol>
-        <li>Los nodos que quieres medir envían paquetes (posición, telemetría…). Si el nodo es tuyo, ponlo a enviar su posición cada 30–60 s para tener más datos.</li>
-        <li>Tú te mueves con otro nodo, el <b>nodo de ruta</b>, conectado por Bluetooth al móvil.</li>
-        <li>Cada vez que el nodo de ruta recibe un paquete, la página lo apunta con <b>tu posición GPS</b> y la <b>calidad de la señal</b> (SNR y RSSI) y lo pinta en el mapa.</li>
-        <li>Donde pasas sin recibir nada queda tu recorrido (línea azul) sin puntos: ahí no hay cobertura.</li>
+        <li>Un <b>nodo fijo</b> envía su posición cada minuto.</li>
+        <li>Tú sales con otro nodo, el <b>nodo de ruta</b>, conectado por Bluetooth a la app oficial. Su GPS va guardando por dónde pasas.</li>
+        <li>Al volver exportas el registro de la app y lo abres aquí. Cada paquete recibido se coloca donde estabas en ese momento, con su <b>SNR</b> y <b>RSSI</b>.</li>
+        <li>Donde pasaste sin recibir nada queda el recorrido (línea azul) sin puntos: ahí no hay cobertura.</li>
       </ol>
       <h3>📊 Qué obtienes</h3>
       <ul>
-        <li>Un mapa con un punto por paquete recibido, de color según la señal: <b>verde</b> buena, <b>amarillo</b> justa, <b>rojo</b> al límite.</li>
-        <li>La vista <b>🔳 Cuadrícula</b>: la zona dividida en celdas con la señal de cada una, y en gris con borde rojo las celdas por las que pasaste sin recibir nada. El color usa solo lo recibido en directo; una celda <b>negra con borde blanco</b> es que allí solo llegó lo repetido por otro nodo.</li>
-        <li>Al guardar, un <b>CSV</b> con todas las recepciones y un <b>GPX</b> con tu recorrido. Puedes juntar rutas de varios días o de otras personas abriéndolas a la vez.</li>
+        <li>Un punto por paquete recibido, de color según la señal: <b>verde</b> buena, <b>amarillo</b> justa, <b>rojo</b> al límite.</li>
+        <li>La vista <b>🔳 Cuadrícula</b>: la zona en celdas con la señal de cada una, y en gris con borde rojo las celdas por las que pasaste sin recibir nada. El color usa solo lo recibido en directo; una celda <b>negra con borde blanco</b> es que allí solo llegó lo repetido por otro nodo.</li>
+        <li>Puedes abrir varios registros a la vez (de varios días o de otras personas): se suman en el mapa.</li>
       </ul>
     </div>
 
     <div class="page" data-p="1" hidden>
       <h3>1. Antes de salir</h3>
       <ol>
-        <li><b>Nodo a medir</b> (si es tuyo): en la app de Meshtastic, Posición → posición fija activada, «posición inteligente» desactivada e intervalo de 30–60 s. Para la cobertura general no hace falta: se registra todo lo que se oiga.</li>
-        <li><b>Nodo de ruta</b>: rol <b>CLIENT_MUTE</b> y los mismos ajustes de radio (LoRa) que el fijo.</li>
-        <li><b>Cierra la app de Meshtastic</b> en el móvil: el nodo solo admite una conexión Bluetooth.</li>
-        <li>Abre esta página en <b>Chrome (Android)</b>, con cobertura de datos, y acepta el permiso de <b>ubicación</b>.</li>
-        <li>Pulsa <b>ᛒ Conectar</b>, elige el nodo de ruta y espera a ver <b>«Config ✓»</b>.</li>
+        <li><b>Nodo fijo</b>: en la app, Posición → posición fija, «posición inteligente» desactivada e intervalo de difusión de 1 minuto.</li>
+        <li><b>Nodo de ruta</b>: rol <b>CLIENT_MUTE</b>, GPS activado, intervalo de difusión de 1 minuto y «posición inteligente» desactivada. Los ajustes de radio (LoRa) tienen que ser iguales en los dos.</li>
+        <li>Saca el nodo de ruta a cielo abierto unos minutos antes, para que coja satélites.</li>
+        <li>En la app, conecta el móvil al nodo de ruta y vacía el registro: Ajustes → panel de depuración → borrar.</li>
       </ol>
       <h3>2. Durante la ruta</h3>
+      <div>Nada: lleva el móvil con la pantalla apagada. La app sigue grabando.</div>
+      <h3>3. Al volver</h3>
       <ol>
-        <li><b>La página tiene que estar en pantalla todo el rato.</b> Si cambias de app o se apaga la pantalla, Chrome la congela y deja de registrar.</li>
-        <li>«🔆 Pantalla ON» viene activado: evita que la pantalla se apague.</li>
-        <li>Para llevar el móvil en el bolsillo o en un soporte sin pulsar nada sin querer, usa la app <a href="https://play.google.com/store/apps/details?id=com.fedeveloper.touchprotector" target="_blank" rel="noopener" style="color:#7fb2ff">Touch Protector</a>: bloquea los toques pero deja la pantalla encendida y la página delante.</li>
-        <li>Con <b>«Automático»</b> activado (en verde), el mapa te sigue sin cambiar el zoom.</li>
-      </ol>
-      <h3>3. Al terminar</h3>
-      <ol>
-        <li><b>💾 Guardar</b>: crea <code>signal_aaaammdd_hhmmss.csv</code> y <code>track_aaaammdd_hhmmss.gpx</code>. En el PC eliges la carpeta; en Android se comparten o van a Descargas.</li>
-        <li>Pulsa <b>Desconectar</b> (el mismo botón, en verde) y, si cambiaste el intervalo de un nodo tuyo, vuelve a ponerle el normal, para no saturar el canal.</li>
-      </ol>
-      <h3>4. En casa (móvil o PC)</h3>
-      <ol>
-        <li><b>📂 Abrir</b> y elige a la vez todos los CSV y GPX que quieras: se suman en el mapa.</li>
-        <li>Pulsa <b>🔳 Cuadrícula</b> y ajusta el tamaño de celda para ver la cobertura por zonas.</li>
+        <li>En la app: Ajustes → panel de depuración → <b>exportar</b>. Mejor sin filtros.</li>
+        <li>Aquí, <b>📂 Abrir</b> y elige el <code>.txt</code>. También abre CSV y GPX de versiones anteriores de esta página.</li>
+        <li>En <b>Nodo</b>, elige el nodo fijo y pulsa <b>🔳 Cuadrícula</b> para ver la cobertura por zonas.</li>
       </ol>
       <h3>Controles</h3>
       <ul>
-        <li><b>Nodo</b>: muestra solo los paquetes de un nodo (si hay varios cerca).</li>
-        <li><b>Saltos</b>: deslizador doble con mínimo y máximo. 0–0 = solo lo que llega <b>directo</b> de cada nodo, que es lo que mide su cobertura propia. Sube el máximo para ver también lo que llega repetido por otros nodos, o sube el mínimo para ver <b>solo</b> lo repetido. Lo repetido sale como <b>cuadrado negro</b>: su SNR es el del último salto (el nodo que lo repitió), no el del nodo fijo, así que no dice nada de la cobertura de este.</li>
-        <li><b>Track</b> (línea azul): recorrido del GPS del móvil; si el móvil no tiene GPS, se usa la posición del nodo de ruta. Se elige solo.</li>
-        <li><b>🗑 Limpiar</b>: deja el mapa vacío (avisa si hay registros sin guardar).</li>
-        <li>En el mapa: capas (mapa topográfico, satélite, relieve…), ⛶ pantalla completa y ⌖ ir a tu posición.</li>
+        <li><b>Nodo</b>: muestra solo los paquetes de un nodo.</li>
+        <li><b>Saltos</b>: deslizador doble con mínimo y máximo. 0–0 = solo lo que llega <b>directo</b>, que es lo que mide la cobertura de cada nodo. Sube el máximo para ver también lo repetido por otros nodos, o el mínimo para ver <b>solo</b> lo repetido. Lo repetido sale como <b>cuadrado negro</b>: su SNR es el del último salto, no el del nodo de origen.</li>
+        <li><b>🗑 Limpiar</b>: quita del mapa todo lo abierto.</li>
+        <li>En el mapa: capas (topográfico, satélite, relieve…) y ⛶ pantalla completa.</li>
       </ul>
     </div>
 
     <div class="page" data-p="2" hidden>
-      <h3>⏸️ Deja de registrar durante la ruta</h3>
-      <div>Casi siempre es porque la página pasó a segundo plano o se apagó la pantalla: Chrome congela la página y se pierden el GPS y el Bluetooth.</div>
+      <h3>📍 Los paquetes no salen en el mapa</h3>
       <ul>
-        <li>Deja «🔆 Pantalla ON» activado.</li>
-        <li>Bloquea los toques con <a href="https://play.google.com/store/apps/details?id=com.fedeveloper.touchprotector" target="_blank" rel="noopener" style="color:#7fb2ff">Touch Protector</a> en vez de apagar la pantalla.</li>
-        <li>Si necesitas otra app, usa la <b>pantalla dividida</b> de Android con Chrome en una mitad.</li>
-        <li>Si el Bluetooth se corta, la página vuelve a conectar sola.</li>
+        <li>El nodo de ruta no tenía posición: revisa que tenga el GPS activado y un intervalo de difusión puesto («unset» es un valor por defecto largo, no 1 minuto).</li>
+        <li>Sácalo a cielo abierto antes de salir: dentro de casa no coge satélites.</li>
       </ul>
-      <h3>📍 El GPS del móvil no funciona</h3>
-      <ol>
-        <li>Abre la página desde su dirección <b>https://</b>, no como archivo descargado.</li>
-        <li>Mantén pulsado el icono de Chrome → «Información de la aplicación» → Permisos → <b>Ubicación → Permitir</b>.</li>
-        <li>Activa la <b>ubicación</b> del móvil (panel de ajustes rápidos).</li>
-        <li>En Chrome, toca el candado 🔒 junto a la dirección → Permisos → Ubicación → Permitir.</li>
-        <li>Vuelve a la página y pulsa <b>🛰️ Activar GPS</b>.</li>
-      </ol>
-      <h3>🔌 El nodo no conecta</h3>
-      <ul>
-        <li>Cierra la app de Meshtastic o desconecta el nodo de cualquier otro dispositivo.</li>
-        <li>En un <b>PC con Windows</b>, empareja antes el nodo: Configuración → Bluetooth y dispositivos → Agregar dispositivo, con el PIN que sale en su pantalla (si no sale ninguno, 123456).</li>
-      </ul>
+      <h3>🚶 El nodo fijo aparece «moviéndose»</h3>
+      <div>Su GPS da posiciones que bailan. Ponle <b>posición fija</b> en la app.</div>
       <h3>📡 No llega nada del nodo que quieres medir</h3>
       <ul>
         <li>Los ajustes de radio (región, ancho de banda, SF, coding rate y frequency slot) tienen que ser <b>idénticos</b> en los dos nodos.</li>
@@ -314,242 +251,23 @@
       <h3>🔳 En la cuadrícula salen celdas grises sueltas</h3>
       <div>La celda es más pequeña que lo que avanzas entre dos paquetes: súbele el tamaño.</div>
     </div>
-
-    <div class="page" data-p="3" hidden>
-      <div>Se registra cualquier paquete recibido por radio de <b>otro nodo</b> (posición, telemetría, nodeinfo, texto, Range Test…), salvo routing y admin. Los repetidos (mismo id) cuentan como duplicados. Los perdidos se calculan por el «seq» o, si no hay, por los huecos de tiempo de cada nodo.</div>
-      <h3>Columnas del CSV</h3>
-      <div>date, time, seq, from, sender_name, sender_lat, sender_lon (posición del nodo que emite = Tx_lat/Tx_lon), rx_lat, rx_lon, rx_alt_m, rx_acc_m (tu posición), rx_snr, rx_rssi, distance_m, hop_limit, hops, portnum, payload, rx_src (movil / nodo: de dónde sale tu posición), tipo (rangetest / position / telemetry …). El CSV guarda <b>todas</b> las recepciones, sin los filtros «Nodo» y «Saltos».</div>
-      <h3>Estado</h3>
-      <div id="dbgOrigin" style="color:#9aa4b2;margin-top:6px"></div>
-      <div id="dbgList"></div>
-    </div>
     </div>
     <div class="mfoot">
       <button id="hPrev" class="sec">‹ Anterior</button>
-      <span id="hNum">1 / 4</span>
+      <span id="hNum">1 / 3</span>
       <button id="hNext" class="sec">Siguiente ›</button>
     </div>
   </div>
 </div>
 
 <script>
-/*
- * parser.js — Decoder Meshtastic (BLE stream -> Range Test rows)
- * Compatible con firmware 2.x: MeshPacket layout "nuevo" (2.6+/2.7.x: rx_snr=8,
- * hop_limit=9, rx_rssi=12, hop_start=15) y "viejo" (<=2.4-era: rx_snr=9,
- * hop_start=10, hop_limit=11, rx_rssi=14). Se detecta por el wire-type del
- * campo 9 (float fixed32 => viejo, varint => nuevo).
- * Puertos RANGE_TEST: 66 (2.5+), 79 (2.0-2.4), 74 (RANGE_TEST_APP_OLD).
- * Funciona en navegador (window.MeshtasticRT) y en Node (module.exports).
- */
-(function (root, factory) {
-  "use strict";
-  if (typeof module === "object" && module.exports) module.exports = factory();
-  else root.MeshtasticRT = factory();
-})(typeof self !== "undefined" ? self : this, function () {
-  "use strict";
-
-  // ------------------------------------------------------------------ varint
-  function readVarint(u8, p) {
-    var b = 0n, shift = 0n, byte;
-    for (;;) {
-      if (p >= u8.length) throw new Error("varint sin terminar");
-      byte = u8[p++];
-      b |= BigInt(byte & 0x7f) << shift;
-      if ((byte & 0x80) === 0) break;
-      shift += 7n;
-      if (shift > 63n) throw new Error("varint demasiado largo");
-    }
-    return { v: b, next: p };
-  }
-
-  function varintBytes(value) {
-    var v = typeof value === "bigint" ? value : BigInt(value);
-    if (v < 0n) v += (1n << 64n); // int32/64 negativo = complemento a dos
-    var out = [];
-    for (;;) {
-      var b = Number(v & 0x7fn);
-      v >>= 7n;
-      if (v === 0n) { out.push(b); break; }
-      out.push(b | 0x80);
-    }
-    return out;
-  }
-
-  // ------------------------------------------------------------- fields core
-  // Devuelve lista de campos {n, wt, vi?, s?, e?} de un mensaje protobuf.
-  function parseFields(u8, start, end) {
-    var out = [], i = start || 0, e = (end === undefined) ? u8.length : end;
-    while (i < e) {
-      var r = readVarint(u8, i);
-      i = r.next;
-      var tag = Number(r.v);
-      var f = { n: tag >>> 3, wt: tag & 7 };
-      if (f.wt === 0) { var rv = readVarint(u8, i); f.vi = rv.v; i = rv.next; }
-      else if (f.wt === 1) { f.s = i; f.e = i + 8; i += 8; }
-      else if (f.wt === 2) { var rl = readVarint(u8, i); var L = Number(rl.v); i = rl.next; f.s = i; f.e = i + L; i = f.e; }
-      else if (f.wt === 5) { f.s = i; f.e = i + 4; i += 4; }
-      else throw new Error("wiretype no soportado " + f.wt + " (campo " + f.n + ")");
-      if (f.e > e) throw new Error("campo " + f.n + " se sale del mensaje");
-      out.push(f);
-    }
-    return out;
-  }
-
-  function getField(fs, n) { for (var i = 0; i < fs.length; i++) if (fs[i].n === n) return fs[i]; return null; }
-  function hasField(fs, n) { return getField(fs, n) !== null; }
-
-  function f32(u8, f) { return new DataView(u8.buffer, u8.byteOffset + f.s, 4).getFloat32(0, true); }
-  function fx32u(u8, f) { return new DataView(u8.buffer, u8.byteOffset + f.s, 4).getUint32(0, true); }
-  function fx32s(u8, f) { return new DataView(u8.buffer, u8.byteOffset + f.s, 4).getInt32(0, true); }
-  function viNum(f) { return Number(f.vi); }                                  // uint32
-  function viS32(f) { var n = f.vi & 0xFFFFFFFFn; if (n >= 0x80000000n) n -= 0x100000000n; return Number(n); } // int32
-  function viBool(f) { return viNum(f) !== 0; }
-  function bts(u8, f) { return u8.subarray(f.s, f.e); }
-  function msgBytes(u8, f) { return u8.subarray(f.s, f.e); }
-  function textOf(u8, f) { return new TextDecoder("utf-8").decode(bts(u8, f)); }
-
-  // ------------------------------------------------------------------- enums
-  var PORT = {
-    TEXT_MESSAGE_APP: 1, POSITION_APP: 3, NODEINFO_APP: 4, ROUTING_APP: 5,
-    ADMIN_APP: 6, RANGE_TEST_APP_OLD: 74, RANGE_TEST_APP: 66, TELEMETRY_APP: 67,
-    TRACEROUTE_APP: 70, NEIGHBORINFO_APP: 71, MAP_REPORT_APP: 73
-  };
-  // Puertos de range test en las distintas generaciones de firmware
-  var RANGE_PORTS = [66, 74, 79];
-  // Puertos con significado propio: el texto "seq N" ahí NO es range test
-  var NON_TEXT_PORTS = [1, 3, 4, 5, 6, 67, 70, 71, 73];
-  // Puertos que no se registran como recepción (acks y administración)
-  var SKIP_PORTS = [5, 6];
-  var PORT_NAMES = { 1: "text", 3: "position", 4: "nodeinfo", 66: "rangetest",
-    74: "rangetest", 79: "rangetest", 67: "telemetry", 70: "traceroute",
-    71: "neighborinfo", 73: "mapreport" };
-  function portName(p) { return PORT_NAMES[p] || ("port " + p); }
-
-  // --------------------------------------------------------------- decoders
-  // Data: portnum=1 varint, payload=2 bytes
-  function decodeData(u8) {
-    var fs = parseFields(u8, 0, u8.length);
-    var out = { portnum: null, payload: null };
-    var f = getField(fs, 1); if (f) out.portnum = viNum(f);
-    f = getField(fs, 2); if (f) out.payload = bts(u8, f);
-    return out;
-  }
-
-  // Position: latitude_i=1 sfixed32, longitude_i=2 sfixed32, altitude=3 int32,
-  //           time=4 fixed32, gps_accuracy=14 uint32
-  function decodePosition(u8) {
-    var fs = parseFields(u8, 0, u8.length);
-    var out = { lat: null, lon: null, alt: null, time: null, accuracy: null };
-    var f = getField(fs, 1); if (f) out.lat = fx32s(u8, f) * 1e-7;
-    f = getField(fs, 2); if (f) out.lon = fx32s(u8, f) * 1e-7;
-    f = getField(fs, 3); if (f) out.alt = viS32(f);
-    f = getField(fs, 4); if (f) out.time = fx32u(u8, f);
-    f = getField(fs, 14); if (f) out.accuracy = viNum(f);
-    return out;
-  }
-
-  // User: id=1 string, long_name=2 string, short_name=3 string
-  function decodeUser(u8) {
-    var fs = parseFields(u8, 0, u8.length);
-    var out = { longName: null, shortName: null };
-    var f = getField(fs, 2); if (f) out.longName = textOf(u8, f);
-    f = getField(fs, 3); if (f) out.shortName = textOf(u8, f);
-    return out;
-  }
-
-  // MeshPacket (v2.7.15): from=1 fx32, to=2 fx32, channel=3, decoded=4,
-  //   id=6 fx32, rx_time=7 fx32, rx_snr=8 float, hop_limit=9, rx_rssi=12 int32,
-  //   hop_start=15.  (Viejo: id=7, rx_time=8, rx_snr=9, hop_start=10,
-  //   hop_limit=11, rx_rssi=14.)
-  function decodeMeshPacket(u8) {
-    var fs = parseFields(u8, 0, u8.length);
-    var layout = "new";
-    var f9 = getField(fs, 9);
-    if (f9) layout = (f9.wt === 5) ? "old" : "new";
-    else if (hasField(fs, 15)) layout = "new";
-    else if (hasField(fs, 10) && hasField(fs, 11)) layout = "old";
-
-    var p = { layout: layout, from: null, to: null, id: null, rxTime: null,
-              rxSnr: null, rxRssi: null, hopLimit: null, hopStart: null,
-              decoded: null };
-    var f = getField(fs, 1); if (f) p.from = fx32u(u8, f);
-    f = getField(fs, 2); if (f) p.to = fx32u(u8, f);
-    if (layout === "new") {
-      f = getField(fs, 6); if (f) p.id = fx32u(u8, f);
-      f = getField(fs, 7); if (f) p.rxTime = fx32u(u8, f);
-      f = getField(fs, 8); if (f) p.rxSnr = f32(u8, f);
-      f = getField(fs, 9); if (f) p.hopLimit = viNum(f);
-      f = getField(fs, 12); if (f) p.rxRssi = viS32(f);
-      f = getField(fs, 15); if (f) p.hopStart = viNum(f);
-    } else {
-      f = getField(fs, 7); if (f) p.id = fx32u(u8, f);
-      f = getField(fs, 8); if (f) p.rxTime = fx32u(u8, f);
-      f = getField(fs, 9); if (f) p.rxSnr = f32(u8, f);
-      f = getField(fs, 10); if (f) p.hopStart = viNum(f);
-      f = getField(fs, 11); if (f) p.hopLimit = viNum(f);
-      f = getField(fs, 14); if (f) p.rxRssi = viS32(f);
-    }
-    f = getField(fs, 4); if (f) p.decoded = decodeData(msgBytes(u8, f));
-    return p;
-  }
-
-  // NodeInfo (v2.7.15): num=1, user=2, position=3, snr=4 float, last_heard=5 fx32
-  function decodeNodeInfo(u8) {
-    var fs = parseFields(u8, 0, u8.length);
-    var out = { num: null, longName: null, shortName: null, lat: null, lon: null,
-                alt: null, snr: null, lastHeard: null };
-    var f = getField(fs, 1); if (f) out.num = viNum(f);
-    f = getField(fs, 2); if (f) { var u = decodeUser(msgBytes(u8, f));
-      out.longName = u.longName; out.shortName = u.shortName; }
-    f = getField(fs, 3); if (f) { var pos = decodePosition(msgBytes(u8, f));
-      out.lat = pos.lat; out.lon = pos.lon; out.alt = pos.alt; }
-    f = getField(fs, 4); if (f) out.snr = f32(u8, f);
-    f = getField(fs, 5); if (f) out.lastHeard = fx32u(u8, f);
-    return out;
-  }
-
-  // MyNodeInfo: my_node_num=1
-  function decodeMyNodeInfo(u8) {
-    var fs = parseFields(u8, 0, u8.length);
-    var out = { myNodeNum: null };
-    var f = getField(fs, 1); if (f) out.myNodeNum = viNum(f);
-    return out;
-  }
-
-  // Payload "seq N" -> N (o null)
-  function seqFromPayload(u8) {
-    if (!u8 || !u8.length) return null;
-    var t = new TextDecoder("utf-8").decode(u8);
-    var m = /^\s*seq\s+(\d+)/i.exec(t);
-    return m ? parseInt(m[1], 10) : null;
-  }
-
-  function isRangeTestPort(portnum) { return RANGE_PORTS.indexOf(portnum) >= 0; }
-
-  function isRangeTestPacket(pkt) {
-    if (!pkt.decoded || pkt.decoded.portnum === null) return false;
-    var port = pkt.decoded.portnum;
-    if (isRangeTestPort(port)) return true;
-    if (NON_TEXT_PORTS.indexOf(port) >= 0) return false;
-    return seqFromPayload(pkt.decoded.payload) !== null;
-  }
-
-  // Paquete recibido por radio desde OTRO nodo (no los internos del propio nodo)
-  function isMeshRx(state, pkt) {
-    if (!pkt.decoded || pkt.decoded.portnum === null) return false;
-    if (pkt.from === null || state.myNodeNum === null || pkt.from === state.myNodeNum) return false;
-    if (pkt.rxSnr === null && pkt.rxRssi === null) return false;
-    return SKIP_PORTS.indexOf(pkt.decoded.portnum) < 0;
-  }
-
-  // -------------------------------------------------------------- geometria
+/* Utilidades: nombre de nodo, distancia y formato de fecha/hora */
+window.MeshtasticRT = (function () {
   // Nombre de nodo para mostrar: «corto - largo» (o el que haya)
   function nodeLabel(shortName, longName) {
     if (shortName && longName && shortName !== longName) return shortName + " - " + longName;
     return longName || shortName || "";
   }
-
   function haversineM(lat1, lon1, lat2, lon2) {
     var R = 6371000.0, toRad = Math.PI / 180;
     var dLat = (lat2 - lat1) * toRad, dLon = (lon2 - lon1) * toRad;
@@ -558,222 +276,22 @@
             Math.sin(dLon / 2) * Math.sin(dLon / 2);
     return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
   }
-
-  // ------------------------------------------------------------- node DB
-  function dbGet(db, num) {
-    if (!db.has(num)) db.set(num, { name: null, shortName: null, lat: null, lon: null, alt: null });
-    return db.get(num);
-  }
-  function updateDbFromPacket(db, pkt) {
-    if (!pkt.decoded || pkt.from === null) return;
-    var port = pkt.decoded.portnum, n = dbGet(db, pkt.from);
-    if (port === PORT.POSITION_APP && pkt.decoded.payload) {
-      var pos = decodePosition(pkt.decoded.payload);
-      if (pos.lat !== null && pos.lon !== null) { n.lat = pos.lat; n.lon = pos.lon; }
-      if (pos.alt !== null) n.alt = pos.alt;
-    } else if (port === PORT.NODEINFO_APP && pkt.decoded.payload) {
-      var u = decodeUser(pkt.decoded.payload);
-      if (u.longName) n.name = u.longName;
-      if (u.shortName) n.shortName = u.shortName;
-    }
-  }
-
-  // ------------------------------------------------------------- estado
-  function newState() {
-    return { db: new Map(), myNodeNum: null, ready: false, rows: [],
-             lastSeq: null, missing: 0, duplicates: 0, otherPackets: 0,
-             seen: new Set(), idDuplicates: 0,
-             errors: 0, lastErrors: [], firstMs: null };
-  }
-
-  // Procesa UN mensaje FromRadio completo (una lectura de FROMRADIO).
-  // state.currentFix = {lat, lon, alt, acc, ms} del GPS del movil (o null).
-  // Devuelve el tipo de evento procesado (o null).
-  function processFromRadio(state, u8, nowMs) {
-    nowMs = nowMs || Date.now();
-    if (!(u8 instanceof Uint8Array)) u8 = Uint8Array.from(u8);
-    var fs;
-    try { fs = parseFields(u8, 0, u8.length); }
-    catch (e) { pushError(state, u8, e); return null; }
-
-    var ev = null;
-    var f = getField(fs, 3);                       // my_info
-    if (f) { state.myNodeNum = decodeMyNodeInfo(msgBytes(u8, f)).myNodeNum; ev = "my_info"; }
-    f = getField(fs, 4);                           // node_info
-    if (f) {
-      var ni = decodeNodeInfo(msgBytes(u8, f));
-      if (ni.num !== null) {
-        var n = dbGet(state.db, ni.num);
-        if (ni.longName) n.name = ni.longName;
-        if (ni.shortName) n.shortName = ni.shortName;
-        if (ni.lat !== null) n.lat = ni.lat;
-        if (ni.lon !== null) n.lon = ni.lon;
-        if (ni.alt !== null) n.alt = ni.alt;
-      }
-      ev = "node_info";
-    }
-    f = getField(fs, 7);                           // config_complete_id
-    if (f !== null) { state.ready = true; ev = "config_complete"; }
-    f = getField(fs, 2);                           // packet
-    if (f) { ev = handlePacket(state, msgBytes(u8, f), nowMs); }
-
-    if (ev === null) {                             // config/channel/metadata/...
-      if (!getField(fs, 5) && !getField(fs, 10) && !getField(fs, 13) &&
-          !getField(fs, 11) && !getField(fs, 16)) ev = "other";
-    }
-    return ev;
-  }
-
-  function handlePacket(state, u8, nowMs) {
-    var pkt;
-    try { pkt = decodeMeshPacket(u8); }
-    catch (e) { pushError(state, u8, e); return null; }
-    if (!pkt.decoded) return "packet_undecoded";
-
-    updateDbFromPacket(state.db, pkt);
-
-    var isRT = isRangeTestPacket(pkt);
-    if (!isRT && !isMeshRx(state, pkt)) { state.otherPackets++; return "packet_other"; }
-
-    // El mismo paquete oído dos veces (retransmisión): se cuenta como duplicado
-    if (pkt.id !== null && pkt.from !== null) {
-      var key = pkt.from + ":" + pkt.id;
-      if (state.seen.has(key)) { state.idDuplicates++; return "packet_dup"; }
-      if (state.seen.size > 5000) state.seen = new Set();
-      state.seen.add(key);
-    }
-
-    var d = pkt.decoded;
-    var seq = isRT ? seqFromPayload(d.payload) : null;
-    var textual = isRT || d.portnum === PORT.TEXT_MESSAGE_APP;
-    var payloadTxt = (textual && d.payload) ? new TextDecoder("utf-8").decode(d.payload) : "";
-
-    if (seq !== null) {
-      if (state.lastSeq !== null && seq === state.lastSeq) state.duplicates++;
-      else if (state.lastSeq !== null && seq > state.lastSeq) state.missing += seq - state.lastSeq - 1;
-      state.lastSeq = seq;
-    }
-
-    // Posición del receptor: GPS del móvil si es reciente (< 2 min);
-    // si no, la posición del propio nodo de ruta (si el T-Echo tiene GPS).
-    var fix = null, rxSrc = "";
-    var mf = state.currentFix || null;
-    if (mf && mf.lat !== null && (nowMs - mf.ms) < 120000) { fix = mf; rxSrc = "movil"; }
-    else if (state.myNodeNum !== null && state.db.has(state.myNodeNum)) {
-      var me = state.db.get(state.myNodeNum);
-      if (me.lat !== null && me.lon !== null && !(me.lat === 0 && me.lon === 0)) {
-        fix = { lat: me.lat, lon: me.lon, alt: me.alt, acc: null }; rxSrc = "nodo";
-      }
-    }
-    var sender = (pkt.from !== null) ? state.db.get(pkt.from) : null;
-    var hops = (pkt.hopStart !== null && pkt.hopLimit !== null && pkt.hopStart >= pkt.hopLimit)
-               ? (pkt.hopStart - pkt.hopLimit) : null;
-    var dist = (fix && fix.lat !== null && sender && sender.lat !== null)
-               ? haversineM(sender.lat, sender.lon, fix.lat, fix.lon) : null;
-
-    var row = { ms: nowMs, seq: seq, from: pkt.from,
-                name: sender ? nodeLabel(sender.shortName, sender.name) : "",
-                senderLat: sender ? sender.lat : null,
-                senderLon: sender ? sender.lon : null,
-                rxLat: fix ? fix.lat : null, rxLon: fix ? fix.lon : null,
-                rxAlt: fix ? fix.alt : null, rxAcc: fix ? fix.acc : null, rxSrc: rxSrc,
-                snr: pkt.rxSnr, rssi: pkt.rxRssi, dist: dist,
-                hopLimit: pkt.hopLimit, hops: hops, port: d.portnum,
-                kind: isRT ? "rangetest" : portName(d.portnum),
-                payload: payloadTxt };
-    state.rows.push(row);
-    if (state.firstMs === null) state.firstMs = nowMs;
-    return "range_test";
-  }
-
-  function pushError(state, u8, e) {
-    state.errors++;
-    var hex = "";
-    try { for (var i = 0; i < Math.min(u8.length, 24); i++) hex += ("0" + u8[i].toString(16)).slice(-2); } catch (x) {}
-    state.lastErrors.unshift(new Date().toISOString() + " — " + e.message + " [" + hex + "]");
-    if (state.lastErrors.length > 5) state.lastErrors.pop();
-  }
-
-  // ----------------------------------------------------------------- CSV
-  var CSV_HEADER = ["date", "time", "seq", "from", "sender_name", "sender_lat",
-                    "sender_lon", "rx_lat", "rx_lon", "rx_alt_m", "rx_acc_m",
-                    "rx_snr", "rx_rssi", "distance_m", "hop_limit", "hops",
-                    "portnum", "payload", "rx_src", "tipo"];
-
   function pad(n, w) { var s = String(n); while (s.length < (w || 2)) s = "0" + s; return s; }
-
   function fmtDate(ms) { var d = new Date(ms); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
   function fmtTime(ms) { var d = new Date(ms); return pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds()); }
-  function num(v, dec) { return (v === null || v === undefined) ? "" : (dec ? v.toFixed(dec) : String(Math.round(v))); }
-
-  function rowToCsv(r) {
-    return [fmtDate(r.ms), fmtTime(r.ms), num(r.seq), num(r.from),
-            '"' + String(r.name || "").replace(/"/g, '""') + '"',
-            num(r.senderLat, 6), num(r.senderLon, 6),
-            num(r.rxLat, 6), num(r.rxLon, 6), num(r.rxAlt), num(r.rxAcc),
-            num(r.snr, 2), num(r.rssi), num(r.dist), num(r.hopLimit),
-            (r.hops === null || r.hops === undefined) ? "" : String(r.hops),
-            num(r.port), '"' + String(r.payload || "").replace(/"/g, '""') + '"',
-            r.rxSrc || "", r.kind || ""
-           ].join(",");
-  }
-
-  function rowsToCsv(rows) {
-    var out = "\uFEFF" + CSV_HEADER.join(",") + "\r\n";
-    for (var i = 0; i < rows.length; i++) out += rowToCsv(rows[i]) + "\r\n";
-    return out;
-  }
-
-  // ------------------------------------------------------- encoders ToRadio
-  // ToRadio: packet=1, want_config_id=3, disconnect=4, heartbeat=7 (Heartbeat{nonce=1})
-  function toRadioWantConfig(id) { return new Uint8Array([0x18].concat(varintBytes(id >>> 0))); }
-  function toRadioDisconnect() { return new Uint8Array([0x20, 0x01]); }
-  function toRadioHeartbeat(nonce) {
-    var hb = [0x08].concat(varintBytes(nonce >>> 0));       // Heartbeat.nonce
-    return new Uint8Array([0x3a, hb.length].concat(hb));    // ToRadio.heartbeat
-  }
-
-  return {
-    parseFields: parseFields, readVarint: readVarint, varintBytes: varintBytes,
-    decodeData: decodeData, decodePosition: decodePosition, decodeUser: decodeUser,
-    decodeMeshPacket: decodeMeshPacket, decodeNodeInfo: decodeNodeInfo,
-    decodeMyNodeInfo: decodeMyNodeInfo, seqFromPayload: seqFromPayload,
-    isRangeTestPort: isRangeTestPort, isRangeTestPacket: isRangeTestPacket,
-    isMeshRx: isMeshRx, portName: portName, CSV_HEADER: CSV_HEADER,
-    haversineM: haversineM, nodeLabel: nodeLabel, dbGet: dbGet, updateDbFromPacket: updateDbFromPacket,
-    newState: newState, processFromRadio: processFromRadio,
-    rowsToCsv: rowsToCsv, rowToCsv: rowToCsv, fmtDate: fmtDate, fmtTime: fmtTime,
-    toRadioWantConfig: toRadioWantConfig, toRadioDisconnect: toRadioDisconnect,
-    toRadioHeartbeat: toRadioHeartbeat,
-    PORT: PORT, RANGE_PORTS: RANGE_PORTS
-  };
-});
-
+  return { nodeLabel: nodeLabel, haversineM: haversineM, fmtDate: fmtDate, fmtTime: fmtTime };
+})();
 </script>
 
 <script>
 "use strict";
-/* ==================== BLE (Web Bluetooth) ==================== */
-const SVC   = "6ba1b218-15a8-461f-9fa8-5dcae273eafd";
-const C_TO  = "f75c76d2-129e-4dad-a1dd-7866124401e7";
-const C_FROM= "2c55e69e-4993-11ed-b878-0242ac120002";
-const C_NUM = "ed9da18c-a800-4f66-a670-aa7547e34453";
 const RT = window.MeshtasticRT;
 
 const $ = id => document.getElementById(id);
-let device = null, chTo = null, chFrom = null, chNum = null;
-let manualDisc = false, reconnectTimer = null, keepaliveTimer = null, wakeLock = null;
-let draining = false, pendingDrain = false, dirtySave = false, dirtyRender = true;
+let dirtyRender = true;
 
-const st = RT.newState();
-const LS_KEY = "rangetest_rows_v1";
-const LS_TRACK = "rangetest_track_v1";
-const LS_NODETRACK = "rangetest_nodetrack_v1";
-st.track = [];          // recorrido del móvil [{ms, lat, lon}]
-st.nodeTrack = [];      // recorrido del nodo de ruta (sus posiciones) [{ms, lat, lon}]
-// track dibujado: el del GPS del móvil; si tiene menos puntos que el del nodo de ruta, el del nodo
-function liveTrackIsNode() { return st.nodeTrack.length > st.track.length; }
-function liveTrack() { return liveTrackIsNode() ? st.nodeTrack : st.track; }
+// Versiones anteriores grababan en vivo y lo guardaban en el navegador: se libera ese espacio
+try { ["rangetest_rows_v1", "rangetest_track_v1", "rangetest_nodetrack_v1", "rangetest_savedcount_v1"].forEach(k => localStorage.removeItem(k)); } catch (e) {}
 let selFrom = "";       // filtro de nodo ("" = todos)
 let maxHops = 0;        // saltos máximos mostrados (0 = solo directos)
 let minHops = 0;        // saltos mínimos mostrados
@@ -784,145 +302,10 @@ function passHops(r) {
   return r.hops >= minHops && r.hops <= maxHops;
 }
 
-/* ---------- persistencia ---------- */
-function persistNow() {
-  try { localStorage.setItem(LS_KEY, JSON.stringify(st.rows.slice(-20000))); } catch (e) {}
-  try { localStorage.setItem(LS_TRACK, JSON.stringify(st.track.slice(-20000))); } catch (e) {}
-  try { localStorage.setItem(LS_NODETRACK, JSON.stringify(st.nodeTrack.slice(-20000))); } catch (e) {}
-}
-function recompute() {
-  st.lastSeq = null; st.missing = 0; st.duplicates = 0; st.firstMs = null;
-  for (const r of st.rows) {
-    if (r.seq !== null && r.seq !== undefined) {
-      if (st.lastSeq !== null && r.seq === st.lastSeq) st.duplicates++;
-      else if (st.lastSeq !== null && r.seq > st.lastSeq) st.missing += r.seq - st.lastSeq - 1;
-      st.lastSeq = r.seq;
-    }
-    if (st.firstMs === null) st.firstMs = r.ms;
-  }
-}
 // nombres de tipo de versiones anteriores (en castellano) → nombres Meshtastic
 const KIND_FIX = { posicion: "position", telemetria: "telemetry", texto: "text", vecinos: "neighborinfo", mapa: "mapreport" };
 function fixKind(k) { if (!k) return k; if (KIND_FIX[k]) return KIND_FIX[k]; return k.replace(/^puerto /, "port "); }
-(function restore() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(LS_KEY) || "[]");
-    if (Array.isArray(saved) && saved.length) { for (const r of saved) r.kind = fixKind(r.kind); st.rows = saved; recompute(); }
-  } catch (e) {}
-  try {
-    const tr = JSON.parse(localStorage.getItem(LS_TRACK) || "[]");
-    if (Array.isArray(tr)) st.track = tr;
-  } catch (e) {}
-  try {
-    const nt = JSON.parse(localStorage.getItem(LS_NODETRACK) || "[]");
-    if (Array.isArray(nt)) st.nodeTrack = nt;
-  } catch (e) {}
-})();
-setInterval(() => { if (dirtySave) { dirtySave = false; persistNow(); } }, 5000);
-window.addEventListener("pagehide", () => { if (dirtySave) persistNow(); });
-
-/* ---------- GPS del móvil ---------- */
-// Chrome solo da la ubicación en páginas https:// (o localhost). Abierta como
-// archivo (file:// o content://) el GPS falla siempre, aunque el Bluetooth vaya.
-let gpsWatch = null, gpsDenied = false;
-const GPS_OPTS = { enableHighAccuracy: true, maximumAge: 3000, timeout: 30000 };
-function gpsChip(t, c) { setChip("chipGps", "dotGps", t, c); }
-// El aviso de GPS denegado está en la ayuda («?» → Soluciones); el chip «GPS móvil» la abre.
-function showGpsHelp(show) {}
-function isWebSegura() {
-  return location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1";
-}
-function stopGps() {
-  if (gpsWatch !== null && "geolocation" in navigator) navigator.geolocation.clearWatch(gpsWatch);
-  gpsWatch = null;
-}
-function onGpsOk(p) {
-  st.currentFix = { lat: p.coords.latitude, lon: p.coords.longitude,
-    alt: (p.coords.altitude == null ? null : p.coords.altitude),
-    acc: (p.coords.accuracy == null ? null : Math.round(p.coords.accuracy)), ms: Date.now() };
-  gpsDenied = false; showGpsHelp(false); $("btnGpsRetry").hidden = true;
-  addTrackPoint(st.currentFix);
-  updatePosMarker();
-  dirtyRender = true;
-}
-// Guarda el recorrido (un punto cada 10 s si te has movido >10 m, o cada minuto)
-// Recorrido del nodo de ruta: cada vez que cambia su posición (la que manda por Bluetooth)
-function recordNodeTrack() {
-  const me = st.myNodeNum !== null ? st.db.get(st.myNodeNum) : null;
-  if (!me || me.lat == null || me.lon == null || (me.lat === 0 && me.lon === 0)) return;
-  const last = st.nodeTrack[st.nodeTrack.length - 1];
-  if (last && last.lat === me.lat && last.lon === me.lon) return;
-  st.nodeTrack.push({ ms: Date.now(), lat: me.lat, lon: me.lon });
-  dirtySave = true; dirtyRender = true;
-}
-setInterval(recordNodeTrack, 2000);
-function addTrackPoint(f) {
-  if (!f || f.lat == null) return;
-  if (f.acc != null && f.acc > 100) return;
-  const last = st.track[st.track.length - 1];
-  if (last) {
-    const dt = f.ms - last.ms, dm = RT.haversineM(last.lat, last.lon, f.lat, f.lon);
-    if (dt < 10000 || (dm < 10 && dt < 60000)) return;
-  }
-  st.track.push({ ms: f.ms, lat: f.lat, lon: f.lon });
-  dirtySave = true;
-}
-function onGpsErr(e) {
-  if (e.code === 1) {                        // PERMISSION_DENIED
-    gpsDenied = true; stopGps();
-    gpsChip(isWebSegura() ? "permiso denegado" : "bloqueado (archivo local)", "bad");
-    if (isWebSegura()) showGpsHelp(true);
-    $("btnGpsRetry").hidden = false;
-  } else if (!st.currentFix) {               // sin señal / timeout: el watch sigue solo
-    gpsChip(e.code === 2 ? "sin señal…" : "buscando…", "warn");
-  }
-}
-function startGps() {
-  if (!("geolocation" in navigator)) { gpsChip("no disponible", "bad"); return; }
-  if (!isWebSegura()) {
-    gpsChip("bloqueado (archivo local)", "bad");
-    $("bannerHttps").hidden = false;
-    $("bannerProto").textContent = location.protocol;
-    return;
-  }
-  stopGps();
-  gpsChip("buscando…", "warn");
-  // getCurrentPosition primero: fuerza el aviso de permiso y da un fix rápido
-  navigator.geolocation.getCurrentPosition(onGpsOk, onGpsErr, GPS_OPTS);
-  gpsWatch = navigator.geolocation.watchPosition(onGpsOk, onGpsErr, GPS_OPTS);
-}
-function retryGpsNow() { say(""); showGpsHelp(false); startGps(); }
-// Refresca el chip con la edad del último fix (avisa si se queda viejo)
-setInterval(() => {
-  const f = st.currentFix;
-  if (f) {
-    const age = Math.round((Date.now() - f.ms) / 1000);
-    if (age < 120) gpsChip("±" + f.acc + " m" + (age > 15 ? " (" + age + " s)" : ""), "ok");
-    else gpsChip("sin fix hace " + Math.round(age / 60) + " min", "warn");
-  }
-  // GPS del propio nodo de ruta (respaldo)
-  const me = st.myNodeNum !== null ? st.db.get(st.myNodeNum) : null;
-  if (me && me.lat !== null && !(me.lat === 0 && me.lon === 0))
-    setChip("chipNodeGps", "dotNodeGps", me.lat.toFixed(4) + ", " + me.lon.toFixed(4), "ok");
-  else if (st.ready) setChip("chipNodeGps", "dotNodeGps", "sin posición", "warn");
-}, 1000);
-function setDbgOrigin(extra) {
-  $("dbgOrigin").textContent = "origen: " + String(location.href).slice(0, 60) +
-    " · contexto seguro: " + (window.isSecureContext ? "sí" : "NO") + (extra ? " · " + extra : "");
-}
-(async () => {
-  try {
-    if (navigator.permissions && navigator.permissions.query) {
-      const s = await navigator.permissions.query({ name: "geolocation" });
-      setDbgOrigin("permiso GPS: " + s.state);
-      s.onchange = () => { setDbgOrigin("permiso GPS: " + s.state); if (s.state === "granted") startGps(); };
-    }
-  } catch (e) {}
-  startGps();
-})();
-
 /* ---------- UI helpers ---------- */
-function setChip(chipId, dotId, txt, cls) { $(chipId).textContent = txt; const d = $(dotId); d.className = "dot" + (cls ? " " + cls : ""); }
 // Los mensajes se borran solos a los pocos segundos
 let sayTimer = null;
 function say(t, ms) {
@@ -934,40 +317,12 @@ function fmtFecha(ms) { const d = new Date(ms), p = n => String(n).padStart(2, "
 function hexId(n) { return "!" + (n >>> 0).toString(16).padStart(8, "0"); }
 function rowsView() {
   const f = selFrom ? Number(selFrom) : null;
-  // Lo recibido en vivo más los archivos abiertos (CSV o registro de la app), en orden de hora
-  const src = fileRows ? st.rows.concat(fileRows).sort((a, b) => a.ms - b.ms) : st.rows;
-  return src.filter(r => (f === null || r.from === f) && passHops(r));
-}
-// Perdidos: por «seq» si lo hay; si no, por huecos de tiempo de cada emisor
-function computeStats(rows) {
-  let lastSeq = null, seqMiss = 0, seqDup = 0;
-  const byFrom = new Map();
-  for (const r of rows) {
-    if (r.seq !== null && r.seq !== undefined) {
-      if (lastSeq !== null && r.seq === lastSeq) seqDup++;
-      else if (lastSeq !== null && r.seq > lastSeq) seqMiss += r.seq - lastSeq - 1;
-      lastSeq = r.seq;
-    } else if (r.from !== null && r.from !== undefined) {
-      if (!byFrom.has(r.from)) byFrom.set(r.from, []);
-      byFrom.get(r.from).push(r.ms);
-    }
-  }
-  let timeMiss = 0;
-  for (const ts of byFrom.values()) {
-    if (ts.length < 4) continue;
-    ts.sort((a, b) => a - b);
-    const gaps = [];
-    for (let i = 1; i < ts.length; i++) gaps.push(ts[i] - ts[i - 1]);
-    const med = gaps.slice().sort((a, b) => a - b)[Math.floor(gaps.length / 2)];
-    if (med < 5000) continue;
-    for (const g of gaps) if (g > 1.5 * med) timeMiss += Math.round(g / med) - 1;
-  }
-  return { lastSeq, missing: seqMiss + timeMiss, duplicates: seqDup };
+  return (fileRows || []).filter(r => (f === null || r.from === f) && passHops(r));
 }
 function refreshFromSelect() {
-  // Nodos de lo recibido en vivo y de los archivos abiertos (CSV o registro de la app), los más oídos primero
+  // Nodos de los archivos abiertos, los más oídos primero
   const sel = $("selFrom"), seen = new Map(), count = new Map();
-  const all = fileRows ? st.rows.concat(fileRows) : st.rows;
+  const all = fileRows || [];
   for (const r of all) {
     if (r.from === null || r.from === undefined) continue;
     if (!seen.has(r.from) || (r.name && !seen.get(r.from))) seen.set(r.from, r.name || "");
@@ -982,24 +337,10 @@ function refreshFromSelect() {
   sel.value = seen.has(Number(selFrom)) ? selFrom : "";
   if (sel.value !== selFrom) { selFrom = sel.value; }
 }
-// «Último paquete»: hace cuánto se oyó, en formato -HH:MM (se actualiza solo)
-let lastPacketMs = null;
-function showLastAge() {
-  const el = $("sSeq");
-  if (lastPacketMs === null) { el.textContent = "—"; return; }
-  const m = Math.max(0, Math.floor((Date.now() - lastPacketMs) / 60000));
-  el.textContent = "-" + String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
-}
-setInterval(showLastAge, 5000);
 function render() {
   refreshFromSelect();
   const rows = rowsView();
-  const S = computeStats(rows);
   $("sReg").textContent = rows.length;
-  const lastR = rows[rows.length - 1];
-  lastPacketMs = lastR ? lastR.ms : null; showLastAge();
-  $("sMiss").textContent = S.missing;
-  $("sDup").textContent = S.duplicates + (st.idDuplicates || 0);
   let bestSnr = null, maxD = null;
   for (const r of rows) {
     if (r.snr !== null && (bestSnr === null || r.snr > bestSnr)) bestSnr = r.snr;
@@ -1007,8 +348,6 @@ function render() {
   }
   $("sSnr").textContent = bestSnr === null ? "—" : bestSnr.toFixed(1);
   $("sDist").textContent = maxD === null ? "—" : (maxD / 1000).toFixed(1);
-  const last = rows[rows.length - 1];
-  $("sRssi").textContent = last && last.rssi !== null ? last.rssi : "—";
   if (rows.length) {
     const s = Math.max(1, Math.round((rows[rows.length - 1].ms - rows[0].ms) / 1000));
     $("sDur").textContent = s >= 3600 ? Math.floor(s / 3600) + "h" + Math.round(s % 3600 / 60) + "m" : Math.floor(s / 60) + "m" + (s % 60) + "s";
@@ -1023,162 +362,14 @@ function render() {
     (r.senderLon == null ? "—" : r.senderLon.toFixed(5)) + "</td><td>" +
     (r.rxLat === null ? "—" : r.rxLat.toFixed(5)) + "</td><td>" +
     (r.rxLon === null ? "—" : r.rxLon.toFixed(5)) + (r.rxSrc === "nodo" ? " 📟" : r.rxSrc === "movil" ? " 📱" : "") + "</td></tr>").join("");
-  const dbg = [];
-  dbg.push("errores de parseo: " + st.errors + " · otros paquetes: " + st.otherPackets +
-           " · repetidos por id: " + (st.idDuplicates || 0) + " · track móvil: " + st.track.length + " · track nodo: " + st.nodeTrack.length);
-  for (const l of st.lastErrors) dbg.push(l);
-  $("dbgList").textContent = dbg.join("\n");
   // solo se redibuja el mapa si cambian los datos (si no, se cerraría el popup abierto)
-  const sig = [rows.length, lastR ? lastR.ms : 0, liveTrack().length, fileRows ? fileRows.length : 0,
+  const sig = [rows.length, fileRows ? fileRows.length : 0,
                fileTracks.length, selFrom, minHops, maxHops, mapView, cellSize].join("|");
   if (sig !== lastMapSig) { lastMapSig = sig; mapDirty = true; }
   if (map) drawMap(false);
 }
 function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;"); }
 
-/* ---------- conexión ---------- */
-let connState = "off";   // off | connecting | on | reconnecting
-function showConn(s) {
-  connState = s;
-  const b = $("btnCon");
-  const linked = s === "on" || s === "reconnecting";
-  b.innerHTML = '<span class="bt">ᛒ</span> ' + (linked ? "Desconectar" : (s === "connecting" ? "Conectando…" : "Conectar"));
-  b.classList.toggle("on", linked);
-  b.classList.toggle("sec", !linked);
-  b.disabled = s === "connecting";
-}
-function toggleConn() { if (connState === "on" || connState === "reconnecting") disconnect(); else if (connState === "off") connect(); }
-async function connect() {
-  if (!navigator.bluetooth) { $("bannerNoBt").hidden = false; return; }
-  manualDisc = false; say("");
-  showConn("connecting");
-  setChip("chipBle", "dotBle", "conectando…", "warn");
-  try {
-    if (!device) {
-      device = await navigator.bluetooth.requestDevice({
-        filters: [{ services: [SVC] }, { namePrefix: "Meshtastic" }, { namePrefix: "T-Echo" }, { namePrefix: "TECHO" }],
-        optionalServices: [SVC]
-      });
-      device.addEventListener("gattserverdisconnected", onDisconnected);
-    }
-    await attach();
-  } catch (e) {
-    showConn("off");
-    setChip("chipBle", "dotBle", "desconectado", "bad");
-    say("No se pudo conectar: " + e.message + "\nSi el nodo está ocupado, cierra la app Meshtastic o desactiva/reactiva el Bluetooth del móvil y reintenta.");
-  }
-}
-async function attach() {
-  const server = device.gatt.connected ? device.gatt : await device.gatt.connect();
-  const svc = await server.getPrimaryService(SVC);
-  chTo = await svc.getCharacteristic(C_TO);
-  chFrom = await svc.getCharacteristic(C_FROM);
-  chNum = await svc.getCharacteristic(C_NUM);
-  await chNum.startNotifications();
-  chNum.addEventListener("characteristicvaluechanged", onFromNum);
-  setChip("chipBle", "dotBle", (device.name || "nodo") + " ✓", "ok");
-  showConn("on");
-  await sendWantConfig();
-  startKeepalive();
-}
-async function sendWantConfig() {
-  st.ready = false; setChip("chipCfg", "dotCfg", "pidiendo…", "warn");
-  const id = (Math.random() * 0xFFFFFFFF) >>> 0;
-  await chTo.writeValue(RT.toRadioWantConfig(id));
-  drainSoon();
-}
-function onFromNum() { drainSoon(); }
-function drainSoon() {
-  if (draining) { pendingDrain = true; return; }
-  draining = true;
-  (async () => {
-    try {
-      let guard = 0;
-      while (guard++ < 3000) {
-        const dv = await chFrom.readValue();
-        if (!dv || !dv.byteLength) break;
-        const ev = RT.processFromRadio(st, new Uint8Array(dv.buffer, dv.byteOffset, dv.byteLength));
-        if (ev === "range_test" || ev === "node_info" || ev === "packet_other" || ev === "packet_dup") { dirtySave = true; dirtyRender = true; }
-        if (ev === "config_complete") { setChip("chipCfg", "dotCfg", "Config ✓", "ok"); dirtyRender = true; }
-      }
-    } catch (e) { /* desconexión o cola vacía */ }
-    draining = false;
-    if (pendingDrain) { pendingDrain = false; drainSoon(); }
-  })();
-}
-function startKeepalive() {
-  stopKeepalive();
-  keepaliveTimer = setInterval(() => {
-    if (chTo && device && device.gatt.connected) {
-      chTo.writeValue(RT.toRadioHeartbeat((Math.random() * 0xFFFF) >>> 0)).catch(() => {});
-    }
-  }, 120000);
-}
-function stopKeepalive() { if (keepaliveTimer) { clearInterval(keepaliveTimer); keepaliveTimer = null; } }
-function onDisconnected() {
-  stopKeepalive();
-  if (manualDisc) { showConn("off"); setChip("chipBle", "dotBle", "desconectado", "bad"); setChip("chipCfg", "dotCfg", "—", ""); return; }
-  showConn("reconnecting");
-  setChip("chipBle", "dotBle", "reconectando…", "warn");
-  let tries = 0;
-  const again = async () => {
-    if (manualDisc) return;
-    tries++;
-    try { await attach(); say("Reconectado ✓ (intento " + tries + ")"); }
-    catch (e) { if (tries < 120) reconnectTimer = setTimeout(again, 3000); else { showConn("off"); setChip("chipBle", "dotBle", "desconectado", "bad"); } }
-  };
-  reconnectTimer = setTimeout(again, 2500);
-}
-async function disconnect() {
-  manualDisc = true;
-  if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
-  stopKeepalive();
-  try { if (chTo && device.gatt.connected) await chTo.writeValue(RT.toRadioDisconnect()); } catch (e) {}
-  try { await chNum.stopNotifications(); } catch (e) {}
-  try { device.gatt.disconnect(); } catch (e) {}
-  setChip("chipBle", "dotBle", "desconectado", "bad");
-  setChip("chipCfg", "dotCfg", "—", "");
-  showConn("off");
-  say("Desconectado.");
-}
-
-/* ---------- exportación ---------- */
-function fileStamp() {
-  const d = new Date(), p = n => String(n).padStart(2, "0");
-  return d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
-}
-function csvName() { return "signal_" + fileStamp() + ".csv"; }
-// «💾 Guardar»: signal_<fecha>.csv (todas las recepciones) + track_<fecha>.gpx (track elegido).
-// PC (Chrome/Edge): pregunta la carpeta. Android: menú compartir o Descargas.
-async function saveAll() {
-  if (!st.rows.length && liveTrack().length < 2) { say("Aún no hay nada que guardar."); return; }
-  persistNow();
-  const stamp = fileStamp(), files = [];
-  if (st.rows.length) files.push({ name: "signal_" + stamp + ".csv", text: RT.rowsToCsv(st.rows), mime: "text/csv" });
-  if (liveTrack().length >= 2) files.push({ name: "track_" + stamp + ".gpx", text: trackToGpx(liveTrack(), "track_" + stamp), mime: "application/gpx+xml" });
-  const names = files.map(f => f.name).join(" y ");
-  if (window.showDirectoryPicker) {
-    let dir;
-    try { dir = await window.showDirectoryPicker({ id: "cobertura", mode: "readwrite", startIn: "downloads" }); }
-    catch (e) { if (e && e.name === "AbortError") return; dir = null; }
-    if (dir) {
-      try {
-        for (const f of files) {
-          const h = await dir.getFileHandle(f.name, { create: true });
-          const w = await h.createWritable(); await w.write(new Blob([f.text], { type: f.mime })); await w.close();
-        }
-        markSaved(); say("Guardado ✓ " + names + " en la carpeta «" + dir.name + "».");
-        return;
-      } catch (e) { say("No se pudo escribir en la carpeta (" + e.message + "). Se descargan."); }
-    }
-  }
-  try {
-    const fl = files.map(f => new File([f.text], f.name, { type: f.mime }));
-    if (navigator.canShare && navigator.canShare({ files: fl })) { await navigator.share({ files: fl, title: "Analizador Cobertura Meshtastic" }); markSaved(); return; }
-  } catch (e) { if (e && e.name === "AbortError") return; }
-  for (let i = 0; i < files.length; i++) setTimeout(() => downloadText(files[i].name, files[i].text, files[i].mime), i * 700);
-  markSaved(); say("Guardado en Descargas ✓ " + names);
-}
 async function openFiles(list) {
   for (const f of list) {
     const head = await f.slice(0, 2000).text();
@@ -1188,22 +379,11 @@ async function openFiles(list) {
     else await openCsvFile(f);
   }
 }
-// «🗑 Limpiar»: quita del mapa todo (registros en vivo, tracks y archivos abiertos).
-// Avisa si hay registros en vivo que aún no se han guardado con «💾 Guardar».
-const LS_SAVED = "rangetest_savedcount_v1";
-let savedCount = (() => { try { return Number(localStorage.getItem(LS_SAVED) || "-1"); } catch (e) { return -1; } })();
-function markSaved() { savedCount = st.rows.length; try { localStorage.setItem(LS_SAVED, String(savedCount)); } catch (e) {} }
+// «🗑 Limpiar»: quita del mapa todo lo abierto
 function clearAll() {
-  const hasLive = st.rows.length || st.track.length || st.nodeTrack.length;
-  const hasFiles = !!fileRows || fileTracks.length > 0;
-  if (!hasLive && !hasFiles) { say("No hay nada que limpiar."); return; }
-  let q = "¿Limpiar en el mapa los registros de señal y el track del recorrido?";
-  if (st.rows.length && st.rows.length !== savedCount) q += "\n\nOjo: hay registros que todavía no has guardado con «💾 Guardar».";
-  if (!confirm(q)) return;
-  st.rows.length = 0; st.track.length = 0; st.nodeTrack.length = 0; st.idDuplicates = 0; st.seen = new Set();
-  fileRows = null; fileNames = []; fileTracks = []; $("lgImp").hidden = true;
-  markSaved();
-  recompute(); persistNow(); mapFitted = false; mapDirty = true; dirtyRender = true; say("Mapa limpio.");
+  if (!fileRows && !fileTracks.length) { say("No hay nada que limpiar."); return; }
+  fileRows = null; fileNames = []; fileTracks = [];
+  mapFitted = false; mapDirty = true; dirtyRender = true; say("Mapa limpio.");
 }
 
 
@@ -1214,20 +394,18 @@ const LEAFLET_SRC = [
 ];
 let map = null, mapLayer = null, mapOn = false, mapDirty = true, mapFitted = false;
 let fileRows = null, fileNames = [], fileTracks = [];
-let mapView = "dots", cellSize = 250, autoFollow = false, lastFollow = null;
-function saveMapPrefs() { try { localStorage.setItem("rangetest_mapprefs_v1", JSON.stringify({ mapView, cellSize, minHops, maxHops, autoFollow })); } catch (e) {} }
+let mapView = "dots", cellSize = 250;
+function saveMapPrefs() { try { localStorage.setItem("rangetest_mapprefs_v1", JSON.stringify({ mapView, cellSize, minHops, maxHops })); } catch (e) {} }
 function loadMapPrefs() {
   try {
     const p = JSON.parse(localStorage.getItem("rangetest_mapprefs_v1") || "{}");
     if (p.mapView === "grid" || p.mapView === "dots") mapView = p.mapView;
     if ([50, 100, 250, 500, 1000].includes(p.cellSize)) cellSize = p.cellSize;
-    if (typeof p.autoFollow === "boolean") autoFollow = p.autoFollow;
     if (Number.isInteger(p.maxHops) && p.maxHops >= 0 && p.maxHops <= 7) maxHops = p.maxHops;
     if (Number.isInteger(p.minHops) && p.minHops >= 0 && p.minHops <= maxHops) minHops = p.minHops;
   } catch (e) {}
   showView(); showCell();
   $("rngHops").value = String(maxHops); $("rngHopsMin").value = String(minHops); showHops();
-  $("btnAuto").classList.toggle("on", autoFollow);
 }
 const CELL_SIZES = [50, 100, 250, 500, 1000];
 function showView() {
@@ -1275,7 +453,7 @@ async function startMap() {
   if (map || mapStarting) return;
   mapStarting = true;
   try { await initMap(); mapOn = true; mapDirty = true; drawMap(false); }
-  catch (e) { $("mapInfo").textContent = "Mapa no disponible (" + e.message + "): hace falta conexión a internet para cargarlo. El registro sigue funcionando y el mapa aparecerá al volver la conexión."; }
+  catch (e) { $("mapInfo").textContent = "Mapa no disponible (" + e.message + "): hace falta conexión a internet para cargarlo. Aparecerá solo al volver la conexión."; }
   mapStarting = false;
 }
 window.addEventListener("online", startMap);
@@ -1301,14 +479,11 @@ async function initMap() {
   });
   addBaseLayers();
   mapLayer = L.layerGroup().addTo(map);
-  posLayer = L.layerGroup().addTo(map);
   L.control.scale({ imperial: false, position: "bottomleft", maxWidth: 140 }).addTo(map);
   addMaxControl();
   L.control.layers(baseLayers, null, { position: "topright", collapsed: true }).addTo(map);
-  addLocateControl();
   map.on("popupclose", () => { if (pendingRedraw) setTimeout(() => { mapDirty = true; drawMap(false); }, 0); });
   map.setView([40.4, -3.7], 6);
-  updatePosMarker();
 }
 
 /* Leaflet.SmoothWheelZoom (mutsuyuki, licencia MIT), integrado aquí para no
@@ -1398,15 +573,12 @@ function addBaseLayers() {
   map.on("baselayerchange", e => { baseName = e.name; try { localStorage.setItem("rangetest_baselayer_v1", e.name); } catch (x) {} });
 }
 function mapRows() {
-  if (fileRows) { const f = selFrom ? Number(selFrom) : null; return fileRows.filter(r => (f === null || r.from === f) && passHops(r)); }
   return rowsView();
 }
-// Segmentos de recorrido que se usan en el mapa: [{pts:[{lat,lon,ms}], imported}]
+// Segmentos de recorrido que se usan en el mapa: [{pts:[{lat,lon,ms}], name}]
 function mapTracks() {
   const out = [];
-  if (!fileRows && liveTrack().length > 1)
-    for (const seg of trackSegments(liveTrack())) out.push({ pts: seg, imported: false });
-  for (const t of fileTracks) for (const seg of t.segs) out.push({ pts: seg, imported: true, name: t.name });
+  for (const t of fileTracks) for (const seg of t.segs) out.push({ pts: seg, name: t.name });
   return out;
 }
 // Intervalo típico entre paquetes del emisor principal (para el % de recepción)
@@ -1525,14 +697,11 @@ function drawMap(fit) {
     }
   }
 
-  // recorridos: el tuyo en azul, los importados en morado discontinuo
+  // recorridos (azul)
   for (const t of tracks) {
     if (t.pts.length > 1) {
-      const line = L.polyline(t.pts.map(p => [p.lat, p.lon]), t.imported
-        ? { color: "#b45cf0", weight: grid ? 2 : 4, opacity: .85, dashArray: "8 6" }
-        : { color: "#2f7df6", weight: grid ? 2 : 4, opacity: .85 });
-      if (t.imported) line.bindPopup("Track importado: " + esc(t.name));
-      line.addTo(mapLayer);
+      L.polyline(t.pts.map(p => [p.lat, p.lon]), { color: "#2f7df6", weight: grid ? 2 : 4, opacity: .85 })
+        .bindPopup("Recorrido: " + esc(t.name)).addTo(mapLayer);
     }
     for (const p of t.pts) pts.push([p.lat, p.lon]);
   }
@@ -1570,16 +739,16 @@ function drawMap(fit) {
       .addTo(mapLayer);
   }
 
-  const src = fileRows ? (fileNames.length === 1 ? "Archivo: " + fileNames[0] : fileNames.length + " CSV abiertos") : "En vivo";
+  if (!fileRows && !fileTracks.length) { $("mapInfo").textContent = "Abre con 📂 Abrir el registro exportado de la app Meshtastic (.txt)."; $("lgRelay").hidden = maxHops === 0; return; }
+  const src = fileNames.length === 1 ? "Archivo: " + fileNames[0] : fileNames.length + " archivos abiertos";
   const info = [src, n + " recepciones con GPS"];
   if (grid) info.push(nCells + " celdas, " + nEmpty + " sin recepción");
   if (sinGps) info.push(sinGps + " sin GPS (no se pintan)");
   $("lgRelay").hidden = maxHops === 0;
-  if (!fileRows) info.push("track del " + (liveTrackIsNode() ? "nodo" : "móvil") + ": " + liveTrack().length + " puntos");
-  if (fileTracks.length) info.push(fileTracks.length + " track" + (fileTracks.length > 1 ? "s" : "") + " importado" + (fileTracks.length > 1 ? "s" : ""));
+  if (fileTracks.length) info.push(fileTracks.length + " recorrido" + (fileTracks.length > 1 ? "s" : ""));
   $("mapInfo").textContent = info.join(" · ");
 
-  if (pts.length && (fit || (!mapFitted && !(autoFollow && currentPos())))) {
+  if (pts.length && (fit || !mapFitted)) {
     if (pts.length === 1) map.flyTo(pts[0], 15, { duration: 0.8 });
     else map.flyToBounds(L.latLngBounds(pts).pad(0.15), { maxZoom: 16, duration: 0.8 });
     mapFitted = true;
@@ -1627,7 +796,7 @@ async function openCsvFile(file) {
     fileRows = (fileRows || []).concat(rows); fileNames.push(file.name);
     if (!map) await startMap();
     mapDirty = true; drawMap(true); refreshFromSelect(); dirtyRender = true;
-    say("Abierto " + file.name + " (" + rows.length + " filas). En el mapa: " + fileNames.length + " CSV, " + fileRows.length + " filas.");
+    say("Abierto " + file.name + " (" + rows.length + " filas). En el mapa: " + fileNames.length + " archivos, " + fileRows.length + " filas.");
   } catch (e) { say("No se pudo abrir " + file.name + ": " + e.message); }
 }
 
@@ -1732,7 +901,7 @@ async function openDebugTxt(file) {
     fileRows = (fileRows || []).concat(r.rows); fileNames.push(file.name);
     for (const t of r.tracks) {
       const segs = trackSegments(t).map(seg => seg.map(p => ({ lat: p.lat, lon: p.lon, ms: p.ms })));
-      fileTracks.push({ name: file.name, segs }); $("lgImp").hidden = false;
+      fileTracks.push({ name: file.name, segs });
     }
     if (!map) await startMap();
     mapDirty = true; drawMap(true); refreshFromSelect(); dirtyRender = true;
@@ -1742,21 +911,7 @@ async function openDebugTxt(file) {
   } catch (e) { say("No se pudo abrir " + file.name + ": " + e.message); }
 }
 
-/* ---------- track: exportar / importar GPX ---------- */
-function downloadText(name, text, mime) {
-  const url = URL.createObjectURL(new Blob([text], { type: mime }));
-  const a = document.createElement("a");
-  a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 8000);
-}
-async function shareOrDownload(name, text, mime) {
-  try {
-    const file = new File([text], name, { type: mime });
-    if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: name }); return "share"; }
-  } catch (e) { if (e && e.name === "AbortError") return "cancel"; }
-  downloadText(name, text, mime);
-  return "download";
-}
+/* ---------- abrir un GPX ---------- */
 function xmlEsc(t) { return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
 function trackSegments(track) {
   const segs = [[]];
@@ -1765,17 +920,6 @@ function trackSegments(track) {
     segs[segs.length - 1].push(track[i]);
   }
   return segs.filter(s => s.length);
-}
-function trackToGpx(track, name) {
-  let out = '<?xml version="1.0" encoding="UTF-8"?>\n' +
-    '<gpx version="1.1" creator="Analizador Cobertura Meshtastic" xmlns="http://www.topografix.com/GPX/1/1">\n' +
-    "  <trk><name>" + xmlEsc(name) + "</name>\n";
-  for (const seg of trackSegments(track)) {
-    out += "    <trkseg>\n";
-    for (const p of seg) out += '      <trkpt lat="' + p.lat.toFixed(7) + '" lon="' + p.lon.toFixed(7) + '"><time>' + new Date(p.ms).toISOString() + "</time></trkpt>\n";
-    out += "    </trkseg>\n";
-  }
-  return out + "  </trk>\n</gpx>\n";
 }
 function gpxToTrack(text) {
   const doc = new DOMParser().parseFromString(text, "application/xml");
@@ -1800,66 +944,16 @@ async function importTrack(file) {
   try {
     const segs = gpxToTrack(await file.text());
     fileTracks.push({ name: file.name, segs });
-    $("lgImp").hidden = false;
     if (!map) await startMap();
     mapDirty = true; drawMap(true);
-    say("Track importado: " + file.name + " (" + segs.reduce((a, s) => a + s.length, 0) + " puntos). Tracks abiertos: " + fileTracks.length + ".");
+    say("Recorrido abierto: " + file.name + " (" + segs.reduce((a, s) => a + s.length, 0) + " puntos).");
   } catch (e) { say("No se pudo importar " + file.name + ": " + e.message); }
 }
 
 /* ---------- maximizar el mapa (pantalla completa en el móvil) ---------- */
 const ICON_MAX = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
 const ICON_MIN = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>';
-let mapMax = false, maxBtn = null, posLayer = null, posMarker = null;
-const ICON_LOC = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>';
-// Posición actual: GPS del móvil si es reciente; si no, la del nodo de ruta
-function currentPos() {
-  const f = st.currentFix;
-  if (f && f.lat != null && Date.now() - f.ms < 120000) return [f.lat, f.lon];
-  const me = st.myNodeNum !== null ? st.db.get(st.myNodeNum) : null;
-  if (me && me.lat != null && !(me.lat === 0 && me.lon === 0)) return [me.lat, me.lon];
-  return null;
-}
-function updatePosMarker() {
-  if (!map || !posLayer) return;
-  const p = currentPos();
-  if (!p) return;
-  if (!posMarker) posMarker = L.circleMarker(p, { radius: 7, color: "#ffffff", weight: 2.5, fillColor: "#2f7df6", fillOpacity: 1, interactive: false }).addTo(posLayer);
-  else posMarker.setLatLng(p);
-  followPos();
-}
-// «Automático»: centra el mapa en tu posición cada vez que cambia, sin tocar el zoom
-function followPos() {
-  if (!autoFollow || !map || !map._loaded) return;
-  const p = currentPos();
-  if (!p) return;
-  if (lastFollow && lastFollow[0] === p[0] && lastFollow[1] === p[1]) return;
-  lastFollow = p;
-  if (map.getZoom() < 10) map.setView(p, 15);          // primera vez con el mapa de España entero
-  else map.panTo(p, { animate: true, duration: 0.5 });
-}
-setInterval(updatePosMarker, 2000);
-function addLocateControl() {
-  const Ctl = L.Control.extend({
-    options: { position: "topright" },
-    onAdd: function () {
-      const box = L.DomUtil.create("div", "leaflet-bar leaflet-control leaflet-control-max");
-      const a = L.DomUtil.create("a", "", box);
-      a.href = "#"; a.setAttribute("role", "button"); a.title = "Ir a mi posición"; a.setAttribute("aria-label", a.title);
-      a.innerHTML = ICON_LOC;
-      L.DomEvent.disableClickPropagation(box);
-      L.DomEvent.on(a, "click", e => {
-        L.DomEvent.preventDefault(e);
-        const p = currentPos();
-        if (!p) { say("Aún no hay posición GPS (ni del móvil ni del nodo)."); return; }
-        updatePosMarker();
-        map.panTo(p, { animate: true, duration: 0.6 });   // mantiene el zoom
-      });
-      return box;
-    }
-  });
-  map.addControl(new Ctl());
-}
+let mapMax = false, maxBtn = null;
 function isTouchDevice() { return window.matchMedia && matchMedia("(pointer: coarse)").matches; }
 function addMaxControl() {
   const Ctl = L.Control.extend({
@@ -1905,7 +999,7 @@ document.addEventListener("keydown", e => {
 
 /* ---------- ayuda: ventana con páginas ---------- */
 let helpPage = 0;
-const HELP_PAGES = 4;
+const HELP_PAGES = 3;
 function showHelpPage(p) {
   helpPage = Math.max(0, Math.min(HELP_PAGES - 1, p));
   document.querySelectorAll("#helpBody .page").forEach(el => el.hidden = Number(el.dataset.p) !== helpPage);
@@ -1926,60 +1020,20 @@ function closeHelp() {
   $("btnHelp").setAttribute("aria-expanded", "false");
 }
 
-/* ---------- pantalla siempre encendida ---------- */
-// «Pantalla ON» viene activado por defecto; si el navegador no lo deja al cargar,
-// se vuelve a intentar con el primer toque en la página.
-let wakeWanted = true;
-function showWake() {
-  const on = !!wakeLock;
-  $("btnWake").textContent = on ? "🔆 Pantalla ON" : "🔅 Pantalla OFF";
-  $("btnWake").classList.toggle("on", on);
-}
-async function acquireWake(quiet) {
-  if (!("wakeLock" in navigator)) { if (!quiet) say("Mantener la pantalla encendida no está disponible en este navegador."); return; }
-  try {
-    wakeLock = await navigator.wakeLock.request("screen");
-    wakeLock.addEventListener("release", () => { wakeLock = null; showWake(); });
-  } catch (e) { wakeLock = null; if (!quiet) say("No se pudo mantener la pantalla encendida: " + e.message); }
-  showWake();
-}
-async function toggleWake() {
-  if (wakeLock) { wakeWanted = false; try { await wakeLock.release(); } catch (e) {} wakeLock = null; showWake(); }
-  else { wakeWanted = true; await acquireWake(false); }
-}
-acquireWake(true);
-document.addEventListener("pointerdown", () => { if (wakeWanted && !wakeLock) acquireWake(true); }, { capture: true });
-document.addEventListener("visibilitychange", async () => {
-  if (document.visibilityState === "visible") {
-    if (wakeWanted && !wakeLock) acquireWake(true);
-    // el grant de «solo esta vez» puede caducar entre visitas: reintento silencioso
-    if (!gpsDenied && isWebSegura()) startGps();
-  }
-});
-
 /* ---------- arranque ---------- */
-$("btnCon").addEventListener("click", toggleConn);
-$("btnSave").addEventListener("click", saveAll);
 $("btnClear").addEventListener("click", clearAll);
-$("btnWake").addEventListener("click", toggleWake);
-$("btnGpsRetry").addEventListener("click", retryGpsNow);
 $("btnHelp").addEventListener("click", () => openHelp());
 $("btnHelpClose").addEventListener("click", closeHelp);
 $("help").addEventListener("click", e => { if (e.target === $("help")) closeHelp(); });
 $("hPrev").addEventListener("click", () => showHelpPage(helpPage - 1));
 $("hNext").addEventListener("click", () => showHelpPage(helpPage + 1));
 document.querySelectorAll("#helpTabs button").forEach(b => b.addEventListener("click", () => showHelpPage(Number(b.dataset.p))));
-$("chipGpsWrap").addEventListener("click", () => openHelp(2));
 $("btnOpen").addEventListener("click", () => $("fileAny").click());
 $("fileAny").addEventListener("change", async e => { const fs = [...(e.target.files || [])]; e.target.value = ""; await openFiles(fs); });
 
 $("vDots").addEventListener("click", () => setView("dots"));
 $("vGrid").addEventListener("click", () => setView("grid"));
 $("rngCell").addEventListener("input", e => { cellSize = CELL_SIZES[Number(e.target.value)] || 250; showCell(); saveMapPrefs(); mapDirty = true; dirtyRender = true; });
-$("btnAuto").addEventListener("click", () => {
-  autoFollow = !autoFollow; $("btnAuto").classList.toggle("on", autoFollow); saveMapPrefs();
-  if (autoFollow) { lastFollow = null; followPos(); if (!currentPos()) say("Automático activado: el mapa te seguirá en cuanto haya posición GPS."); }
-});
 function showHops() {
   $("hopsVal").textContent = minHops === maxHops ? String(maxHops) : minHops + "–" + maxHops;
   let hint;
@@ -2006,8 +1060,6 @@ $("rngHopsMin").addEventListener("input", e => {
 });
 loadMapPrefs();
 $("selFrom").addEventListener("change", e => { selFrom = e.target.value; mapDirty = true; mapFitted = false; dirtyRender = true; if (mapOn) setTimeout(() => drawMap(true), 0); });
-setDbgOrigin("permiso GPS: consultando…");
-if (!navigator.bluetooth) $("bannerNoBt").hidden = false;
 render();
 startMap();
 setInterval(() => { if (dirtyRender) { dirtyRender = false; render(); } }, 600);
