@@ -338,9 +338,9 @@
 
     <div class="page" data-p="3" data-lang="es" hidden>
       <h3>🌍 Mapa de cobertura comunitario</h3>
-      <div>Un mapa común de la <b>cobertura real de la red</b>, hecho entre todos: cada persona que hace un recorrido con su nodo suma sus celdas, y el mapa se va completando zona a zona.</div>
+      <div>Un mapa común de la <b>cobertura real de la red</b>, hecho entre todas/os: cada persona que hace un recorrido con su nodo suma sus celdas, y el mapa se va completando zona a zona.</div>
       <h3>👀 Verlo</h3>
-      <div>Pulsa <b>🌍 Mapa comunitario</b>. Se carga en <b>cuadrícula de 250 m</b>: cada celda sale del color del nodo que mejor se oye allí, y al pinchar ves sus datos. Las celdas grises son sitios por los que alguien pasó <b>sin recibir nada</b>. Puedes sumarle tus propios registros con <b>📂 Añadir registros</b> sin subirlos.</div>
+      <div>Pulsa <b>🌍 Mapa comunitario</b>. Se carga en <b>cuadrícula de 250 m</b>: cada celda sale del color del nodo que mejor se oye allí. Las celdas grises son sitios por los que alguien pasó <b>sin recibir nada</b>. Puedes sumarle tus propios registros con <b>📂 Añadir registros</b> sin subirlos.</div>
       <h3>🚶 Aportar tu recorrido</h3>
       <ol>
         <li>Prepara el nodo de ruta como en «Cómo usar → Cobertura general de la red»: <b>mismos ajustes de radio que la red</b>, CLIENT_MUTE, GPS y posición cada minuto.</li>
@@ -354,7 +354,7 @@
       <ul>
         <li>Mejor si no empiezas ni acabas en casa; si lo haces, el recorte por defecto (300 m) quita esa zona. Las paradas de más de 5 min también se recortan.</li>
         <li>Varias pasadas por la misma zona se suman: cuanta más gente, más fiable el mapa.</li>
-        <li>Todo se guarda siempre en celdas de 250 m, para que los archivos de todos encajen.</li>
+        <li>Todo se guarda siempre en celdas de 250 m, para que los archivos de todo el mundo encajen.</li>
         <li>Para evitar abusos, como mucho 6 subidas por hora desde la misma conexión.</li>
         <li>Qué se sube exactamente y cómo comprobarlo: pestaña <b>Privacidad</b>.</li>
       </ul>
@@ -457,7 +457,7 @@
       <h3>🌍 Community coverage map</h3>
       <div>A shared map of the <b>real coverage of the network</b>, built by everyone: each person who does a route with their node adds their cells, and the map fills in area by area.</div>
       <h3>👀 Viewing it</h3>
-      <div>Press <b>🌍 Community map</b>. It loads as a <b>250 m grid</b>: each cell takes the colour of the node heard best there, and tapping it shows its details. Grey cells are places someone passed <b>without receiving anything</b>. You can add your own logs on top with <b>📂 Add Logs</b> without uploading them.</div>
+      <div>Press <b>🌍 Community map</b>. It loads as a <b>250 m grid</b>: each cell takes the colour of the node heard best there. Grey cells are places someone passed <b>without receiving anything</b>. You can add your own logs on top with <b>📂 Add Logs</b> without uploading them.</div>
       <h3>🚶 Contributing your route</h3>
       <ol>
         <li>Set up the route node as in «How to use → General coverage of the mesh»: <b>same radio settings as the network</b>, CLIENT_MUTE, GPS and position every minute.</li>
@@ -619,7 +619,7 @@ const I18N = {
     errNoTrack: "no tiene puntos de recorrido", errOpen: (f, m) => "No se pudo abrir " + f + ": " + m,
     nodeSearch: "Buscar nodo", noMatch: "Ningún nodo coincide",
     communityBtn: "Mapa comunitario", communityTitle: "Añadir el mapa de cobertura compartido que ha subido todo el mundo",
-    expUp: "Subir a la comunidad", expPrivLink: "¿Qué se guarda o sube exactamente?", upConfirm: n => "¿Subir estas " + n + " celdas al mapa comunitario público? Se suman para todos.\n\nPrivacidad: el archivo que se sube no lleva ningún dato personal, pero puedes revisarlo antes descargándolo con el botón «Descargar archivo» y abriéndolo con cualquier editor de texto, o consultando el código abierto, tú mismo o con una IA, en https://github.com/flydecision/meshtastic",
+    expUp: "Subir a la comunidad", expPrivLink: "¿Qué se guarda o sube exactamente?", upConfirm: n => "¿Subir estas " + n + " celdas al mapa comunitario público? Se suman para todo el mundo.\n\nPrivacidad: el archivo que se sube no lleva ningún dato personal, pero puedes revisarlo antes descargándolo con el botón «Descargar archivo» y abriéndolo con cualquier editor de texto, o consultando el código abierto, por tu cuenta o con una IA, en https://github.com/flydecision/meshtastic",
     upOk: n => "✅ Subido: " + n + " celdas añadidas al mapa comunitario. ¡Gracias!", upBusy: "Subiendo…",
     upErr: m => "No se pudo subir (" + m + ").", upRate: "demasiadas subidas desde tu conexión, prueba dentro de una hora",
     commEmpty: "El mapa comunitario aún está vacío.", commErr: m => "No se pudo cargar el mapa comunitario (" + m + ").", commName: "Mapa comunitario",
@@ -1150,12 +1150,13 @@ function buildGrid(rows, tracks, size) {
   const mLat = 111320, mLon = 111320 * Math.cos(latRef * Math.PI / 180);
   const key = (lat, lon) => Math.floor(lat * mLat / size) + ":" + Math.floor(lon * mLon / size);
   const cells = new Map();
-  const cell = k => { if (!cells.has(k)) cells.set(k, { k, snr: [], rssi: [], snrRelay: [], by: new Map(), n: 0, nRelay: 0, ms: 0, visited: false }); return cells.get(k); };
+  const cell = k => { if (!cells.has(k)) cells.set(k, { k, snr: [], rssi: [], snrRelay: [], by: new Map(), n: 0, nRelay: 0, ms: 0, visited: false, own: false }); return cells.get(k); };
   const heard = heardMode();
   for (const r of rows) {
     if (r.rxLat == null || r.rxLon == null || isNaN(r.rxLat)) continue;
     const c = cell(key(r.rxLat, r.rxLon));
     c.n += r.w || 1; c.visited = true;
+    if (!r.community) c.own = true;   // celdas solo del mapa comunitario: sin ventana de datos
     // repetido por otro nodo: cuenta como recibido, pero su SNR/RSSI es del último salto y no entra en la mediana
     // (en «oído directamente» sí vale: es la señal del nodo que se oyó)
     const v = sigOf(r);
@@ -1166,7 +1167,7 @@ function buildGrid(rows, tracks, size) {
     }
     if (r.rssi != null && !isNaN(r.rssi)) c.rssi.push(r.rssi);
   }
-  for (const v of fileVisited) cell(key(v.lat, v.lon)).visited = true;
+  for (const v of fileVisited) { const c = cell(key(v.lat, v.lon)); c.visited = true; if (!v.community) c.own = true; }
   for (const t of tracks) {
     const p = t.pts;
     for (let i = 0; i < p.length; i++) {
@@ -1176,11 +1177,11 @@ function buildGrid(rows, tracks, size) {
         const steps = Math.min(200, Math.floor(d / (size / 2)));
         for (let j = 1; j <= steps; j++) {
           const f = j / (steps + 1);
-          cell(key(p[i - 1].lat + (p[i].lat - p[i - 1].lat) * f, p[i - 1].lon + (p[i].lon - p[i - 1].lon) * f)).visited = true;
+          const cc = cell(key(p[i - 1].lat + (p[i].lat - p[i - 1].lat) * f, p[i - 1].lon + (p[i].lon - p[i - 1].lon) * f)); cc.visited = true; cc.own = true;
         }
       }
       const c = cell(key(p[i].lat, p[i].lon));
-      c.visited = true;
+      c.visited = true; c.own = true;
       if (i < p.length - 1 && p[i].ms && p[i + 1].ms) {
         const dt = p[i + 1].ms - p[i].ms;
         if (dt > 0 && dt < 5 * 60000) c.ms += dt;
@@ -1241,12 +1242,12 @@ function drawMap(fit, fromZoom) {
       // solo repetidos: gris con borde grueso del color de su señal (la del último salto)
       // sin nada recibido: gris oscuro translúcido, sin borde (se ve el mapa debajo)
       // el borde de color va por dentro de la celda: se dibuja en un rectángulo reducido medio grosor
-      L.rectangle(c.bounds, onlyRelay
+      const rect = L.rectangle(c.bounds, Object.assign(onlyRelay
         ? { stroke: false, fillOpacity: 0 }
         : has
         ? { color: "#0b0d10", weight: .5, fillColor: sigColor(med), fillOpacity: .65 }
-        : { stroke: false, fillColor: "#1a1d22", fillOpacity: .45 })
-        .bindPopup(has
+        : { stroke: false, fillColor: "#1a1d22", fillOpacity: .45 }, c.own ? {} : { interactive: false }));
+      if (c.own) rect.bindPopup(has
           ? "<b>" + t("cellOf", cellSize >= 1000 ? cellSize / 1000 + " km" : cellSize + " m") + "</b><br>" +
             t("pktsRx") + ": " + c.n + (c.nRelay ? " (" + t("byOther", c.nRelay) + ")" : "") + (pct !== null ? " · " + t("reception") + " ≈ " + pct + " %" : "") + "<br>" +
             (onlyRelay
@@ -1255,8 +1256,8 @@ function drawMap(fit, fromZoom) {
                 t(useMargin ? "medMargin" : "medSnr", fmtN(med, 1), fmtN(sorted[0], 1), fmtN(sorted[sorted.length - 1], 1)) + "<br>" +
                 t("medRssi", fmtN(median(c.rssi))) + (c.nRelay ? " <i>(" + t("directOnly") + ")</i>" : "")) + (c.ms ? "<br>" + t("timeInCell") + ": " + fmtDur(c.ms) : "")
           : "<b>" + t("noRx") + "</b><br>" + t("noRxText") + (c.ms ? "<br>" + t("timeInCell") + ": " + fmtDur(c.ms) : "") +
-            (expected && expected >= 1 ? "<br>" + t("expected", Math.round(expected)) : ""))
-        .addTo(mapLayer);
+            (expected && expected >= 1 ? "<br>" + t("expected", Math.round(expected)) : ""));
+      rect.addTo(mapLayer);
       // el gris solo dentro del borde: así el borde se ve sobre el mapa con el mismo tono que las celdas en directo
       if (onlyRelay) L.rectangle(insetBounds(c.bounds, RELAY_BORDER), { stroke: false, fillColor: "#2b2f36", fillOpacity: .6, interactive: false }).addTo(mapLayer);
       if (onlyRelay) L.rectangle(insetBounds(c.bounds, RELAY_BORDER / 2), { color: sigColor(median(c.snrRelay)), weight: RELAY_BORDER, opacity: .65, fill: false, interactive: false }).addTo(mapLayer);
@@ -1671,7 +1672,7 @@ async function loadCommunity() {
     if (!r.ok) throw new Error("HTTP " + r.status);
     const data = await r.json();
     if (!data || !Array.isArray(data.cells) || !data.cells.length) { say(t("commEmpty")); return; }
-    await addCoverage(data, t("commName"));
+    await addCoverage(data, t("commName"), true);
   } catch (e) { say(t("commErr", e.message)); }
 }
 function downloadCoverage() {
@@ -1692,26 +1693,26 @@ async function importCoverage(file) {
     await addCoverage(data, file.name);
   } catch (e) { say(t("errOpen", file.name, e.message)); }
 }
-async function addCoverage(data, name) {
+async function addCoverage(data, name, community) {
     if (!data || data.format !== "meshtastic-coverage" || !Array.isArray(data.cells)) throw new Error(t("errJson"));
     const rows = [];
     for (const c of data.cells) {
       const lat = Number(c.lat), lon = Number(c.lon);
       if (!isFinite(lat) || !isFinite(lon)) continue;
       const n = Math.max(0, Number(c.n) || 0);
-      if (!n) { fileVisited.push({ lat, lon }); continue; }
+      if (!n) { fileVisited.push({ lat, lon, community: !!community }); continue; }
       let known = 0;
       for (const o of c.nodes || []) {
         const id = parseInt(String(o.id || "").replace("!", ""), 16);
         if (isNaN(id)) continue;
         const w = Math.max(1, Number(o.n) || 1); known += w;
-        rows.push({ ms: null, synthetic: true, w, seq: null, from: id >>> 0, name: String(o.name || ""), heard: id >>> 0, heardName: String(o.name || ""),
+        rows.push({ ms: null, synthetic: true, community: !!community, w, seq: null, from: id >>> 0, name: String(o.name || ""), heard: id >>> 0, heardName: String(o.name || ""),
           senderLat: null, senderLon: null, rxLat: lat, rxLon: lon, rxAlt: null, rxAcc: null, rxSrc: "", dist: null,
           snr: o.snr != null ? Number(o.snr) : null, rssi: o.rssi != null ? Number(o.rssi) : null,
           sf: o.sf ? Number(o.sf) : null, bw: o.bw ? Number(o.bw) : null, hops: 0, hopLimit: null, port: null, kind: "coverage", payload: "" });
       }
       // paquetes de la celda sin nodo oído conocido: cuentan como recibidos
-      if (n > known) rows.push({ ms: null, synthetic: true, w: n - known, seq: null, from: null, name: "", heard: null, heardName: "",
+      if (n > known) rows.push({ ms: null, synthetic: true, community: !!community, w: n - known, seq: null, from: null, name: "", heard: null, heardName: "",
         senderLat: null, senderLon: null, rxLat: lat, rxLon: lon, rxSrc: "", dist: null, snr: null, rssi: null, sf: null, bw: null,
         hops: 0, hopLimit: null, port: null, kind: "coverage", payload: "" });
     }
