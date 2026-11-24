@@ -1,5 +1,7 @@
 # Analizador Cobertura Meshtastic
 
+> 🧪 **Repositorio de pruebas.** Esto es un experimento personal para medir la cobertura real de una red Meshtastic. La idea es que, si funciona bien, se ofrezca a la comunidad de Meshtastic para que lo integre, lo modifique o lo rechace, como mejor le parezca. Las ideas, los fallos y las propuestas son bienvenidos.
+
 Página web para medir la cobertura real entre nodos [Meshtastic](https://meshtastic.org). Un nodo se queda fijo enviando su posición y otro va contigo por la ruta, conectado al móvil por Bluetooth. La página apunta cada paquete recibido junto con la posición GPS y la calidad de la señal (SNR/RSSI), y lo dibuja en un mapa.
 
 👉 **Úsala aquí:** https://meshtastic.flydecision.com
