@@ -123,6 +123,14 @@
   .combo-list .ci.top { padding-left:10px; }
   .combo-list .ci.act { background:#23456e; }
   .combo-list .ci.sel { color:#7fb2ff; font-weight:600; }
+  .exppanel { background:#1a2029; border:1px solid #2a3340; border-radius:10px; padding:10px 12px; margin:0 0 8px; line-height:1.4; color:#c9d1db; }
+  .exphead { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; }
+  .exphead button { width:32px; height:32px; padding:0; border-radius:50%; flex:none; }
+  .exprow { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin:10px 0 6px; }
+  .exprow input[type=range] { flex:1 1 140px; min-width:120px; max-width:320px; accent-color:#d7352b; }
+  #expInfo { color:#9aa4b2; }
+  .expbtns { margin-top:8px; }
+  .expbtns button { height:29px; padding:0 11px; display:inline-flex; align-items:center; gap:5px; }
   #tblNote { color:#9aa4b2; margin:10px 0 6px; line-height:1.4; }
   .combo-list .none { padding:8px 10px; color:#9aa4b2; }
   .filt.hops { display:inline-flex; margin:0; gap:6px; flex:1 1 100px; min-width:max-content; max-width:280px; }
@@ -169,7 +177,8 @@
 <div class="btns">
   <button id="btnOpen" data-i18n-title="openTitle">📂 <span data-i18n="open">Add Logs</span></button>
   <button id="btnClear" class="sec" data-i18n-title="clearTitle">🗑 <span data-i18n="clear">Clear</span></button>
-  <input type="file" id="fileAny" accept=".csv,.gpx,.txt,text/csv,text/plain,application/gpx+xml,application/xml,text/xml" multiple hidden>
+  <button id="btnExport" class="sec" data-i18n-title="exportTitle">📤 <span data-i18n="exportBtn">Export coverage</span></button>
+  <input type="file" id="fileAny" accept=".csv,.gpx,.txt,.json,text/csv,text/plain,application/gpx+xml,application/xml,text/xml,application/json" multiple hidden>
 </div>
 <div id="toast" hidden role="alert"></div>
 
@@ -189,6 +198,13 @@
       </span>
     </span>
     <span id="cellWrap" hidden><span class="colon" data-i18n="cell">Cell</span> <input type="range" id="rngCell" min="0" max="4" step="1" value="2" data-i18n-aria="cellSize"><b id="cellVal">250 m</b></span>
+  </div>
+  <div id="expPanel" class="exppanel" hidden>
+    <div class="exphead"><b>📤 <span data-i18n="expTitle">Export anonymous coverage</span></b><button id="btnExpClose" class="sec" data-i18n-aria="close">✕</button></div>
+    <div data-i18n="expWhat"></div>
+    <div class="exprow"><span data-i18n="expRadius">Remove around start and end</span> <input type="range" id="rngPriv" min="0" max="2000" step="50" value="300" data-i18n-aria="expRadius"> <b id="privVal">300 m</b></div>
+    <div id="expInfo"></div>
+    <div class="expbtns"><button id="btnExpGo">💾 <span data-i18n="expGo">Download file</span></button></div>
   </div>
   <div id="map"></div>
   <div class="legend">
@@ -275,6 +291,7 @@
         <li><b>Nodo</b>: en <b>📡 Enviado por</b>, los paquetes que envió un nodo. En <b>📶 Oído directamente</b>, lo que oíste directamente de un nodo, aunque fuera repitiendo paquetes de otros: su SNR sí es de ese nodo, así que es su cobertura real. «Mejor señal de cualquier nodo» pinta en cada celda el nodo que mejor se oye: la cobertura de la red.</li>
         <li><b>Saltos</b>: deslizador doble con mínimo y máximo. Al abrir la página empieza en 0–7 (todo). 0–0 = solo lo que llega <b>directo</b>, que es lo que mide la cobertura de cada nodo. Sube el máximo para ver también lo repetido por otros nodos, o el mínimo para ver <b>solo</b> lo repetido. Con <b>📡 Enviado por</b>, lo repetido sale como <b>cuadrado negro</b>: su SNR es el del último salto, no el del nodo de origen.</li>
         <li><b>🗑 Limpiar</b>: quita del mapa todo lo abierto.</li>
+        <li><b>📤 Exportar cobertura</b>: guarda un archivo <code>.json</code> anónimo con solo las celdas, para compartirlo. Con el deslizador eliges cuánto quitar alrededor de donde empieza y acaba cada ruta (círculos rojos en el mapa). Los archivos de otras personas se abren con <b>📂 Añadir registros</b> y se suman al mapa.</li>
         <li>En el mapa: capas (topográfico, satélite, relieve…) y ⛶ pantalla completa.</li>
       </ul>
     </div>
@@ -344,6 +361,7 @@
         <li><b>Node</b>: under <b>📡 Sent by</b>, the packets a node sent. Under <b>📶 Heard directly</b>, what you heard directly from a node, even when it was relaying other nodes' packets: that SNR does belong to that node, so it is its real coverage. «Best signal of any node» paints each cell with the node heard best: the coverage of the mesh.</li>
         <li><b>Hops</b>: double slider with minimum and maximum. It starts at 0–7 (everything). 0–0 = only what arrives <b>directly</b>, which is what measures each node's coverage. Raise the maximum to also see packets relayed by other nodes, or the minimum to see <b>only</b> relayed ones. With <b>📡 Sent by</b>, relayed packets show as a <b>black square</b>: their SNR is the last hop's, not the origin node's.</li>
         <li><b>🗑 Clear</b>: removes everything opened from the map.</li>
+        <li><b>📤 Export coverage</b>: saves an anonymous <code>.json</code> file with only the cells, to share. The slider sets how much to remove around where each route starts and ends (red circles on the map). Files from other people open with <b>📂 Add Logs</b> and add up on the map.</li>
         <li>On the map: layers (topographic, satellite, hillshade…) and ⛶ full screen.</li>
       </ul>
     </div>
@@ -433,6 +451,12 @@ const I18N = {
     errNoPkts: "there are no packets received over the radio in the file", errGpx: "the file is not a valid GPX",
     errNoTrack: "it has no track points", errOpen: (f, m) => "Could not open " + f + ": " + m,
     nodeSearch: "Search node", noMatch: "No node matches",
+    exportBtn: "Export coverage", exportTitle: "Save the coverage of what is open as an anonymous file to share",
+    expTitle: "Export anonymous coverage", expRadius: "Remove around start and end", expGo: "Download file",
+    expWhat: "Only the grid cells are saved (signal of each node heard and cells with no reception). No track, no times and nothing near where each route starts and ends (or stops for more than 5 min), where your home may be.",
+    expInfo: (c, s, r) => c + " cells of " + s + " will be saved" + (r ? ", " + r + " removed near the start and end (red circles)." : "."),
+    expNoData: "Open a log first: there is nothing to export.", expEmpty: "No cells are left with that radius.",
+    errJson: "it is not a coverage file from this page", impCov: n => "Imported coverage · " + n + (n === 1 ? " packet" : " packets"), impCells: n => n + " cells imported",
     heardNote: n => "📶 Packets heard directly from " + n + ": its own and the ones it relayed from other nodes. The Node column is the original sender.",
     heardNoteAll: "📶 Packets with a known directly heard node. The Node column is the original sender.",
     grpHeard: "📶 Heard directly", grpSender: "📡 Sent by", bestAll: "Best signal of any node",
@@ -471,6 +495,12 @@ const I18N = {
     errNoPkts: "no hay paquetes recibidos por radio en el archivo", errGpx: "el archivo no es un GPX válido",
     errNoTrack: "no tiene puntos de recorrido", errOpen: (f, m) => "No se pudo abrir " + f + ": " + m,
     nodeSearch: "Buscar nodo", noMatch: "Ningún nodo coincide",
+    exportBtn: "Exportar cobertura", exportTitle: "Guardar la cobertura de lo abierto en un archivo anónimo para compartir",
+    expTitle: "Exportar cobertura anónima", expRadius: "Quitar alrededor del inicio y del final", expGo: "Descargar archivo",
+    expWhat: "Solo se guardan las celdas de la cuadrícula (señal de cada nodo oído y celdas sin recepción). Sin recorrido, sin horas y sin nada cerca de donde empieza y acaba cada ruta (o se para más de 5 min), donde puede estar tu casa.",
+    expInfo: (c, s, r) => "Se guardarán " + c + " celdas de " + s + (r ? "; se quitan " + r + " cerca del inicio y del final (círculos rojos)." : "."),
+    expNoData: "Abre primero un registro: no hay nada que exportar.", expEmpty: "Con ese radio no queda ninguna celda.",
+    errJson: "no es un archivo de cobertura de esta página", impCov: n => "Cobertura importada · " + n + (n === 1 ? " packet" : " packets"), impCells: n => n + " celdas importadas",
     heardNote: n => "📶 Paquetes oídos directamente de " + n + ": los suyos y los que repitió de otros nodos. La columna Nodo es el emisor original.",
     heardNoteAll: "📶 Paquetes en los que se sabe qué nodo se oyó directamente. La columna Nodo es el emisor original.",
     grpHeard: "📶 Oído directamente", grpSender: "📡 Enviado por", bestAll: "Mejor señal de cualquier nodo",
@@ -586,9 +616,9 @@ function refreshFromSelect() {
     // el mejor nombre conocido del nodo: «corto - largo» si lo hay
     const cur = seen.get(r.from);
     if (!seen.has(r.from) || (r.name && (!cur || (!cur.includes(" - ") && r.name.includes(" - "))))) seen.set(r.from, r.name || "");
-    count.set(r.from, (count.get(r.from) || 0) + 1);
+    count.set(r.from, (count.get(r.from) || 0) + (r.w || 1));
     if (r.senderLat != null && !(r.senderLat === 0 && r.senderLon === 0)) nodePos.set(r.from, { lat: r.senderLat, lon: r.senderLon });
-    if (r.heard != null) heardCount.set(r.heard, (heardCount.get(r.heard) || 0) + 1);
+    if (r.heard != null) heardCount.set(r.heard, (heardCount.get(r.heard) || 0) + (r.w || 1));
   }
   for (const r of all) if (r.heard != null && !seen.has(r.heard)) seen.set(r.heard, r.heardName || "");
   bestNames = seen;
@@ -662,7 +692,7 @@ $("nodeList").addEventListener("click", e => { const it = e.target.closest(".ci"
 function render() {
   refreshFromSelect();
   const rows = rowsView();
-  $("sReg").textContent = rows.length;
+  $("sReg").textContent = rows.reduce((a, r) => a + (r.w || 1), 0);
   let bestSnr = null, maxD = null;
   for (const r of rows) {
     if (r.snr !== null && (bestSnr === null || r.snr > bestSnr)) bestSnr = r.snr;
@@ -671,8 +701,10 @@ function render() {
   }
   $("sSnr").textContent = bestSnr === null ? "—" : bestSnr.toFixed(1);
   $("sDist").textContent = maxD === null ? "—" : (maxD / 1000).toFixed(1);
-  if (rows.length) {
-    const s = Math.max(1, Math.round((rows[rows.length - 1].ms - rows[0].ms) / 1000));
+  const timed = rows.filter(r => r.ms);
+  if (timed.length) {
+    let a = Infinity, z = -Infinity; for (const r of timed) { if (r.ms < a) a = r.ms; if (r.ms > z) z = r.ms; }
+    const s = Math.max(1, Math.round((z - a) / 1000));
     $("sDur").textContent = s >= 3600 ? Math.floor(s / 3600) + "h" + Math.round(s % 3600 / 60) + "m" : Math.floor(s / 60) + "m" + (s % 60) + "s";
   } else $("sDur").textContent = "0m";
   // en «oído directamente» la tabla lleva paquetes de otros emisores que ese nodo repitió: se explica encima
@@ -680,7 +712,7 @@ function render() {
   $("tblNote").hidden = !heardMode();
   if (heardMode()) $("tblNote").innerHTML = selFrom === "h*" ? esc(t("heardNoteAll")) : t("heardNote", "<b>" + esc(bestNames.get(hn) || hexId(hn)) + "</b>");
   const tb = $("tbody");
-  const view = rows.slice(-100).reverse();
+  const view = timed.slice(-100).reverse();   // las celdas importadas no van en la tabla
   tb.innerHTML = view.map(r => "<tr><td class=\"tl\">" + fmtFecha(r.ms).slice(0, 5) + " " + RT.fmtTime(r.ms) + "</td><td class=\"tl nodo\" title=\"" + esc(nodeName(r) || "") + "\">" +
     esc(nodeName(r) || "—") + "</td><td class=\"tl\"><b>" + esc(r.seq != null ? "seq " + r.seq : (r.kind || "—")) + "</b></td><td>" +
     (r.snr === null ? "—" : r.snr.toFixed(1)) + "</td><td>" + (r.rssi === null ? "—" : r.rssi) + "</td><td>" +
@@ -705,15 +737,17 @@ async function openFiles(list) {
   for (const f of list) {
     const head = await f.slice(0, 2000).text();
     const isGpx = /\.gpx$/i.test(f.name) || (!/\.csv$/i.test(f.name) && /^\s*</.test(head));
-    if (isGpx) await importTrack(f);
+    if (/\.json$/i.test(f.name) || /^\s*\{/.test(head)) await importCoverage(f);
+    else if (isGpx) await importTrack(f);
     else if (isDebugTxt(head)) await openDebugTxt(f);
     else await openCsvFile(f);
   }
 }
 // «🗑 Limpiar»: quita del mapa todo lo abierto
 function clearAll() {
-  if (!fileRows && !fileTracks.length) return;
-  fileRows = null; fileNames = []; fileTracks = [];
+  if (!fileRows && !fileTracks.length && !fileVisited.length) return;
+  fileRows = null; fileNames = []; fileTracks = []; fileVisited = [];
+  closeExport();
   mapFitted = false; mapDirty = true; dirtyRender = true;
 }
 
@@ -725,6 +759,7 @@ const LEAFLET_SRC = [
 ];
 let map = null, mapLayer = null, mapOn = false, mapDirty = true, mapFitted = false;
 let fileRows = null, fileNames = [], fileTracks = [];
+let fileVisited = [];   // centros de celdas sin recepción de archivos de cobertura importados
 let mapView = "dots", cellSize = 250;
 function saveMapPrefs() { try { localStorage.setItem("rangetest_mapprefs_v1", JSON.stringify({ mapView, cellSize })); } catch (e) {} }
 function loadMapPrefs() {
@@ -978,6 +1013,7 @@ function buildGrid(rows, tracks, size) {
   const all = [];
   for (const r of rows) if (r.rxLat != null && !isNaN(r.rxLat)) all.push(r.rxLat);
   for (const t of tracks) for (const p of t.pts) all.push(p.lat);
+  for (const v of fileVisited) all.push(v.lat);
   if (!all.length) return [];
   const latRef = Math.round(all.reduce((a, b) => a + b, 0) / all.length);   // fijo por zona: celdas estables
   const mLat = 111320, mLon = 111320 * Math.cos(latRef * Math.PI / 180);
@@ -988,17 +1024,18 @@ function buildGrid(rows, tracks, size) {
   for (const r of rows) {
     if (r.rxLat == null || r.rxLon == null || isNaN(r.rxLat)) continue;
     const c = cell(key(r.rxLat, r.rxLon));
-    c.n++; c.visited = true;
+    c.n += r.w || 1; c.visited = true;
     // repetido por otro nodo: cuenta como recibido, pero su SNR/RSSI es del último salto y no entra en la mediana
     // (en «oído directamente» sí vale: es la señal del nodo que se oyó)
     const v = sigOf(r);
-    if (!heard && r.hops != null && r.hops > 0) { c.nRelay++; if (v != null && !isNaN(v)) c.snrRelay.push(v); continue; }
+    if (!heard && r.hops != null && r.hops > 0) { c.nRelay += r.w || 1; if (v != null && !isNaN(v)) c.snrRelay.push(v); continue; }
     if (v != null && !isNaN(v)) {
       c.snr.push(v);
       if (r.heard != null) { if (!c.by.has(r.heard)) c.by.set(r.heard, []); c.by.get(r.heard).push(v); }
     }
     if (r.rssi != null && !isNaN(r.rssi)) c.rssi.push(r.rssi);
   }
+  for (const v of fileVisited) cell(key(v.lat, v.lon)).visited = true;
   for (const t of tracks) {
     const p = t.pts;
     for (let i = 0; i < p.length; i++) {
@@ -1132,7 +1169,7 @@ function drawMap(fit, fromZoom) {
     (square
       ? L.marker([r.rxLat, r.rxLon], { icon: relayIcon(), keyboard: false, pane: relayPane() })
       : L.circleMarker([r.rxLat, r.rxLon], { radius: 7, color: "#0b0d10", weight: 1, fillColor: sigColor(v), fillOpacity: .9 }))
-      .bindPopup("<b>" + RT.fmtDate(r.ms) + " " + RT.fmtTime(r.ms) + "</b><br>" +
+      .bindPopup("<b>" + (r.ms ? RT.fmtDate(r.ms) + " " + RT.fmtTime(r.ms) : t("impCov", r.w || 1)) + "</b><br>" +
         "SNR " + fmtN(r.snr, 1) + " dB · RSSI " + fmtN(r.rssi) + " dBm" + (relayed && !heard ? " <i>(" + t("lastHop") + ")</i>" : "") + "<br>" +
         (r.sf ? "SF" + r.sf + (r.bw ? " · BW " + r.bw : "") + " · " + t("marginTxt", (marginOf(r) >= 0 ? "+" : "") + fmtN(marginOf(r), 1)) + "<br>" : "") +
         (relayed && hName ? t("heardFrom") + ": " + esc(hName) + "<br>" : "") +
@@ -1354,6 +1391,146 @@ async function openDebugTxt(file) {
   } catch (e) { say(t("errOpen", file.name, e.message)); }
 }
 
+/* ---------- exportar / importar cobertura anónima ---------- */
+// Formato «meshtastic-coverage» v1: solo celdas (centro, nº de paquetes y, por nodo oído directamente,
+// nº de paquetes, SNR y RSSI medianos y SF). Sin recorrido, sin horas y sin celdas cerca del inicio/fin.
+let expLayer = null;
+function privacyPoints() {
+  // inicio y fin de cada tramo del recorrido (se corta en cada parada de más de 5 min: un registro de
+  // varios días empieza y acaba muchas veces en casa); si no hay recorrido, la primera y la última recepción
+  const pts = [];
+  for (const tr of fileTracks) for (const sg of tr.segs) {
+    if (!sg.length) continue;
+    const a = sg[0], z = sg[sg.length - 1];
+    pts.push({ lat: a.lat, lon: a.lon });
+    if (RT.haversineM(a.lat, a.lon, z.lat, z.lon) > 1) pts.push({ lat: z.lat, lon: z.lon });
+  }
+  if (!pts.length) {
+    const rx = (fileRows || []).filter(r => r.ms && r.rxLat != null && !isNaN(r.rxLat)).sort((a, b) => a.ms - b.ms);
+    if (rx.length) pts.push({ lat: rx[0].rxLat, lon: rx[0].rxLon }, { lat: rx[rx.length - 1].rxLat, lon: rx[rx.length - 1].rxLon });
+  }
+  return pts;
+}
+function coverageCells(size, radius) {
+  const rows = (fileRows || []).filter(r => r.rxLat != null && !isNaN(r.rxLat));
+  const tracks = mapTracks();
+  const lats = rows.map(r => r.rxLat).concat(...tracks.map(t => t.pts.map(p => p.lat)), fileVisited.map(v => v.lat));
+  if (!lats.length) return { cells: [], removed: 0 };
+  const latRef = Math.round(lats.reduce((a, b) => a + b, 0) / lats.length);
+  const mLat = 111320, mLon = 111320 * Math.cos(latRef * Math.PI / 180);
+  const key = (lat, lon) => Math.floor(lat * mLat / size) + ":" + Math.floor(lon * mLon / size);
+  const cells = new Map();
+  const cell = k => { if (!cells.has(k)) cells.set(k, { k, n: 0, by: new Map() }); return cells.get(k); };
+  for (const r of rows) {
+    const c = cell(key(r.rxLat, r.rxLon)), w = r.w || 1;
+    c.n += w;
+    if (r.heard == null) continue;
+    if (!c.by.has(r.heard)) c.by.set(r.heard, { n: 0, snr: [], rssi: [], sf: new Map(), bw: null, name: bestNames.get(r.heard) || r.heardName || "" });
+    const b = c.by.get(r.heard);
+    b.n += w;
+    if (r.snr != null && !isNaN(r.snr)) b.snr.push(r.snr);
+    if (r.rssi != null && !isNaN(r.rssi)) b.rssi.push(r.rssi);
+    if (r.sf) { b.sf.set(r.sf, (b.sf.get(r.sf) || 0) + w); b.bw = r.bw || b.bw; }
+  }
+  // celdas por las que se pasó sin recibir (con los tramos largos rellenados, como en la cuadrícula)
+  for (const v of fileVisited) cell(key(v.lat, v.lon));
+  for (const t of tracks) {
+    const p = t.pts;
+    for (let i = 0; i < p.length; i++) {
+      if (i > 0) {
+        const d = RT.haversineM(p[i - 1].lat, p[i - 1].lon, p[i].lat, p[i].lon);
+        const steps = Math.min(200, Math.floor(d / (size / 2)));
+        for (let j = 1; j <= steps; j++) { const f = j / (steps + 1); cell(key(p[i - 1].lat + (p[i].lat - p[i - 1].lat) * f, p[i - 1].lon + (p[i].lon - p[i - 1].lon) * f)); }
+      }
+      cell(key(p[i].lat, p[i].lon));
+    }
+  }
+  const priv = privacyPoints(), half = size * Math.SQRT1_2, out = [];
+  let removed = 0;
+  for (const c of cells.values()) {
+    const [iy, ix] = c.k.split(":").map(Number);
+    const lat = (iy + .5) * size / mLat, lon = (ix + .5) * size / mLon;
+    // fuera toda celda que toque el círculo de privacidad
+    if (radius > 0 && priv.some(q => RT.haversineM(q.lat, q.lon, lat, lon) < radius + half)) { removed++; continue; }
+    const r1 = v => Math.round(v * 10) / 10;
+    out.push({ lat: Math.round(lat * 1e6) / 1e6, lon: Math.round(lon * 1e6) / 1e6, n: c.n,
+      nodes: [...c.by].map(([id, b]) => {
+        const sf = b.sf.size ? [...b.sf].sort((x, y) => y[1] - x[1])[0][0] : null;
+        const o = { id: hexId(id), name: b.name, n: b.n };
+        if (b.snr.length) o.snr = r1(median(b.snr));
+        if (b.rssi.length) o.rssi = Math.round(median(b.rssi));
+        if (sf) { o.sf = sf; if (b.bw) o.bw = b.bw; }
+        return o;
+      }) });
+  }
+  return { cells: out, removed, priv };
+}
+function privRadius() { return Number($("rngPriv").value); }
+function fmtM(m) { return m >= 1000 ? (m / 1000).toFixed(m % 1000 ? 2 : 0).replace(/\.?0+$/, "") + " km" : m + " m"; }
+function updateExport() {
+  const r = privRadius(), res = coverageCells(cellSize, r);
+  $("privVal").textContent = fmtM(r);
+  $("expInfo").textContent = res.cells.length ? t("expInfo", res.cells.length, fmtM(cellSize), res.removed) : t("expEmpty");
+  $("btnExpGo").disabled = !res.cells.length;
+  if (!map) return;
+  if (!expLayer) expLayer = L.layerGroup();
+  expLayer.clearLayers(); expLayer.addTo(map);
+  if (r > 0) for (const q of res.priv) L.circle([q.lat, q.lon], { radius: r, color: "#d7352b", weight: 2, dashArray: "6 6", fillColor: "#d7352b", fillOpacity: .18, interactive: false }).addTo(expLayer);
+}
+function openExport() {
+  if (!(fileRows && fileRows.length) && !fileTracks.length && !fileVisited.length) { say(t("expNoData")); return; }
+  $("expPanel").hidden = false;
+  updateExport();
+  // para ver qué se exporta, la vista de cuadrícula
+  if (mapView !== "grid") { setView("grid"); if (map) drawMap(false); }
+  const pts = privacyPoints();
+  if (map && pts.length && privRadius() > 0) map.flyToBounds(L.latLngBounds(pts.map(p => [p.lat, p.lon])).pad(0.5), { maxZoom: 15, duration: 0.6 });
+}
+function closeExport() { $("expPanel").hidden = true; if (expLayer) expLayer.clearLayers(); }
+function downloadCoverage() {
+  const res = coverageCells(cellSize, privRadius());
+  if (!res.cells.length) return;
+  const d = new Date(), p = n => String(n).padStart(2, "0");
+  const data = { format: "meshtastic-coverage", version: 1, cellSize, date: d.getFullYear() + "-" + p(d.getMonth() + 1), cells: res.cells };
+  const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "meshtastic_coverage_" + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + ".json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+}
+async function importCoverage(file) {
+  try {
+    let data;
+    try { data = JSON.parse(await file.text()); } catch (e) { throw new Error(t("errJson")); }
+    if (!data || data.format !== "meshtastic-coverage" || !Array.isArray(data.cells)) throw new Error(t("errJson"));
+    const rows = [];
+    for (const c of data.cells) {
+      const lat = Number(c.lat), lon = Number(c.lon);
+      if (!isFinite(lat) || !isFinite(lon)) continue;
+      const n = Math.max(0, Number(c.n) || 0);
+      if (!n) { fileVisited.push({ lat, lon }); continue; }
+      let known = 0;
+      for (const o of c.nodes || []) {
+        const id = parseInt(String(o.id || "").replace("!", ""), 16);
+        if (isNaN(id)) continue;
+        const w = Math.max(1, Number(o.n) || 1); known += w;
+        rows.push({ ms: null, synthetic: true, w, seq: null, from: id >>> 0, name: String(o.name || ""), heard: id >>> 0, heardName: String(o.name || ""),
+          senderLat: null, senderLon: null, rxLat: lat, rxLon: lon, rxAlt: null, rxAcc: null, rxSrc: "", dist: null,
+          snr: o.snr != null ? Number(o.snr) : null, rssi: o.rssi != null ? Number(o.rssi) : null,
+          sf: o.sf ? Number(o.sf) : null, bw: o.bw ? Number(o.bw) : null, hops: 0, hopLimit: null, port: null, kind: "coverage", payload: "" });
+      }
+      // paquetes de la celda sin nodo oído conocido: cuentan como recibidos
+      if (n > known) rows.push({ ms: null, synthetic: true, w: n - known, seq: null, from: null, name: "", heard: null, heardName: "",
+        senderLat: null, senderLon: null, rxLat: lat, rxLon: lon, rxSrc: "", dist: null, snr: null, rssi: null, sf: null, bw: null,
+        hops: 0, hopLimit: null, port: null, kind: "coverage", payload: "" });
+    }
+    fileRows = (fileRows || []).concat(rows); fileNames.push(file.name);
+    if (!map) await startMap();
+    mapDirty = true; refreshFromSelect(); dirtyRender = true; drawMap(true);
+  } catch (e) { say(t("errOpen", file.name, e.message)); }
+}
+
 /* ---------- abrir un GPX ---------- */
 function xmlEsc(t) { return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
 function trackSegments(track) {
@@ -1464,6 +1641,10 @@ function closeHelp() {
 
 /* ---------- arranque ---------- */
 $("btnClear").addEventListener("click", clearAll);
+$("btnExport").addEventListener("click", () => $("expPanel").hidden ? openExport() : closeExport());
+$("btnExpClose").addEventListener("click", closeExport);
+$("rngPriv").addEventListener("input", updateExport);
+$("btnExpGo").addEventListener("click", downloadCoverage);
 $("btnHelp").addEventListener("click", () => openHelp());
 $("btnHelpClose").addEventListener("click", closeHelp);
 $("help").addEventListener("click", e => { if (e.target === $("help")) closeHelp(); });
@@ -1475,7 +1656,7 @@ $("fileAny").addEventListener("change", async e => { const fs = [...(e.target.fi
 
 $("vDots").addEventListener("click", () => setView("dots"));
 $("vGrid").addEventListener("click", () => setView("grid"));
-$("rngCell").addEventListener("input", e => { cellSize = CELL_SIZES[Number(e.target.value)] || 250; showCell(); saveMapPrefs(); mapDirty = true; dirtyRender = true; });
+$("rngCell").addEventListener("input", e => { cellSize = CELL_SIZES[Number(e.target.value)] || 250; showCell(); saveMapPrefs(); mapDirty = true; dirtyRender = true; if (!$("expPanel").hidden) updateExport(); });
 function showHops() {
   $("hopsVal").textContent = minHops === maxHops ? String(maxHops) : minHops + "–" + maxHops;
   // franja azul entre los dos extremos (los 8 px son medio botón)
