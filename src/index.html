@@ -242,7 +242,7 @@
       <h3>📊 Qué obtienes</h3>
       <ul>
         <li>Un mapa con un punto por paquete recibido, de color según la señal: <b>verde</b> buena, <b>amarillo</b> justa, <b>rojo</b> al límite.</li>
-        <li>La vista <b>🔳 Cuadrícula</b>: la zona dividida en celdas con la señal de cada una, y en gris con borde rojo las celdas por las que pasaste sin recibir nada.</li>
+        <li>La vista <b>🔳 Cuadrícula</b>: la zona dividida en celdas con la señal de cada una, y en gris con borde rojo las celdas por las que pasaste sin recibir nada. El color usa solo lo recibido en directo; una celda <b>negra con borde blanco</b> es que allí solo llegó lo repetido por otro nodo.</li>
         <li>Al guardar, un <b>CSV</b> con todas las recepciones y un <b>GPX</b> con tu recorrido. Puedes juntar rutas de varios días o de otras personas abriéndolas a la vez.</li>
       </ul>
     </div>
@@ -1441,11 +1441,13 @@ function buildGrid(rows, tracks, size) {
   const mLat = 111320, mLon = 111320 * Math.cos(latRef * Math.PI / 180);
   const key = (lat, lon) => Math.floor(lat * mLat / size) + ":" + Math.floor(lon * mLon / size);
   const cells = new Map();
-  const cell = k => { if (!cells.has(k)) cells.set(k, { k, snr: [], rssi: [], n: 0, ms: 0, visited: false }); return cells.get(k); };
+  const cell = k => { if (!cells.has(k)) cells.set(k, { k, snr: [], rssi: [], n: 0, nRelay: 0, ms: 0, visited: false }); return cells.get(k); };
   for (const r of rows) {
     if (r.rxLat == null || r.rxLon == null || isNaN(r.rxLat)) continue;
     const c = cell(key(r.rxLat, r.rxLon));
     c.n++; c.visited = true;
+    // repetido por otro nodo: cuenta como recibido, pero su SNR/RSSI es del último salto y no entra en la mediana
+    if (r.hops != null && r.hops > 0) { c.nRelay++; continue; }
     if (r.snr != null && !isNaN(r.snr)) c.snr.push(r.snr);
     if (r.rssi != null && !isNaN(r.rssi)) c.rssi.push(r.rssi);
   }
@@ -1499,19 +1501,23 @@ function drawMap(fit) {
     for (const c of buildGrid(rows, tracks, cellSize)) {
       if (!c.visited) continue;
       nCells++;
-      const has = c.n > 0, med = median(c.snr);
+      const has = c.n > 0, med = median(c.snr), onlyRelay = has && !c.snr.length;
       if (!has) nEmpty++;
       const expected = (iv && c.ms) ? c.ms / iv : null;
       const pct = (expected && expected >= 1) ? Math.min(100, Math.round(100 * c.n / expected)) : null;
       const sorted = c.snr.slice().sort((a, b) => a - b);
-      L.rectangle(c.bounds, has
+      L.rectangle(c.bounds, onlyRelay
+        ? { color: "#ffffff", weight: 1, fillColor: "#000000", fillOpacity: .7 }
+        : has
         ? { color: "#0b0d10", weight: .5, fillColor: snrColor(med), fillOpacity: .65 }
         : { color: "#d7352b", weight: 1, fillColor: "#2b2f36", fillOpacity: .55 })
         .bindPopup(has
           ? "<b>Celda de " + (cellSize >= 1000 ? cellSize / 1000 + " km" : cellSize + " m") + "</b><br>" +
-            "Paquetes recibidos: " + c.n + (pct !== null ? " · recepción ≈ " + pct + " %" : "") + "<br>" +
-            "SNR mediano " + fmtN(med, 1) + " dB (peor " + fmtN(sorted[0], 1) + ", mejor " + fmtN(sorted[sorted.length - 1], 1) + ")<br>" +
-            "RSSI mediano " + fmtN(median(c.rssi)) + " dBm" + (c.ms ? "<br>Tiempo en la celda: " + fmtDur(c.ms) : "")
+            "Paquetes recibidos: " + c.n + (c.nRelay ? " (" + c.nRelay + " por otro nodo)" : "") + (pct !== null ? " · recepción ≈ " + pct + " %" : "") + "<br>" +
+            (onlyRelay
+              ? "Solo llegaron repetidos por otro nodo: sin SNR útil del nodo de origen"
+              : "SNR mediano " + fmtN(med, 1) + " dB (peor " + fmtN(sorted[0], 1) + ", mejor " + fmtN(sorted[sorted.length - 1], 1) + ")<br>" +
+                "RSSI mediano " + fmtN(median(c.rssi)) + " dBm" + (c.nRelay ? " <i>(solo directos)</i>" : "")) + (c.ms ? "<br>Tiempo en la celda: " + fmtDur(c.ms) : "")
           : "<b>Sin recepción</b><br>Pasaste por aquí y no llegó ningún paquete." + (c.ms ? "<br>Tiempo en la celda: " + fmtDur(c.ms) : "") +
             (expected && expected >= 1 ? "<br>Se esperaban ≈ " + Math.round(expected) + " paquetes" : ""))
         .addTo(mapLayer);
@@ -1568,7 +1574,7 @@ function drawMap(fit) {
   const info = [src, n + " recepciones con GPS"];
   if (grid) info.push(nCells + " celdas, " + nEmpty + " sin recepción");
   if (sinGps) info.push(sinGps + " sin GPS (no se pintan)");
-  $("lgRelay").hidden = grid || maxHops === 0;
+  $("lgRelay").hidden = maxHops === 0;
   if (!fileRows) info.push("track del " + (liveTrackIsNode() ? "nodo" : "móvil") + ": " + liveTrack().length + " puntos");
   if (fileTracks.length) info.push(fileTracks.length + " track" + (fileTracks.length > 1 ? "s" : "") + " importado" + (fileTracks.length > 1 ? "s" : ""));
   $("mapInfo").textContent = info.join(" · ");
