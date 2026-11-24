@@ -129,7 +129,8 @@
   .exprow { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin:10px 0 6px; }
   .exprow input[type=range] { flex:1 1 140px; min-width:120px; max-width:320px; accent-color:#d7352b; }
   #expInfo { color:#9aa4b2; }
-  .expbtns { margin-top:8px; }
+  .expbtns { margin-top:8px; display:flex; flex-wrap:wrap; gap:8px; }
+  #expUpMsg { margin-top:8px; color:#7fd49a; }
   .expbtns button { height:29px; padding:0 11px; display:inline-flex; align-items:center; gap:5px; }
   #tblNote { color:#9aa4b2; margin:10px 0 6px; line-height:1.4; }
   .combo-list .none { padding:8px 10px; color:#9aa4b2; }
@@ -191,6 +192,7 @@
   <button id="btnOpen" data-i18n-title="openTitle">📂 <span data-i18n="open">Add Logs</span></button>
   <button id="btnClear" class="sec" data-i18n-title="clearTitle">🗑 <span data-i18n="clear">Clear</span></button>
   <button id="btnExport" class="sec" data-i18n-title="exportTitle">📤 <span data-i18n="exportBtn">Export coverage</span></button>
+  <button id="btnCommunity" class="sec" data-i18n-title="communityTitle">🌍 <span data-i18n="communityBtn">Community map</span></button>
   <input type="file" id="fileAny" accept=".csv,.gpx,.txt,.json,text/csv,text/plain,application/gpx+xml,application/xml,text/xml,application/json" multiple hidden>
 </div>
 <div id="toast" hidden role="alert"></div>
@@ -217,7 +219,8 @@
     <div data-i18n="expWhat"></div>
     <div class="exprow"><span data-i18n="expRadius">Remove around start and end</span> <input type="range" id="rngPriv" min="0" max="2000" step="50" value="300" data-i18n-aria="expRadius"> <b id="privVal">300 m</b></div>
     <div id="expInfo"></div>
-    <div class="expbtns"><button id="btnExpGo">💾 <span data-i18n="expGo">Download file</span></button></div>
+    <div class="expbtns"><button id="btnExpGo">💾 <span data-i18n="expGo">Download file</span></button><button id="btnExpUp">☁️ <span data-i18n="expUp">Upload to community</span></button></div>
+    <div id="expUpMsg" hidden></div>
   </div>
   <div id="map"></div>
   <div class="legend">
@@ -305,6 +308,7 @@
         <li><b>Saltos</b>: deslizador doble con mínimo y máximo. Al abrir la página empieza en 0–7 (todo). 0–0 = solo lo que llega <b>directo</b>, que es lo que mide la cobertura de cada nodo. Sube el máximo para ver también lo repetido por otros nodos, o el mínimo para ver <b>solo</b> lo repetido. Con <b>📡 Enviado por</b>, lo repetido sale como <b>cuadrado negro</b>: su SNR es el del último salto, no el del nodo de origen.</li>
         <li><b>🗑 Limpiar</b>: quita del mapa todo lo abierto.</li>
         <li><b>📤 Exportar cobertura</b>: guarda un archivo <code>.json</code> anónimo con solo las celdas, para compartirlo. Con el deslizador eliges cuánto quitar alrededor de donde empieza y acaba cada ruta (círculos rojos en el mapa). Los archivos de otras personas se abren con <b>📂 Añadir registros</b> y se suman al mapa.</li>
+        <li><b>☁️ Subir a la comunidad</b> (dentro de 📤): envía ese mismo archivo anónimo al servidor y se suma al momento al mapa común. <b>🌍 Mapa comunitario</b> carga la suma de todo lo que ha subido la gente.</li>
         <li>En el mapa: capas (topográfico, satélite, relieve…) y ⛶ pantalla completa.</li>
       </ul>
     </div>
@@ -375,6 +379,7 @@
         <li><b>Hops</b>: double slider with minimum and maximum. It starts at 0–7 (everything). 0–0 = only what arrives <b>directly</b>, which is what measures each node's coverage. Raise the maximum to also see packets relayed by other nodes, or the minimum to see <b>only</b> relayed ones. With <b>📡 Sent by</b>, relayed packets show as a <b>black square</b>: their SNR is the last hop's, not the origin node's.</li>
         <li><b>🗑 Clear</b>: removes everything opened from the map.</li>
         <li><b>📤 Export coverage</b>: saves an anonymous <code>.json</code> file with only the cells, to share. The slider sets how much to remove around where each route starts and ends (red circles on the map). Files from other people open with <b>📂 Add Logs</b> and add up on the map.</li>
+        <li><b>☁️ Upload to community</b> (inside 📤): sends that same anonymous file to the server and it is added to the shared map right away. <b>🌍 Community map</b> loads the sum of everything people have uploaded.</li>
         <li>On the map: layers (topographic, satellite, hillshade…) and ⛶ full screen.</li>
       </ul>
     </div>
@@ -464,6 +469,11 @@ const I18N = {
     errNoPkts: "there are no packets received over the radio in the file", errGpx: "the file is not a valid GPX",
     errNoTrack: "it has no track points", errOpen: (f, m) => "Could not open " + f + ": " + m,
     nodeSearch: "Search node", noMatch: "No node matches",
+    communityBtn: "Community map", communityTitle: "Add the shared coverage map uploaded by everyone",
+    expUp: "Upload to community", upConfirm: n => "Upload these " + n + " cells to the public community map? They are added for everyone and cannot be removed from the page.",
+    upOk: n => "✅ Uploaded: " + n + " cells added to the community map. Thanks!", upBusy: "Uploading…",
+    upErr: m => "Could not upload (" + m + ").", upRate: "too many uploads from your connection, try again in an hour",
+    commEmpty: "The community map is still empty.", commErr: m => "Could not load the community map (" + m + ").", commName: "Community map",
     exportBtn: "Export coverage", exportTitle: "Save the coverage of what is open as an anonymous file to share",
     expTitle: "Export anonymous coverage", expRadius: "Remove around start and end", expGo: "Download file",
     expWhat: "Only the grid cells are saved (signal of each node heard and cells with no reception). No track, no times and nothing near where each route starts and ends (or stops for more than 5 min), where your home may be.",
@@ -508,6 +518,11 @@ const I18N = {
     errNoPkts: "no hay paquetes recibidos por radio en el archivo", errGpx: "el archivo no es un GPX válido",
     errNoTrack: "no tiene puntos de recorrido", errOpen: (f, m) => "No se pudo abrir " + f + ": " + m,
     nodeSearch: "Buscar nodo", noMatch: "Ningún nodo coincide",
+    communityBtn: "Mapa comunitario", communityTitle: "Añadir el mapa de cobertura compartido que ha subido todo el mundo",
+    expUp: "Subir a la comunidad", upConfirm: n => "¿Subir estas " + n + " celdas al mapa comunitario público? Se suman para todos y no se pueden quitar desde la página.",
+    upOk: n => "✅ Subido: " + n + " celdas añadidas al mapa comunitario. ¡Gracias!", upBusy: "Subiendo…",
+    upErr: m => "No se pudo subir (" + m + ").", upRate: "demasiadas subidas desde tu conexión, prueba dentro de una hora",
+    commEmpty: "El mapa comunitario aún está vacío.", commErr: m => "No se pudo cargar el mapa comunitario (" + m + ").", commName: "Mapa comunitario",
     exportBtn: "Exportar cobertura", exportTitle: "Guardar la cobertura de lo abierto en un archivo anónimo para compartir",
     expTitle: "Exportar cobertura anónima", expRadius: "Quitar alrededor del inicio y del final", expGo: "Descargar archivo",
     expWhat: "Solo se guardan las celdas de la cuadrícula (señal de cada nodo oído y celdas sin recepción). Sin recorrido, sin horas y sin nada cerca de donde empieza y acaba cada ruta (o se para más de 5 min), donde puede estar tu casa.",
@@ -1488,7 +1503,8 @@ function updateExport() {
   const r = privRadius(), res = coverageCells(EXPORT_CELL, r);
   $("privVal").textContent = fmtM(r);
   $("expInfo").textContent = res.cells.length ? t("expInfo", res.cells.length, fmtM(EXPORT_CELL), res.removed) : t("expEmpty");
-  $("btnExpGo").disabled = !res.cells.length;
+  $("btnExpGo").disabled = $("btnExpUp").disabled = !res.cells.length;
+  $("expUpMsg").hidden = true;
   if (!map) return;
   if (!expLayer) expLayer = L.layerGroup();
   expLayer.clearLayers(); expLayer.addTo(map);
@@ -1504,11 +1520,39 @@ function openExport() {
   if (map && pts.length && privRadius() > 0) map.flyToBounds(L.latLngBounds(pts.map(p => [p.lat, p.lon])).pad(0.5), { maxZoom: 15, duration: 0.6 });
 }
 function closeExport() { $("expPanel").hidden = true; if (expLayer) expLayer.clearLayers(); }
-function downloadCoverage() {
+function coverageData() {
   const res = coverageCells(EXPORT_CELL, privRadius());
-  if (!res.cells.length) return;
+  if (!res.cells.length) return null;
   const d = new Date(), p = n => String(n).padStart(2, "0");
-  const data = { format: "meshtastic-coverage", version: 1, cellSize: EXPORT_CELL, date: d.getFullYear() + "-" + p(d.getMonth() + 1), cells: res.cells };
+  return { format: "meshtastic-coverage", version: 1, cellSize: EXPORT_CELL, date: d.getFullYear() + "-" + p(d.getMonth() + 1), cells: res.cells };
+}
+// Sube el archivo anónimo al servidor (api/upload.php), que lo valida y lo suma al mapa comunitario
+async function uploadCoverage() {
+  const data = coverageData(), msg = $("expUpMsg"), btn = $("btnExpUp");
+  if (!data) return;
+  if (!confirm(t("upConfirm", data.cells.length))) return;
+  btn.disabled = true; msg.hidden = false; msg.style.color = ""; msg.textContent = t("upBusy");
+  try {
+    const r = await fetch("api/upload.php", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+    let j = null; try { j = await r.json(); } catch (e) {}
+    if (!r.ok || !j || !j.ok) throw new Error(r.status === 429 ? t("upRate") : (j && j.error ? j.error + (j.detail ? ": " + j.detail : "") : "HTTP " + r.status));
+    msg.textContent = t("upOk", j.cells);
+  } catch (e) { msg.style.color = "#ff8a80"; msg.textContent = t("upErr", e.message); }
+  btn.disabled = false;
+}
+async function loadCommunity() {
+  try {
+    const r = await fetch("api/community.php", { cache: "no-cache" });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const data = await r.json();
+    if (!data || !Array.isArray(data.cells) || !data.cells.length) { say(t("commEmpty")); return; }
+    await addCoverage(data, t("commName"));
+  } catch (e) { say(t("commErr", e.message)); }
+}
+function downloadCoverage() {
+  const data = coverageData();
+  if (!data) return;
+  const d = new Date(), p = n => String(n).padStart(2, "0");
   const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -1520,6 +1564,10 @@ async function importCoverage(file) {
   try {
     let data;
     try { data = JSON.parse(await file.text()); } catch (e) { throw new Error(t("errJson")); }
+    await addCoverage(data, file.name);
+  } catch (e) { say(t("errOpen", file.name, e.message)); }
+}
+async function addCoverage(data, name) {
     if (!data || data.format !== "meshtastic-coverage" || !Array.isArray(data.cells)) throw new Error(t("errJson"));
     const rows = [];
     for (const c of data.cells) {
@@ -1542,13 +1590,12 @@ async function importCoverage(file) {
         senderLat: null, senderLon: null, rxLat: lat, rxLon: lon, rxSrc: "", dist: null, snr: null, rssi: null, sf: null, bw: null,
         hops: 0, hopLimit: null, port: null, kind: "coverage", payload: "" });
     }
-    fileRows = (fileRows || []).concat(rows); fileNames.push(file.name);
+    fileRows = (fileRows || []).concat(rows); fileNames.push(name);
     // con celdas más pequeñas que las del archivo, cada celda importada saldría como un cuadradito suelto
     const fsz = Number(data.cellSize) || EXPORT_CELL;
     if (cellSize < fsz && CELL_SIZES.includes(fsz)) { cellSize = fsz; showCell(); saveMapPrefs(); }
     if (!map) await startMap();
     mapDirty = true; refreshFromSelect(); dirtyRender = true; drawMap(true);
-  } catch (e) { say(t("errOpen", file.name, e.message)); }
 }
 
 /* ---------- abrir un GPX ---------- */
@@ -1665,6 +1712,8 @@ $("btnExport").addEventListener("click", () => $("expPanel").hidden ? openExport
 $("btnExpClose").addEventListener("click", closeExport);
 $("rngPriv").addEventListener("input", updateExport);
 $("btnExpGo").addEventListener("click", downloadCoverage);
+$("btnExpUp").addEventListener("click", uploadCoverage);
+$("btnCommunity").addEventListener("click", loadCommunity);
 $("btnHelp").addEventListener("click", () => openHelp());
 $("btnHelpClose").addEventListener("click", closeHelp);
 $("help").addEventListener("click", e => { if (e.target === $("help")) closeHelp(); });
