@@ -1,0 +1,145 @@
+<?php
+// Mapa comunitario de cobertura: utilidades comunes a upload.php y community.php.
+// Los datos se guardan en ../data (fuera del alcance de la web gracias a su .htaccess).
+
+const CELL_SIZE = 250;            // tamaño fijo de celda de los archivos exportados por la página
+const MAX_BYTES = 524288;         // 512 KB por subida
+const MAX_CELLS = 20000;
+const MAX_NODES_PER_CELL = 60;
+const RATE_MAX = 6;               // subidas por IP…
+const RATE_WINDOW = 3600;         // …por hora
+
+function data_dir(): string {
+  $d = dirname(__DIR__) . '/data';
+  if (!is_dir($d)) @mkdir($d, 0755, true);
+  // la carpeta de datos nunca se sirve directamente
+  $ht = $d . '/.htaccess';
+  if (!is_file($ht)) @file_put_contents($ht, "Require all denied\nDeny from all\n");
+  foreach (['uploads', 'rate'] as $sub) if (!is_dir("$d/$sub")) @mkdir("$d/$sub", 0755, true);
+  return $d;
+}
+
+function reply(int $code, array $body): void {
+  http_response_code($code);
+  header('Content-Type: application/json; charset=utf-8');
+  header('Cache-Control: no-store');
+  header('X-Content-Type-Options: nosniff');
+  echo json_encode($body, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+  exit;
+}
+
+function num($v, float $min, float $max): ?float {
+  if (!is_int($v) && !is_float($v)) return null;
+  $f = (float)$v;
+  return ($f >= $min && $f <= $max && is_finite($f)) ? $f : null;
+}
+
+// Comprueba un archivo «meshtastic-coverage» y devuelve una copia limpia (solo los campos conocidos)
+function clean_coverage($data): array {
+  if (!is_array($data) || ($data['format'] ?? null) !== 'meshtastic-coverage') throw new Exception('format');
+  if (($data['version'] ?? null) !== 1) throw new Exception('version');
+  if (($data['cellSize'] ?? null) !== CELL_SIZE) throw new Exception('cellSize');
+  $cells = $data['cells'] ?? null;
+  if (!is_array($cells) || !count($cells) || count($cells) > MAX_CELLS) throw new Exception('cells');
+  $out = [];
+  foreach ($cells as $c) {
+    if (!is_array($c)) throw new Exception('cell');
+    $lat = num($c['lat'] ?? null, -90, 90); $lon = num($c['lon'] ?? null, -180, 180);
+    $n = num($c['n'] ?? null, 0, 1000000);
+    if ($lat === null || $lon === null || $n === null || floor($n) != $n) throw new Exception('cell');
+    $nodes = $c['nodes'] ?? [];
+    if (!is_array($nodes) || count($nodes) > MAX_NODES_PER_CELL) throw new Exception('nodes');
+    $cn = [];
+    foreach ($nodes as $o) {
+      if (!is_array($o)) throw new Exception('node');
+      $id = $o['id'] ?? '';
+      if (!is_string($id) || !preg_match('/^![0-9a-f]{8}$/', $id)) throw new Exception('node id');
+      $nn = num($o['n'] ?? null, 1, 1000000);
+      if ($nn === null || floor($nn) != $nn) throw new Exception('node n');
+      $name = is_string($o['name'] ?? null) ? $o['name'] : '';
+      $name = mb_substr(preg_replace('/[\x00-\x1F\x7F<>]/u', '', $name) ?? '', 0, 60);
+      $node = ['id' => $id, 'name' => $name, 'n' => (int)$nn];
+      if (array_key_exists('snr', $o)) { $v = num($o['snr'], -40, 30); if ($v === null) throw new Exception('snr'); $node['snr'] = round($v, 1); }
+      if (array_key_exists('rssi', $o)) { $v = num($o['rssi'], -200, 10); if ($v === null) throw new Exception('rssi'); $node['rssi'] = (int)round($v); }
+      if (array_key_exists('sf', $o)) { $v = num($o['sf'], 5, 12); if ($v === null || floor($v) != $v) throw new Exception('sf'); $node['sf'] = (int)$v; }
+      if (array_key_exists('bw', $o)) { $v = num($o['bw'], 7.8, 1625); if ($v === null) throw new Exception('bw'); $node['bw'] = $v; }
+      $cn[] = $node;
+    }
+    $out[] = ['lat' => round($lat, 6), 'lon' => round($lon, 6), 'n' => (int)$n, 'nodes' => $cn];
+  }
+  $date = (is_string($data['date'] ?? null) && preg_match('/^\d{4}-\d{2}$/', $data['date'])) ? $data['date'] : gmdate('Y-m');
+  return ['format' => 'meshtastic-coverage', 'version' => 1, 'cellSize' => CELL_SIZE, 'date' => $date, 'cells' => $out];
+}
+
+// Suma todas las subidas en un solo archivo: por celda se suman los paquetes y, por nodo,
+// SNR y RSSI se combinan con la media ponderada por nº de paquetes; el SF es el de más paquetes
+function build_community(string $dir): array {
+  $cells = []; $files = 0;
+  foreach (glob("$dir/uploads/*.json") ?: [] as $f) {
+    $d = json_decode((string)@file_get_contents($f), true);
+    if (!is_array($d) || !is_array($d['cells'] ?? null)) continue;
+    $files++;
+    foreach ($d['cells'] as $c) {
+      $k = sprintf('%.6f,%.6f', $c['lat'], $c['lon']);
+      if (!isset($cells[$k])) $cells[$k] = ['lat' => $c['lat'], 'lon' => $c['lon'], 'n' => 0, 'nodes' => []];
+      $cells[$k]['n'] += $c['n'];
+      foreach ($c['nodes'] as $o) {
+        $id = $o['id'];
+        if (!isset($cells[$k]['nodes'][$id])) $cells[$k]['nodes'][$id] = ['id' => $id, 'name' => '', 'n' => 0, 'ws' => 0, 'snr' => 0, 'wr' => 0, 'rssi' => 0, 'sf' => []];
+        $a = &$cells[$k]['nodes'][$id];
+        if ($o['name'] !== '') $a['name'] = $o['name'];
+        $a['n'] += $o['n'];
+        if (isset($o['snr'])) { $a['snr'] += $o['snr'] * $o['n']; $a['ws'] += $o['n']; }
+        if (isset($o['rssi'])) { $a['rssi'] += $o['rssi'] * $o['n']; $a['wr'] += $o['n']; }
+        if (isset($o['sf'])) { $key = $o['sf'] . '|' . ($o['bw'] ?? ''); $a['sf'][$key] = ($a['sf'][$key] ?? 0) + $o['n']; }
+        unset($a);
+      }
+    }
+  }
+  $out = [];
+  foreach ($cells as $c) {
+    $nodes = [];
+    foreach ($c['nodes'] as $a) {
+      $o = ['id' => $a['id'], 'name' => $a['name'], 'n' => $a['n']];
+      if ($a['ws']) $o['snr'] = round($a['snr'] / $a['ws'], 1);
+      if ($a['wr']) $o['rssi'] = (int)round($a['rssi'] / $a['wr']);
+      if ($a['sf']) { arsort($a['sf']); [$sf, $bw] = explode('|', (string)array_key_first($a['sf'])); $o['sf'] = (int)$sf; if ($bw !== '') $o['bw'] = (float)$bw; }
+      $nodes[] = $o;
+    }
+    $out[] = ['lat' => $c['lat'], 'lon' => $c['lon'], 'n' => $c['n'], 'nodes' => $nodes];
+  }
+  return ['format' => 'meshtastic-coverage', 'version' => 1, 'cellSize' => CELL_SIZE, 'date' => gmdate('Y-m'),
+          'files' => $files, 'cells' => $out];
+}
+
+// Recalcula community.json si falta o si ha cambiado la carpeta de subidas (también al borrar una a mano)
+function community_file(string $dir): string {
+  $f = "$dir/community.json";
+  clearstatcache();
+  $newest = filemtime("$dir/uploads") ?: 0;
+  foreach (glob("$dir/uploads/*.json") ?: [] as $u) $newest = max($newest, filemtime($u) ?: 0);
+  if (!is_file($f) || filemtime($f) <= $newest) {
+    $lock = fopen("$dir/.lock", 'c');
+    if ($lock) flock($lock, LOCK_EX);
+    $tmp = "$f." . bin2hex(random_bytes(4));
+    file_put_contents($tmp, json_encode(build_community($dir), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    rename($tmp, $f);
+    if ($lock) { flock($lock, LOCK_UN); fclose($lock); }
+  }
+  return $f;
+}
+
+// Límite de subidas por IP; la IP no se guarda, solo un resumen con una sal propia del servidor
+function rate_ok(string $dir): bool {
+  $saltf = "$dir/salt.txt";
+  if (!is_file($saltf)) @file_put_contents($saltf, bin2hex(random_bytes(16)));
+  $salt = (string)@file_get_contents($saltf);
+  $h = substr(hash('sha256', $salt . ($_SERVER['REMOTE_ADDR'] ?? '')), 0, 24);
+  $f = "$dir/rate/$h";
+  $now = time();
+  $times = array_filter(array_map('intval', explode(',', (string)@file_get_contents($f))), fn($t) => $t > $now - RATE_WINDOW);
+  if (count($times) >= RATE_MAX) return false;
+  $times[] = $now;
+  @file_put_contents($f, implode(',', $times));
+  return true;
+}

@@ -28,3 +28,6 @@ desktop.ini
 
 # Registros exportados de la app oficial (llevan posiciones de tus nodos)
 meshtastic_debug_*.txt
+
+# Datos del mapa comunitario (subidas de la gente) en el servidor
+src/data/
