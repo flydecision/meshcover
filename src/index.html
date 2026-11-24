@@ -80,7 +80,7 @@
   .mhead { display:flex; align-items:center; justify-content:space-between; padding:10px 12px 6px 14px; }
   .mhead b { font-size:16px; }
   .mhead button { width:38px; height:38px; padding:0; border-radius:50%; }
-  .tabs { display:flex; gap:6px; padding:0 12px 8px; overflow-x:auto; border-bottom:1px solid #2a3340; flex:none; }
+  .tabs { display:flex; gap:6px; padding:0 12px 8px; flex-wrap:wrap; border-bottom:1px solid #2a3340; flex:none; }
   .tabs button { padding:7px 11px; font-size:16px; border-radius:999px; background:#2a3340; white-space:nowrap; }
   .tabs button.on { background:#23456e; }
   .mbody { overflow-y:auto; padding:12px 14px; font-size:16px; line-height:1.5; flex:1; min-height:0; overscroll-behavior:contain; }
@@ -129,6 +129,7 @@
   .exprow { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin:10px 0 6px; }
   .exprow input[type=range] { flex:1 1 140px; min-width:120px; max-width:320px; accent-color:#d7352b; }
   #expInfo { color:#9aa4b2; }
+  .exppanel a, #helpBody a { color:#7fb8ff; }
   .expbtns { margin-top:8px; display:flex; flex-wrap:wrap; gap:8px; }
   #expUpMsg { margin-top:8px; color:#7fd49a; }
   .expbtns button { height:29px; padding:0 11px; display:inline-flex; align-items:center; gap:5px; }
@@ -216,7 +217,7 @@
   </div>
   <div id="expPanel" class="exppanel" hidden>
     <div class="exphead"><b>📤 <span data-i18n="expTitle">Export anonymous coverage</span></b><button id="btnExpClose" class="sec" data-i18n-aria="close">✕</button></div>
-    <div data-i18n="expWhat"></div>
+    <div><span data-i18n="expWhat"></span> <a href="#" id="lnkPriv" data-i18n="expPrivLink">What is uploaded?</a></div>
     <div class="exprow"><span data-i18n="expRadius">Remove around start and end</span> <input type="range" id="rngPriv" min="0" max="2000" step="50" value="300" data-i18n-aria="expRadius"> <b id="privVal">300 m</b></div>
     <div id="expInfo"></div>
     <div class="expbtns"><button id="btnExpGo">💾 <span data-i18n="expGo">Download file</span></button><button id="btnExpUp">☁️ <span data-i18n="expUp">Upload to community</span></button></div>
@@ -258,6 +259,7 @@
       <button data-p="0" data-i18n="tabWhat">What for</button>
       <button data-p="1" data-i18n="tabHow">How to use</button>
       <button data-p="2" data-i18n="tabFix">Troubleshooting</button>
+      <button data-p="3" data-i18n="tabPriv">Privacy</button>
     </div>
     <div class="mbody" id="helpBody">
     <div class="page" data-p="0" data-lang="es" hidden>
@@ -331,6 +333,31 @@
       <div>La celda es más pequeña que lo que avanzas entre dos paquetes: súbele el tamaño.</div>
     </div>
 
+    <div class="page" data-p="3" data-lang="es" hidden>
+      <h3>🔒 Privacidad</h3>
+      <div>Tus registros (<code>.txt</code>, CSV, GPX) <b>no salen de tu dispositivo</b>: se leen y se dibujan dentro del navegador. Solo se envía algo al servidor si pulsas <b>☁️ Subir a la comunidad</b>.</div>
+      <h3>📦 Qué se sube</h3>
+      <ul>
+        <li>Celdas de <b>250 m</b>: el centro de cada celda y cuántos paquetes se recibieron en ella (0 si pasaste sin recibir).</li>
+        <li>Por cada nodo oído en la celda: su <b>id</b> (<code>!xxxxxxxx</code>), su <b>nombre</b> público en la malla, nº de paquetes, SNR y RSSI medios, SF y ancho de banda.</li>
+        <li>El <b>mes</b> (año-mes) de la exportación.</li>
+      </ul>
+      <h3>🚫 Qué no se sube</h3>
+      <ul>
+        <li>Ni el recorrido, ni horas, ni días, ni el orden en que pasaste.</li>
+        <li>Nada cerca de donde empieza y acaba cada ruta, ni de donde te paraste más de 5 min (círculos rojos; tú eliges el radio).</li>
+        <li>Ni tu nombre, ni tu nodo, ni tu móvil, ni ningún dato de cuenta.</li>
+      </ul>
+      <h3>🔍 Cómo comprobarlo antes</h3>
+      <div>Pulsa <b>💾 Descargar archivo</b>: es exactamente lo mismo que se subiría. Ábrelo con cualquier editor de texto, o vuelve a abrirlo aquí con <b>📂 Añadir registros</b> en una página limpia, y mira en el mapa que no hay celdas cerca de tu casa. Si no te convence, sube el radio o no lo subas.</div>
+      <h3>🌍 Qué pasa con lo subido</h3>
+      <ul>
+        <li>Se suma al <b>mapa comunitario</b>, que es <b>público</b>: cualquiera puede verlo y descargarlo.</li>
+        <li>Cada subida se guarda como un archivo aparte. Para evitar abusos, el servidor guarda durante una hora una huella (hash) de la IP (no la IP), solo para limitar a 6 subidas por hora. El alojamiento web, como cualquier web, puede guardar registros técnicos de acceso.</li>
+        <li>No hay cuentas, así que la página no puede saber qué subida es tuya. Si quieres que se retire algo, abre una incidencia en <a href="https://github.com/flydecision/meshtastic/issues" target="_blank" rel="noopener">GitHub</a> indicando la zona y la fecha aproximada.</li>
+      </ul>
+      <div style="margin-top:6px">Los nombres de nodo son los que cada persona emite en abierto por la malla. Si no quieres que el tuyo aparezca, ponle un nombre que no te identifique.</div>
+    </div>
     <div class="page" data-p="0" data-lang="en" hidden>
       <h3>🎯 What it is for</h3>
       <div>It draws a Meshtastic <b>coverage map</b> from the log exported by the <b>official Android app</b>: how far <b>the signal of a specific node</b> reaches, or the general coverage of the mesh with every node you heard.</div>
@@ -401,10 +428,35 @@
       <h3>🔳 The grid shows isolated «no reception» cells</h3>
       <div>The cell is smaller than the distance you move between two packets: make it bigger.</div>
     </div>
+    <div class="page" data-p="3" data-lang="en" hidden>
+      <h3>🔒 Privacy</h3>
+      <div>Your logs (<code>.txt</code>, CSV, GPX) <b>never leave your device</b>: they are read and drawn inside the browser. Something is sent to the server only if you press <b>☁️ Upload to community</b>.</div>
+      <h3>📦 What is uploaded</h3>
+      <ul>
+        <li><b>250 m</b> cells: the centre of each cell and how many packets were received in it (0 if you passed without reception).</li>
+        <li>For each node heard in the cell: its <b>id</b> (<code>!xxxxxxxx</code>), its public <b>name</b> on the mesh, number of packets, mean SNR and RSSI, SF and bandwidth.</li>
+        <li>The <b>month</b> (year-month) of the export.</li>
+      </ul>
+      <h3>🚫 What is not uploaded</h3>
+      <ul>
+        <li>No track, no times, no days, no order in which you passed.</li>
+        <li>Nothing near where each route starts and ends, or where you stopped for more than 5 min (red circles; you choose the radius).</li>
+        <li>Not your name, your node, your phone or any account data.</li>
+      </ul>
+      <h3>🔍 How to check it first</h3>
+      <div>Press <b>💾 Download file</b>: it is exactly what would be uploaded. Open it with any text editor, or open it again here with <b>📂 Add Logs</b> on a clean page and check on the map that there are no cells near your home. If you are not happy, raise the radius or do not upload it.</div>
+      <h3>🌍 What happens to uploads</h3>
+      <ul>
+        <li>They are added to the <b>community map</b>, which is <b>public</b>: anyone can view and download it.</li>
+        <li>Each upload is stored as a separate file. To prevent abuse, the server keeps a fingerprint (hash) of the IP (not the IP) for one hour, only to limit uploads to 6 per hour. The web host, like any website, may keep technical access logs.</li>
+        <li>There are no accounts, so the page cannot tell which upload is yours. If you want something removed, open an issue on <a href="https://github.com/flydecision/meshtastic/issues" target="_blank" rel="noopener">GitHub</a> with the area and approximate date.</li>
+      </ul>
+      <div style="margin-top:6px">Node names are the ones each person broadcasts openly on the mesh. If you do not want yours to appear, give it a name that does not identify you.</div>
+    </div>
     </div>
     <div class="mfoot">
       <button id="hPrev" class="sec">‹ <span data-i18n="prev">Previous</span></button>
-      <span id="hNum">1 / 3</span>
+      <span id="hNum">1 / 4</span>
       <button id="hNext" class="sec"><span data-i18n="next">Next</span> ›</button>
     </div>
   </div>
@@ -451,7 +503,7 @@ const I18N = {
     cell: "Cell", cellSize: "Cell size", to: "to", track: "Track", noRx: "No reception", nodeIcon: "Node",
     statRows: "Records", statSnr: "Best SNR dB", statDist: "Max dist. km", statDur: "Duration",
     thDate: "Date and time", thType: "Type",
-    tabWhat: "What for", tabHow: "How to use", tabFix: "Troubleshooting", prev: "Previous", next: "Next",
+    tabWhat: "What for", tabHow: "How to use", tabFix: "Troubleshooting", tabPriv: "Privacy", prev: "Previous", next: "Next",
     packets: n => n === 1 ? "packet" : "packets",
     offline: "no connection",
     mapUnavailable: m => "Map not available (" + m + "): an internet connection is needed to load it. It will appear when the connection is back.",
@@ -470,7 +522,7 @@ const I18N = {
     errNoTrack: "it has no track points", errOpen: (f, m) => "Could not open " + f + ": " + m,
     nodeSearch: "Search node", noMatch: "No node matches",
     communityBtn: "Community map", communityTitle: "Add the shared coverage map uploaded by everyone",
-    expUp: "Upload to community", upConfirm: n => "Upload these " + n + " cells to the public community map? They are added for everyone and cannot be removed from the page.",
+    expUp: "Upload to community", expPrivLink: "What exactly is saved or uploaded?", upConfirm: n => "Upload these " + n + " cells to the public community map? They are added for everyone and cannot be removed from the page.",
     upOk: n => "✅ Uploaded: " + n + " cells added to the community map. Thanks!", upBusy: "Uploading…",
     upErr: m => "Could not upload (" + m + ").", upRate: "too many uploads from your connection, try again in an hour",
     commEmpty: "The community map is still empty.", commErr: m => "Could not load the community map (" + m + ").", commName: "Community map",
@@ -500,7 +552,7 @@ const I18N = {
     cell: "Celda", cellSize: "Tamaño de celda", to: "a", track: "Recorrido", noRx: "Sin recepción", nodeIcon: "Nodo",
     statRows: "Registros", statSnr: "Mejor SNR dB", statDist: "Dist. máx km", statDur: "Duración",
     thDate: "Fecha y hora", thType: "Tipo",
-    tabWhat: "Para qué", tabHow: "Cómo usar", tabFix: "Soluciones", prev: "Anterior", next: "Siguiente",
+    tabWhat: "Para qué", tabHow: "Cómo usar", tabFix: "Soluciones", tabPriv: "Privacidad", prev: "Anterior", next: "Siguiente",
     packets: n => n === 1 ? "packet" : "packets",
     offline: "sin conexión",
     mapUnavailable: m => "Mapa no disponible (" + m + "): hace falta conexión a internet para cargarlo. Aparecerá solo al volver la conexión.",
@@ -519,7 +571,7 @@ const I18N = {
     errNoTrack: "no tiene puntos de recorrido", errOpen: (f, m) => "No se pudo abrir " + f + ": " + m,
     nodeSearch: "Buscar nodo", noMatch: "Ningún nodo coincide",
     communityBtn: "Mapa comunitario", communityTitle: "Añadir el mapa de cobertura compartido que ha subido todo el mundo",
-    expUp: "Subir a la comunidad", upConfirm: n => "¿Subir estas " + n + " celdas al mapa comunitario público? Se suman para todos y no se pueden quitar desde la página.",
+    expUp: "Subir a la comunidad", expPrivLink: "¿Qué se guarda o sube exactamente?", upConfirm: n => "¿Subir estas " + n + " celdas al mapa comunitario público? Se suman para todos y no se pueden quitar desde la página.",
     upOk: n => "✅ Subido: " + n + " celdas añadidas al mapa comunitario. ¡Gracias!", upBusy: "Subiendo…",
     upErr: m => "No se pudo subir (" + m + ").", upRate: "demasiadas subidas desde tu conexión, prueba dentro de una hora",
     commEmpty: "El mapa comunitario aún está vacío.", commErr: m => "No se pudo cargar el mapa comunitario (" + m + ").", commName: "Mapa comunitario",
@@ -1593,7 +1645,9 @@ async function addCoverage(data, name) {
     fileRows = (fileRows || []).concat(rows); fileNames.push(name);
     // con celdas más pequeñas que las del archivo, cada celda importada saldría como un cuadradito suelto
     const fsz = Number(data.cellSize) || EXPORT_CELL;
-    if (cellSize < fsz && CELL_SIZES.includes(fsz)) { cellSize = fsz; showCell(); saveMapPrefs(); }
+    // la cobertura solo tiene sentido como cuadrícula, con el tamaño de celda del archivo
+    if (CELL_SIZES.includes(fsz)) cellSize = fsz;
+    mapView = "grid"; showView(); showCell(); saveMapPrefs();
     if (!map) await startMap();
     mapDirty = true; refreshFromSelect(); dirtyRender = true; drawMap(true);
 }
@@ -1685,7 +1739,7 @@ document.addEventListener("keydown", e => {
 
 /* ---------- ayuda: ventana con páginas ---------- */
 let helpPage = 0;
-const HELP_PAGES = 3;
+const HELP_PAGES = 4;
 function showHelpPage(p) {
   helpPage = Math.max(0, Math.min(HELP_PAGES - 1, p));
   document.querySelectorAll("#helpBody .page").forEach(el => el.hidden = Number(el.dataset.p) !== helpPage || el.dataset.lang !== lang);
@@ -1717,6 +1771,7 @@ $("btnCommunity").addEventListener("click", loadCommunity);
 $("btnHelp").addEventListener("click", () => openHelp());
 $("btnHelpClose").addEventListener("click", closeHelp);
 $("help").addEventListener("click", e => { if (e.target === $("help")) closeHelp(); });
+$("lnkPriv").addEventListener("click", e => { e.preventDefault(); openHelp(3); });
 $("hPrev").addEventListener("click", () => showHelpPage(helpPage - 1));
 $("hNext").addEventListener("click", () => showHelpPage(helpPage + 1));
 document.querySelectorAll("#helpTabs button").forEach(b => b.addEventListener("click", () => showHelpPage(Number(b.dataset.p))));
