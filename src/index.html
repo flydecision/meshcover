@@ -88,6 +88,22 @@
   .mapopts select { flex:none; padding:6px 8px; font-size:.82rem; }
   .filt input[type=range] { flex:1; min-width:90px; accent-color:#2f7df6; }
   .filt .hv { color:#e6e9ee; font-weight:700; min-width:1.2em; text-align:center; }
+  /* Deslizador doble (mínimo y máximo de saltos): dos «range» superpuestos */
+  .filt .dual { position:relative; flex:1; min-width:110px; height:24px; }
+  /* anchos fijos para que el deslizador no cambie de tamaño mientras se arrastra */
+  #hopsVal { min-width:2.4em; }
+  #hopsHint { flex:0 0 7.5em; line-height:1.15; font-size:.78rem; }
+  .filt .dual input[type=range] { position:absolute; left:0; top:0; width:100%; height:24px; margin:0; background:none;
+    pointer-events:none; -webkit-appearance:none; appearance:none; }
+  .filt .dual input[type=range]::-webkit-slider-runnable-track { background:none; }
+  .filt .dual input[type=range]::-moz-range-track { background:none; }
+  .filt .dual input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; pointer-events:auto; width:20px; height:20px;
+    border-radius:50%; background:#2f7df6; border:2px solid #fff; cursor:pointer; margin-top:2px; }
+  .filt .dual input[type=range]::-moz-range-thumb { pointer-events:auto; width:16px; height:16px; border-radius:50%;
+    background:#2f7df6; border:2px solid #fff; cursor:pointer; }
+  .filt .dual-track, .filt .dual-fill { position:absolute; top:10px; height:4px; border-radius:2px; }
+  .filt .dual-track { left:10px; right:10px; background:#3a4150; }
+  .filt .dual-fill { background:#2f7df6; }
   .filt .hint { font-size:.75rem; color:#6d7684; }
   .seg { display:inline-flex; border-radius:10px; overflow:hidden; border:1px solid #2a3340; }
   .seg button { border-radius:0; padding:7px 11px; font-size:.82rem; background:#1a2029; }
@@ -146,9 +162,13 @@
 </div>
 
 <div class="filt">Nodo: <select id="selFrom"><option value="">Todos los nodos</option></select></div>
-<div class="filt" title="0 = solo paquetes recibidos en directo; más saltos = incluye los que llegaron repetidos por otros nodos">
-  Saltos máx.: <span class="hv" id="hopsVal">0</span>
-  <input type="range" id="rngHops" min="0" max="7" step="1" value="0" aria-label="Saltos máximos">
+<div class="filt" title="0 = recibido en directo; 1, 2… = llegó repetido por otros nodos. Mueve los dos extremos para elegir un mínimo y un máximo">
+  Saltos: <span class="hv" id="hopsVal">0</span>
+  <span class="dual" id="hopsDual">
+    <span class="dual-track"></span><span class="dual-fill" id="hopsFill"></span>
+    <input type="range" id="rngHopsMin" min="0" max="7" step="1" value="0" aria-label="Saltos mínimos">
+    <input type="range" id="rngHops" min="0" max="7" step="1" value="0" aria-label="Saltos máximos">
+  </span>
   <span class="hint" id="hopsHint">solo directos</span>
 </div>
 
@@ -208,7 +228,7 @@
     <div class="page" data-p="0">
       <h3>🎯 Para qué sirve</h3>
       <div>Para dibujar un <b>mapa de cobertura</b> Meshtastic: saber <b>hasta dónde llega la señal de un nodo concreto</b> (uno tuyo puesto a propósito o cualquier otro de la red) o analizar la <b>cobertura general</b> de la red en tu zona con todos los nodos que oigas.</div>
-      <div style="margin-top:6px">Con el filtro <b>«Nodo»</b> eliges entre un nodo concreto o todos; con <b>«Saltos máx.»</b>, entre lo que llega en directo o también lo que llega repetido por otros nodos.</div>
+      <div style="margin-top:6px">Con el filtro <b>«Nodo»</b> eliges entre un nodo concreto o todos; con <b>«Saltos»</b> (deslizador doble), el mínimo y el máximo de saltos: solo directos, solo repetidos, o un rango.</div>
       <h3>⚙️ Cómo funciona</h3>
       <ol>
         <li>Los nodos que quieres medir envían paquetes (posición, telemetría…). Si el nodo es tuyo, ponlo a enviar su posición cada 30–60 s para tener más datos.</li>
@@ -253,7 +273,7 @@
       <h3>Controles</h3>
       <ul>
         <li><b>Nodo</b>: muestra solo los paquetes de un nodo (si hay varios cerca).</li>
-        <li><b>Saltos máx.</b>: 0 = solo lo que llega <b>directo</b> de cada nodo, que es lo que mide su cobertura propia. Súbelo para ver también lo que llega repetido por otros nodos.</li>
+        <li><b>Saltos</b>: deslizador doble con mínimo y máximo. 0–0 = solo lo que llega <b>directo</b> de cada nodo, que es lo que mide su cobertura propia. Sube el máximo para ver también lo que llega repetido por otros nodos, o sube el mínimo para ver <b>solo</b> lo repetido.</li>
         <li><b>Track: Móvil / Nodo</b>: recorrido según el GPS del móvil (normal) o según la posición del nodo de ruta.</li>
         <li><b>🗑 Limpiar</b>: deja el mapa vacío (avisa si hay registros sin guardar).</li>
         <li>En el mapa: capas (mapa topográfico, satélite, relieve…), ⛶ pantalla completa y ⌖ ir a tu posición.</li>
@@ -295,7 +315,7 @@
     <div class="page" data-p="3" hidden>
       <div>Se registra cualquier paquete recibido por radio de <b>otro nodo</b> (posición, telemetría, nodeinfo, texto, Range Test…), salvo routing y admin. Los repetidos (mismo id) cuentan como duplicados. Los perdidos se calculan por el «seq» o, si no hay, por los huecos de tiempo de cada nodo.</div>
       <h3>Columnas del CSV</h3>
-      <div>date, time, seq, from, sender_name, sender_lat, sender_lon (posición del nodo que emite = Tx_lat/Tx_lon), rx_lat, rx_lon, rx_alt_m, rx_acc_m (tu posición), rx_snr, rx_rssi, distance_m, hop_limit, hops, portnum, payload, rx_src (movil / nodo: de dónde sale tu posición), tipo (rangetest / position / telemetry …). El CSV guarda <b>todas</b> las recepciones, sin los filtros «Nodo» y «Saltos máx.».</div>
+      <div>date, time, seq, from, sender_name, sender_lat, sender_lon (posición del nodo que emite = Tx_lat/Tx_lon), rx_lat, rx_lon, rx_alt_m, rx_acc_m (tu posición), rx_snr, rx_rssi, distance_m, hop_limit, hops, portnum, payload, rx_src (movil / nodo: de dónde sale tu posición), tipo (rangetest / position / telemetry …). El CSV guarda <b>todas</b> las recepciones, sin los filtros «Nodo» y «Saltos».</div>
       <h3>Estado</h3>
       <div id="dbgOrigin" style="color:#9aa4b2;margin-top:6px"></div>
       <div id="dbgList"></div>
@@ -751,10 +771,14 @@ st.nodeTrack = [];      // recorrido del nodo de ruta (sus posiciones) [{ms, lat
 function liveTrack() { return trackSrc === "nodo" ? st.nodeTrack : st.track; }
 let selFrom = "";       // filtro de nodo ("" = todos)
 let maxHops = 0;        // saltos máximos mostrados (0 = solo directos)
+let minHops = 0;        // saltos mínimos mostrados
 let trackSrc = "movil"; // fuente del track dibujado: "movil" | "nodo"
 let lastMapSig = "";
 // sin dato de saltos (firmware antiguo) se muestra siempre
-function passHops(r) { return r.hops === null || r.hops === undefined || isNaN(r.hops) || r.hops <= maxHops; }
+function passHops(r) {
+  if (r.hops === null || r.hops === undefined || isNaN(r.hops)) return minHops === 0;   // sin dato de saltos: se trata como directo
+  return r.hops >= minHops && r.hops <= maxHops;
+}
 
 /* ---------- persistencia ---------- */
 function persistNow() {
@@ -1002,7 +1026,7 @@ function render() {
   $("dbgList").textContent = dbg.join("\n");
   // solo se redibuja el mapa si cambian los datos (si no, se cerraría el popup abierto)
   const sig = [rows.length, lastR ? lastR.ms : 0, liveTrack().length, fileRows ? fileRows.length : 0,
-               fileTracks.length, selFrom, maxHops, mapView, cellSize, trackSrc].join("|");
+               fileTracks.length, selFrom, minHops, maxHops, mapView, cellSize, trackSrc].join("|");
   if (sig !== lastMapSig) { lastMapSig = sig; mapDirty = true; }
   if (map) drawMap(false);
 }
@@ -1187,7 +1211,7 @@ const LEAFLET_SRC = [
 let map = null, mapLayer = null, mapOn = false, mapDirty = true, mapFitted = false;
 let fileRows = null, fileNames = [], fileTracks = [];
 let mapView = "dots", cellSize = 250, autoFollow = false, lastFollow = null;
-function saveMapPrefs() { try { localStorage.setItem("rangetest_mapprefs_v1", JSON.stringify({ mapView, cellSize, trackSrc, maxHops, autoFollow })); } catch (e) {} }
+function saveMapPrefs() { try { localStorage.setItem("rangetest_mapprefs_v1", JSON.stringify({ mapView, cellSize, trackSrc, minHops, maxHops, autoFollow })); } catch (e) {} }
 function loadMapPrefs() {
   try {
     const p = JSON.parse(localStorage.getItem("rangetest_mapprefs_v1") || "{}");
@@ -1196,9 +1220,10 @@ function loadMapPrefs() {
     if (p.trackSrc === "nodo" || p.trackSrc === "movil") trackSrc = p.trackSrc;
     if (typeof p.autoFollow === "boolean") autoFollow = p.autoFollow;
     if (Number.isInteger(p.maxHops) && p.maxHops >= 0 && p.maxHops <= 7) maxHops = p.maxHops;
+    if (Number.isInteger(p.minHops) && p.minHops >= 0 && p.minHops <= maxHops) minHops = p.minHops;
   } catch (e) {}
   showView(); showCell();
-  $("selTrack").value = trackSrc; $("rngHops").value = String(maxHops); showHops();
+  $("selTrack").value = trackSrc; $("rngHops").value = String(maxHops); $("rngHopsMin").value = String(minHops); showHops();
   $("btnAuto").classList.toggle("on", autoFollow);
 }
 const CELL_SIZES = [50, 100, 250, 500, 1000];
@@ -1941,10 +1966,29 @@ $("btnAuto").addEventListener("click", () => {
   if (autoFollow) { lastFollow = null; followPos(); if (!currentPos()) say("Automático activado: el mapa te seguirá en cuanto haya posición GPS."); }
 });
 function showHops() {
-  $("hopsVal").textContent = maxHops;
-  $("hopsHint").textContent = maxHops === 0 ? "solo directos" : "directos + hasta " + maxHops + (maxHops === 1 ? " salto" : " saltos");
+  $("hopsVal").textContent = minHops === maxHops ? String(maxHops) : minHops + "–" + maxHops;
+  let hint;
+  if (maxHops === 0) hint = "solo directos";
+  else if (minHops === 0) hint = "directos + hasta " + maxHops + (maxHops === 1 ? " salto" : " saltos");
+  else if (minHops === maxHops) hint = "solo con " + maxHops + (maxHops === 1 ? " salto" : " saltos");
+  else hint = "de " + minHops + " a " + maxHops + " saltos";
+  $("hopsHint").textContent = hint;
+  // franja azul entre los dos extremos (los 10 px son medio botón)
+  const f = $("hopsFill"), pct = v => v / 7;
+  f.style.left = "calc(10px + (100% - 20px) * " + pct(minHops) + ")";
+  f.style.width = "calc((100% - 20px) * " + (pct(maxHops) - pct(minHops)) + ")";
+  // el botón de mínimo encima cuando los dos están arriba del todo, para poder bajarlo
+  $("rngHopsMin").style.zIndex = minHops >= 7 ? "3" : "1";
+  $("rngHops").style.zIndex = "2";
 }
-$("rngHops").addEventListener("input", e => { maxHops = Number(e.target.value); showHops(); saveMapPrefs(); dirtyRender = true; });
+$("rngHops").addEventListener("input", e => {
+  maxHops = Math.max(Number(e.target.value), minHops); e.target.value = String(maxHops);
+  showHops(); saveMapPrefs(); mapDirty = true; dirtyRender = true;
+});
+$("rngHopsMin").addEventListener("input", e => {
+  minHops = Math.min(Number(e.target.value), maxHops); e.target.value = String(minHops);
+  showHops(); saveMapPrefs(); mapDirty = true; dirtyRender = true;
+});
 $("selTrack").addEventListener("change", e => { trackSrc = e.target.value; saveMapPrefs(); dirtyRender = true; });
 loadMapPrefs();
 $("selFrom").addEventListener("change", e => { selFrom = e.target.value; mapDirty = true; mapFitted = false; dirtyRender = true; if (mapOn) setTimeout(() => drawMap(true), 0); });
