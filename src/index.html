@@ -146,13 +146,6 @@
 </div>
 <div id="msg"></div>
 
-<div class="stats">
-  <div class="stat"><div class="v" id="sReg">0</div><div class="l">Registros</div></div>
-  <div class="stat"><div class="v" id="sSnr">—</div><div class="l">Mejor SNR dB</div></div>
-  <div class="stat"><div class="v" id="sDist">—</div><div class="l">Dist. máx km</div></div>
-  <div class="stat"><div class="v" id="sDur">0m</div><div class="l">Duración</div></div>
-</div>
-
 <div class="filt">Nodo: <select id="selFrom"><option value="">Todos los nodos</option></select></div>
 
 <div id="mapBox">
@@ -184,6 +177,13 @@
     <span>📡 Nodo</span>
   </div>
   <div id="mapInfo"></div>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="v" id="sReg">0</div><div class="l">Registros</div></div>
+  <div class="stat"><div class="v" id="sSnr">—</div><div class="l">Mejor SNR dB</div></div>
+  <div class="stat"><div class="v" id="sDist">—</div><div class="l">Dist. máx km</div></div>
+  <div class="stat"><div class="v" id="sDur">0m</div><div class="l">Duración</div></div>
 </div>
 
 <div class="tbltop" id="tblTop" hidden><div id="tblTopIn"></div></div>
@@ -719,7 +719,7 @@ function drawMap(fit, fromZoom) {
       // sin nada recibido: gris oscuro translúcido, sin borde (se ve el mapa debajo)
       // el borde de color va por dentro de la celda: se dibuja en un rectángulo reducido medio grosor
       L.rectangle(c.bounds, onlyRelay
-        ? { stroke: false, fillColor: "#2b2f36", fillOpacity: .6 }
+        ? { stroke: false, fillOpacity: 0 }
         : has
         ? { color: "#0b0d10", weight: .5, fillColor: snrColor(med), fillOpacity: .65 }
         : { stroke: false, fillColor: "#1a1d22", fillOpacity: .45 })
@@ -733,6 +733,8 @@ function drawMap(fit, fromZoom) {
           : "<b>Sin recepción</b><br>Pasaste por aquí y no llegó ningún paquete." + (c.ms ? "<br>Tiempo en la celda: " + fmtDur(c.ms) : "") +
             (expected && expected >= 1 ? "<br>Se esperaban ≈ " + Math.round(expected) + " paquetes" : ""))
         .addTo(mapLayer);
+      // el gris solo dentro del borde: así el borde se ve sobre el mapa con el mismo tono que las celdas en directo
+      if (onlyRelay) L.rectangle(insetBounds(c.bounds, RELAY_BORDER), { stroke: false, fillColor: "#2b2f36", fillOpacity: .6, interactive: false }).addTo(mapLayer);
       if (onlyRelay) L.rectangle(insetBounds(c.bounds, RELAY_BORDER / 2), { color: snrColor(median(c.snrRelay)), weight: RELAY_BORDER, opacity: .65, fill: false, interactive: false }).addTo(mapLayer);
       pts.push(c.bounds[0], c.bounds[1]);
     }
@@ -741,9 +743,13 @@ function drawMap(fit, fromZoom) {
   // recorridos (azul)
   for (const t of tracks) {
     if (t.pts.length > 1) {
-      L.polyline(t.pts.map(p => [p.lat, p.lon]), { color: "#2f7df6", weight: grid ? 2 : 4, opacity: .85 })
+      L.polyline(t.pts.map(p => [p.lat, p.lon]), { color: "#2f7df6", weight: 4, opacity: .85 })
         .bindPopup("Recorrido: " + esc(t.name)).addTo(mapLayer);
     }
+    // un puntito en cada posición GPS real del recorrido
+    for (const p of t.pts)
+      L.circleMarker([p.lat, p.lon], { radius: 3, color: "#ffffff", weight: 1, fillColor: "#2f7df6", fillOpacity: 1 })
+        .bindPopup("Posición GPS" + (p.ms ? " · " + RT.fmtDate(p.ms) + " " + RT.fmtTime(p.ms) : "")).addTo(mapLayer);
     for (const p of t.pts) pts.push([p.lat, p.lon]);
   }
 
