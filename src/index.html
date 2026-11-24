@@ -123,6 +123,7 @@
   .combo-list .ci.top { padding-left:10px; }
   .combo-list .ci.act { background:#23456e; }
   .combo-list .ci.sel { color:#7fb2ff; font-weight:600; }
+  #tblNote { color:#9aa4b2; margin:10px 0 6px; line-height:1.4; }
   .combo-list .none { padding:8px 10px; color:#9aa4b2; }
   .filt.hops { display:inline-flex; margin:0; gap:6px; flex:1 1 100px; min-width:max-content; max-width:280px; }
   .filt.hops .dual { min-width:60px; }
@@ -206,6 +207,7 @@
   <div class="stat"><div class="v" id="sDur">0m</div><div class="l" data-i18n="statDur">Duration</div></div>
 </div>
 
+<div id="tblNote" hidden></div>
 <div class="tbltop" id="tblTop" hidden><div id="tblTopIn"></div></div>
 <div class="tblwrap" id="tblWrap">
 <table id="tbl">
@@ -431,6 +433,8 @@ const I18N = {
     errNoPkts: "there are no packets received over the radio in the file", errGpx: "the file is not a valid GPX",
     errNoTrack: "it has no track points", errOpen: (f, m) => "Could not open " + f + ": " + m,
     nodeSearch: "Search node", noMatch: "No node matches",
+    heardNote: n => "📶 Packets heard directly from " + n + ": its own and the ones it relayed from other nodes. The Node column is the original sender.",
+    heardNoteAll: "📶 Packets with a known directly heard node. The Node column is the original sender.",
     grpHeard: "📶 Heard directly", grpSender: "📡 Sent by", bestAll: "Best signal of any node",
     heardFrom: "Heard directly from", marginTxt: m => "margin " + m + " dB", lgMargin: "Margin",
     medMargin: (m, w, b) => "Median margin " + m + " dB (worst " + w + ", best " + b + ")",
@@ -467,6 +471,8 @@ const I18N = {
     errNoPkts: "no hay paquetes recibidos por radio en el archivo", errGpx: "el archivo no es un GPX válido",
     errNoTrack: "no tiene puntos de recorrido", errOpen: (f, m) => "No se pudo abrir " + f + ": " + m,
     nodeSearch: "Buscar nodo", noMatch: "Ningún nodo coincide",
+    heardNote: n => "📶 Paquetes oídos directamente de " + n + ": los suyos y los que repitió de otros nodos. La columna Nodo es el emisor original.",
+    heardNoteAll: "📶 Paquetes en los que se sabe qué nodo se oyó directamente. La columna Nodo es el emisor original.",
     grpHeard: "📶 Oído directamente", grpSender: "📡 Enviado por", bestAll: "Mejor señal de cualquier nodo",
     heardFrom: "Oído directamente de", marginTxt: m => "margen " + m + " dB", lgMargin: "Margen",
     medMargin: (m, w, b) => "Margen mediano " + m + " dB (peor " + w + ", mejor " + b + ")",
@@ -586,7 +592,8 @@ function refreshFromSelect() {
   }
   for (const r of all) if (r.heard != null && !seen.has(r.heard)) seen.set(r.heard, r.heardName || "");
   bestNames = seen;
-  const label = (n, c) => { const name = seen.get(n); return esc((name ? name + " " : "") + "(" + hexId(n) + ") · " + c + (c === 1 ? " packet" : " packets")); };
+  // cada opción lleva el emoji de su grupo, para distinguirlas aunque el buscador oculte los títulos
+  const label = (n, c, ic) => { const name = seen.get(n); return esc(ic + " " + (name ? name + " " : "") + "(" + hexId(n) + ") · " + c + (c === 1 ? " packet" : " packets")); };
   const keys = [...count.keys()].sort((a, b) => count.get(b) - count.get(a));
   const hkeys = [...heardCount.keys()].sort((a, b) => heardCount.get(b) - heardCount.get(a));
   const want = [lang, ...keys.map(k => k + ":" + count.get(k)), "|h", ...hkeys.map(k => k + ":" + heardCount.get(k))].join("|");
@@ -594,8 +601,8 @@ function refreshFromSelect() {
     sel.dataset.keys = want;
     sel.innerHTML = '<option value="">' + esc(t("allNodes")) + '</option>' +
       (hkeys.length ? '<optgroup label="' + esc(t("grpHeard")) + '"><option value="h*">' + esc(t("bestAll")) + '</option>' +
-        hkeys.map(n => '<option value="h' + n + '">' + label(n, heardCount.get(n)) + "</option>").join("") + "</optgroup>" : "") +
-      '<optgroup label="' + esc(t("grpSender")) + '">' + keys.map(n => '<option value="' + n + '">' + label(n, count.get(n)) + "</option>").join("") + "</optgroup>";
+        hkeys.map(n => '<option value="h' + n + '">' + label(n, heardCount.get(n), "📶") + "</option>").join("") + "</optgroup>" : "") +
+      '<optgroup label="' + esc(t("grpSender")) + '">' + keys.map(n => '<option value="' + n + '">' + label(n, count.get(n), "📡") + "</option>").join("") + "</optgroup>";
   }
   const ok = selFrom === "" || (selFrom === "h*" && hkeys.length) || (heardMode() ? heardCount.has(Number(selFrom.slice(1))) : count.has(Number(selFrom)));
   sel.value = ok ? selFrom : "";
@@ -668,6 +675,10 @@ function render() {
     const s = Math.max(1, Math.round((rows[rows.length - 1].ms - rows[0].ms) / 1000));
     $("sDur").textContent = s >= 3600 ? Math.floor(s / 3600) + "h" + Math.round(s % 3600 / 60) + "m" : Math.floor(s / 60) + "m" + (s % 60) + "s";
   } else $("sDur").textContent = "0m";
+  // en «oído directamente» la tabla lleva paquetes de otros emisores que ese nodo repitió: se explica encima
+  const hn = heardMode() && selFrom !== "h*" ? Number(selFrom.slice(1)) : null;
+  $("tblNote").hidden = !heardMode();
+  if (heardMode()) $("tblNote").innerHTML = selFrom === "h*" ? esc(t("heardNoteAll")) : t("heardNote", "<b>" + esc(bestNames.get(hn) || hexId(hn)) + "</b>");
   const tb = $("tbody");
   const view = rows.slice(-100).reverse();
   tb.innerHTML = view.map(r => "<tr><td class=\"tl\">" + fmtFecha(r.ms).slice(0, 5) + " " + RT.fmtTime(r.ms) + "</td><td class=\"tl nodo\" title=\"" + esc(nodeName(r) || "") + "\">" +
