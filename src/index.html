@@ -109,7 +109,21 @@
   /* anchos fijos para que el deslizador no cambie de tamaño mientras se arrastra */
   #hopsVal { min-width:2.4em; }
   .filt.nodesel { display:inline-flex; margin:0; gap:6px; flex:0 1 auto; min-width:0; }
-  .filt.nodesel select { flex:1 1 auto; min-width:0; max-width:200px; width:100%; padding:5px 8px; height:29px; box-sizing:border-box; }
+  /* selector de nodo con buscador: campo de texto + lista desplegable filtrada */
+  .combo { position:relative; flex:1 1 auto; min-width:0; max-width:200px; width:200px; display:inline-flex; }
+  .combo input { width:100%; min-width:0; height:29px; box-sizing:border-box; padding:5px 26px 5px 8px; font-size:16px; color:#e6e9ee;
+                 background:#1a2029; border:1px solid #2a3340; border-radius:8px; text-overflow:ellipsis; }
+  .combo input:focus { outline:none; border-color:#2f7df6; }
+  .combo .caret { position:absolute; right:8px; top:50%; transform:translateY(-50%); color:#9aa4b2; pointer-events:none; font-size:12px; }
+  .combo-list { position:absolute; left:0; top:calc(100% + 4px); z-index:3000; max-height:min(60vh, 420px);
+                overflow-y:auto; background:#1a2029; border:1px solid #2a3340; border-radius:8px; box-shadow:0 6px 22px #000a; padding:4px 0;
+                overscroll-behavior:contain; color:#e6e9ee; }
+  .combo-list .cg { padding:8px 10px 4px; color:#9aa4b2; font-weight:600; }
+  .combo-list .ci { padding:6px 10px 6px 18px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .combo-list .ci.top { padding-left:10px; }
+  .combo-list .ci.act { background:#23456e; }
+  .combo-list .ci.sel { color:#7fb2ff; font-weight:600; }
+  .combo-list .none { padding:8px 10px; color:#9aa4b2; }
   .filt.hops { display:inline-flex; margin:0; gap:6px; flex:1 1 100px; min-width:max-content; max-width:280px; }
   .filt.hops .dual { min-width:60px; }
   @media (max-width:380px) { .seg button { padding:0 7px; } .filt.hops { gap:4px; } .filt.hops .lbl { display:none; } }
@@ -160,7 +174,7 @@
 
 <div id="mapBox">
   <div class="mapopts">
-    <span class="filt nodesel">📡 <span class="colon" data-i18n="node">Node</span> <select id="selFrom"><option value="" data-i18n="allNodes">All nodes</option></select></span>
+    <span class="filt nodesel">📡 <span class="colon" data-i18n="node">Node</span> <span class="combo"><input id="nodeSearch" type="text" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="false" aria-controls="nodeList" data-i18n-aria="nodeSearch"><span class="caret">▼</span><div id="nodeList" class="combo-list" role="listbox" hidden></div></span><select id="selFrom" hidden><option value="" data-i18n="allNodes">All nodes</option></select></span>
     <span class="seg" role="group" data-i18n-aria="view">
       <button id="vDots" data-i18n-title="dotsTitle">🔵 <span data-i18n="dots">Dots</span></button>
       <button id="vGrid" data-i18n-title="gridTitle">🔳 <span data-i18n="grid">Grid</span></button>
@@ -416,6 +430,7 @@ const I18N = {
     errEmpty: "the file is empty", errCsv: "it does not look like a CSV from this page",
     errNoPkts: "there are no packets received over the radio in the file", errGpx: "the file is not a valid GPX",
     errNoTrack: "it has no track points", errOpen: (f, m) => "Could not open " + f + ": " + m,
+    nodeSearch: "Search node", noMatch: "No node matches",
     grpHeard: "📶 Heard directly", grpSender: "📡 Sent by", bestAll: "Best signal of any node",
     heardFrom: "Heard directly from", marginTxt: m => "margin " + m + " dB", lgMargin: "Margin",
     medMargin: (m, w, b) => "Median margin " + m + " dB (worst " + w + ", best " + b + ")",
@@ -451,6 +466,7 @@ const I18N = {
     errEmpty: "el archivo está vacío", errCsv: "no parece un CSV de esta página",
     errNoPkts: "no hay paquetes recibidos por radio en el archivo", errGpx: "el archivo no es un GPX válido",
     errNoTrack: "no tiene puntos de recorrido", errOpen: (f, m) => "No se pudo abrir " + f + ": " + m,
+    nodeSearch: "Buscar nodo", noMatch: "Ningún nodo coincide",
     grpHeard: "📶 Oído directamente", grpSender: "📡 Enviado por", bestAll: "Mejor señal de cualquier nodo",
     heardFrom: "Oído directamente de", marginTxt: m => "margen " + m + " dB", lgMargin: "Margen",
     medMargin: (m, w, b) => "Margen mediano " + m + " dB (peor " + w + ", mejor " + b + ")",
@@ -584,7 +600,58 @@ function refreshFromSelect() {
   const ok = selFrom === "" || (selFrom === "h*" && hkeys.length) || (heardMode() ? heardCount.has(Number(selFrom.slice(1))) : count.has(Number(selFrom)));
   sel.value = ok ? selFrom : "";
   if (sel.value !== selFrom) { selFrom = sel.value; }
+  syncCombo();
 }
+/* ---------- buscador del selector de nodo ---------- */
+// El <select id="selFrom"> (oculto) sigue siendo la lista de opciones; el campo de texto la filtra al escribir
+const fold = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+let comboAct = -1;
+function selLabel() { const o = $("selFrom").selectedOptions[0]; return o ? o.textContent : t("allNodes"); }
+function syncCombo() { if (document.activeElement !== $("nodeSearch")) $("nodeSearch").value = selLabel(); }
+function comboItems() { return [...$("nodeList").querySelectorAll(".ci")]; }
+function drawCombo(q) {
+  const f = fold(q.trim()), sel = $("selFrom"), parts = [];
+  for (const el of sel.children) {
+    if (el.tagName === "OPTION") {
+      if (!f || fold(el.textContent).includes(f)) parts.push('<div class="ci top' + (el.value === sel.value ? " sel" : "") + '" role="option" data-v="' + esc(el.value) + '">' + esc(el.textContent) + "</div>");
+    } else {
+      const its = [...el.children].filter(o => !f || fold(o.textContent).includes(f));
+      if (its.length) parts.push('<div class="cg">' + esc(el.label) + "</div>" +
+        its.map(o => '<div class="ci' + (o.value === sel.value ? " sel" : "") + '" role="option" data-v="' + esc(o.value) + '">' + esc(o.textContent) + "</div>").join(""));
+    }
+  }
+  $("nodeList").innerHTML = parts.join("") || '<div class="none">' + esc(t("noMatch")) + "</div>";
+  comboAct = f ? 0 : -1; markAct();
+}
+// desplaza solo la lista (no la página) para que se vea el elemento
+function showInList(e) { const l = $("nodeList"); if (e.offsetTop < l.scrollTop) l.scrollTop = e.offsetTop; else if (e.offsetTop + e.offsetHeight > l.scrollTop + l.clientHeight) l.scrollTop = e.offsetTop + e.offsetHeight - l.clientHeight; }
+function markAct() { comboItems().forEach((e, i) => { e.classList.toggle("act", i === comboAct); if (i === comboAct) showInList(e); }); }
+function openCombo() { const i = $("nodeSearch"), l = $("nodeList"); i.value = ""; i.placeholder = t("nodeSearch") + "…"; drawCombo("");
+  // la lista no se sale de la pantalla por la derecha
+  const vw = document.documentElement.clientWidth, w = Math.min(380, vw - 32), x = i.getBoundingClientRect().left;
+  l.style.width = w + "px"; l.style.left = Math.min(0, vw - 16 - x - w) + "px";
+  l.hidden = false; i.setAttribute("aria-expanded", "true");
+  const s = l.querySelector(".ci.sel"); if (s) showInList(s); }
+function closeCombo() { $("nodeList").hidden = true; $("nodeSearch").setAttribute("aria-expanded", "false"); $("nodeSearch").value = selLabel(); }
+function pickCombo(v) {
+  const sel = $("selFrom"); closeCombo(); $("nodeSearch").blur();
+  if (sel.value !== v) { sel.value = v; sel.dispatchEvent(new Event("change")); }
+  $("nodeSearch").value = selLabel();
+}
+$("nodeSearch").addEventListener("focus", openCombo);
+$("nodeSearch").addEventListener("click", () => { if ($("nodeList").hidden) openCombo(); });
+$("nodeSearch").addEventListener("input", e => { $("nodeList").hidden = false; drawCombo(e.target.value); });
+$("nodeSearch").addEventListener("keydown", e => {
+  const its = comboItems();
+  if (e.key === "ArrowDown") { e.preventDefault(); if ($("nodeList").hidden) openCombo(); comboAct = Math.min(its.length - 1, comboAct + 1); markAct(); }
+  else if (e.key === "ArrowUp") { e.preventDefault(); comboAct = Math.max(0, comboAct - 1); markAct(); }
+  else if (e.key === "Enter") { e.preventDefault(); if (its[comboAct]) pickCombo(its[comboAct].dataset.v); else if (its.length === 1) pickCombo(its[0].dataset.v); }
+  else if (e.key === "Escape") { closeCombo(); e.target.blur(); }
+});
+$("nodeSearch").addEventListener("blur", () => setTimeout(() => { if (document.activeElement !== $("nodeSearch")) closeCombo(); }, 150));
+// mousedown (no click) para elegir antes de que el campo pierda el foco
+$("nodeList").addEventListener("mousedown", e => e.preventDefault());
+$("nodeList").addEventListener("click", e => { const it = e.target.closest(".ci"); if (it) pickCombo(it.dataset.v); });
 function render() {
   refreshFromSelect();
   const rows = rowsView();
