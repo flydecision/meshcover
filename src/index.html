@@ -152,7 +152,7 @@
 
 
 <div class="btns">
-  <button id="btnOpen" data-i18n-title="openTitle">📂 <span data-i18n="open">Open Logs</span></button>
+  <button id="btnOpen" data-i18n-title="openTitle">📂 <span data-i18n="open">Add Logs</span></button>
   <button id="btnClear" class="sec" data-i18n-title="clearTitle">🗑 <span data-i18n="clear">Clear</span></button>
   <input type="file" id="fileAny" accept=".csv,.gpx,.txt,text/csv,text/plain,application/gpx+xml,application/xml,text/xml" multiple hidden>
 </div>
@@ -244,13 +244,20 @@
       <h3>3. Al volver</h3>
       <ol>
         <li>En la app: Ajustes → panel de depuración → <b>exportar</b>. Mejor sin filtros.</li>
-        <li>Aquí, <b>📂 Abrir registros</b> y elige el <code>.txt</code>. También abre CSV y GPX de versiones anteriores de esta página.</li>
+        <li>Aquí, <b>📂 Añadir registros</b> y elige el <code>.txt</code>. Cada archivo se suma a lo que ya hay en el mapa. También abre CSV y GPX de versiones anteriores de esta página.</li>
         <li>En <b>Nodo</b>, elige el nodo fijo y pulsa <b>🔳 Cuadrícula</b> para ver la cobertura por zonas.</li>
+      </ol>
+      <h3>Cobertura general de la red</h3>
+      <ol>
+        <li>No hace falta nodo fijo. El nodo de ruta, con los <b>mismos ajustes de radio que la red</b>, en CLIENT_MUTE, con GPS y posición cada minuto.</li>
+        <li>Sal y exporta el registro igual que antes, y añádelo aquí.</li>
+        <li>En <b>Nodo</b>, elige <b>📶 Oído directamente → Mejor señal de cualquier nodo</b> y pulsa <b>🔳 Cuadrícula</b>. Cada celda sale del color del nodo que mejor se oye allí; al pinchar, dice cuál es. Para la cobertura de un repetidor concreto, elígelo en ese mismo grupo.</li>
+        <li>Deja los saltos en 0–7. Suma registros de varios días o personas para completar la zona.</li>
       </ol>
       <h3>Controles</h3>
       <ul>
         <li><b>Nodo</b>: en <b>📡 Enviado por</b>, los paquetes que envió un nodo. En <b>📶 Oído directamente</b>, lo que oíste directamente de un nodo, aunque fuera repitiendo paquetes de otros: su SNR sí es de ese nodo, así que es su cobertura real. «Mejor señal de cualquier nodo» pinta en cada celda el nodo que mejor se oye: la cobertura de la red.</li>
-        <li><b>Saltos</b>: deslizador doble con mínimo y máximo. Al abrir la página empieza en 0–7 (todo). 0–0 = solo lo que llega <b>directo</b>, que es lo que mide la cobertura de cada nodo. Sube el máximo para ver también lo repetido por otros nodos, o el mínimo para ver <b>solo</b> lo repetido. Lo repetido sale como <b>cuadrado negro</b>: su SNR es el del último salto, no el del nodo de origen.</li>
+        <li><b>Saltos</b>: deslizador doble con mínimo y máximo. Al abrir la página empieza en 0–7 (todo). 0–0 = solo lo que llega <b>directo</b>, que es lo que mide la cobertura de cada nodo. Sube el máximo para ver también lo repetido por otros nodos, o el mínimo para ver <b>solo</b> lo repetido. Con <b>📡 Enviado por</b>, lo repetido sale como <b>cuadrado negro</b>: su SNR es el del último salto, no el del nodo de origen.</li>
         <li><b>🗑 Limpiar</b>: quita del mapa todo lo abierto.</li>
         <li>En el mapa: capas (topográfico, satélite, relieve…) y ⛶ pantalla completa.</li>
       </ul>
@@ -306,13 +313,20 @@
       <h3>3. When you are back</h3>
       <ol>
         <li>In the app: Settings → debug panel → <b>export</b>. Better without filters.</li>
-        <li>Here, <b>📂 Open Logs</b> and pick the <code>.txt</code>. It also opens CSV and GPX files from older versions of this page.</li>
+        <li>Here, <b>📂 Add Logs</b> and pick the <code>.txt</code>. Each file adds to what is already on the map. It also opens CSV and GPX files from older versions of this page.</li>
         <li>In <b>Node</b>, pick the fixed node and press <b>🔳 Grid</b> to see coverage by area.</li>
+      </ol>
+      <h3>General coverage of the mesh</h3>
+      <ol>
+        <li>No fixed node needed. The route node, with the <b>same radio settings as the mesh</b>, in CLIENT_MUTE, with GPS and position every minute.</li>
+        <li>Go out and export the log as before, and add it here.</li>
+        <li>In <b>Node</b>, pick <b>📶 Heard directly → Best signal of any node</b> and press <b>🔳 Grid</b>. Each cell takes the colour of the node heard best there; tap it to see which one. For the coverage of a specific repeater, pick it in that same group.</li>
+        <li>Leave hops at 0–7. Add logs from several days or people to complete the area.</li>
       </ol>
       <h3>Controls</h3>
       <ul>
         <li><b>Node</b>: under <b>📡 Sent by</b>, the packets a node sent. Under <b>📶 Heard directly</b>, what you heard directly from a node, even when it was relaying other nodes' packets: that SNR does belong to that node, so it is its real coverage. «Best signal of any node» paints each cell with the node heard best: the coverage of the mesh.</li>
-        <li><b>Hops</b>: double slider with minimum and maximum. It starts at 0–7 (everything). 0–0 = only what arrives <b>directly</b>, which is what measures each node's coverage. Raise the maximum to also see packets relayed by other nodes, or the minimum to see <b>only</b> relayed ones. Relayed packets show as a <b>black square</b>: their SNR is the last hop's, not the origin node's.</li>
+        <li><b>Hops</b>: double slider with minimum and maximum. It starts at 0–7 (everything). 0–0 = only what arrives <b>directly</b>, which is what measures each node's coverage. Raise the maximum to also see packets relayed by other nodes, or the minimum to see <b>only</b> relayed ones. With <b>📡 Sent by</b>, relayed packets show as a <b>black square</b>: their SNR is the last hop's, not the origin node's.</li>
         <li><b>🗑 Clear</b>: removes everything opened from the map.</li>
         <li>On the map: layers (topographic, satellite, hillshade…) and ⛶ full screen.</li>
       </ul>
@@ -375,8 +389,8 @@ const $ = id => document.getElementById(id);
 /* ---------- idioma (inglés por defecto, español opcional) ---------- */
 const I18N = {
   en: {
-    appTitle: "Meshtastic Coverage Analyzer", help: "Help", close: "Close", open: "Open Logs", clear: "Clear",
-    openTitle: "Open the packet log exported from the Meshtastic app (.txt), or CSV and GPX files",
+    appTitle: "Meshtastic Coverage Analyzer", help: "Help", close: "Close", open: "Add Logs", clear: "Clear",
+    openTitle: "Add the packet log exported from the Meshtastic app (.txt), or CSV and GPX files. Each file adds to what is already on the map",
     clearTitle: "Remove everything opened from the map",
     node: "Node", allNodes: "All nodes", view: "View",
     dots: "Dots", grid: "Grid", dotsTitle: "Show each reception as a dot", gridTitle: "Show coverage by cells",
@@ -410,8 +424,8 @@ const I18N = {
     directPl: "direct", lastPos: "Last position", lastHeard: "Last heard", relayedWord: "relayed", maxDist: "Max distance"
   },
   es: {
-    appTitle: "Analizador Cobertura Meshtastic", help: "Ayuda", close: "Cerrar", open: "Abrir registros", clear: "Limpiar",
-    openTitle: "Abrir el registro de paquetes exportado de la app Meshtastic (.txt), o CSV y GPX",
+    appTitle: "Analizador Cobertura Meshtastic", help: "Ayuda", close: "Cerrar", open: "Añadir registros", clear: "Limpiar",
+    openTitle: "Añadir el registro de paquetes exportado de la app Meshtastic (.txt), o CSV y GPX. Cada archivo se suma a lo que ya hay en el mapa",
     clearTitle: "Quitar del mapa todo lo abierto",
     node: "Nodo", allNodes: "Todos los nodos", view: "Vista",
     dots: "Puntos", grid: "Cuadrícula", dotsTitle: "Ver cada recepción como un punto", gridTitle: "Ver la cobertura por celdas",

@@ -20,7 +20,7 @@ Página web para analizar la cobertura real entre nodos [Meshtastic](https://mes
 1. **Nodo fijo**: posición fija e intervalo de difusión de 1 minuto.
 2. **Nodo de ruta**: rol `CLIENT_MUTE`, GPS activado e intervalo de difusión de 1 minuto. Los mismos ajustes LoRa (BW, SF, CR y slot) en los dos.
 3. Conecta la app oficial al nodo de ruta, vacía el registro del panel de depuración y sal de ruta con la pantalla apagada.
-4. Al volver: Ajustes → panel de depuración → exportar. Abre el `.txt` aquí con **📂 Abrir**, elige el nodo fijo y pulsa **🔳 Cuadrícula**.
+4. Al volver: Ajustes → panel de depuración → exportar. Abre el `.txt` aquí con **📂 Añadir registros**, elige el nodo fijo y pulsa **🔳 Cuadrícula**.
 
 La ayuda completa está dentro de la propia página (botón de ayuda).
 
