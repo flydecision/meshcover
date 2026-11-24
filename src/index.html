@@ -10,28 +10,28 @@
   * { box-sizing: border-box; }
   body { font-family: system-ui, sans-serif; background:#0e1116; color:#e6e9ee; margin:0; padding:14px; max-width:760px; margin-inline:auto; }
   h1 { font-size:1.15rem; margin:0 0 4px; }
-  .sub { color:#9aa4b2; font-size:.82rem; margin-bottom:12px; }
+  .sub { color:#9aa4b2; font-size:16px; margin-bottom:12px; }
   .btns { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0; }
-  button { background:#23456e; color:#fff; border:0; border-radius:10px; padding:11px 14px; font-size:.92rem; font-weight:600; }
+  button { background:#23456e; color:#fff; border:0; border-radius:10px; padding:11px 14px; font-size:16px; font-weight:600; }
   button.sec { background:#2a3340; }
   button.danger { background:#5e2620; }
   button:disabled { opacity:.45; }
-  .btns button { box-sizing:border-box; height:29px; padding:0 11px; font-size:.82rem; display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
+  .btns button { box-sizing:border-box; height:29px; padding:0 11px; font-size:16px; display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
   .btns button[hidden] { display:none; }
   #toast { position:fixed; left:50%; bottom:18px; transform:translateX(-50%); z-index:2000; max-width:min(92vw,560px);
-    background:#5e2620; color:#fff; border-radius:10px; padding:10px 14px; font-size:.85rem; box-shadow:0 4px 18px #0008; white-space:pre-wrap; }
+    background:#5e2620; color:#fff; border-radius:10px; padding:10px 14px; font-size:16px; box-shadow:0 4px 18px #0008; white-space:pre-wrap; }
   #toast[hidden] { display:none; }
   .colon::after { content:":"; }
   .hdr .tools { display:flex; align-items:center; gap:8px; flex:none; }
-  #selLang { padding:6px 8px; font-size:.82rem; border-radius:8px; }
+  #selLang { padding:6px 8px; font-size:16px; border-radius:8px; }
   /* el mapa usa todo el ancho de la ventana (16 px de margen a cada lado) */
   #mapBox:not(.max) { margin-inline:calc((100% - (var(--vw, 100%) - 32px)) / 2); }
   .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin:8px 0 12px; }
   .stat { background:#1a2029; border:1px solid #2a3340; border-radius:10px; padding:0; text-align:center; }
-  .stat .v { font-size:1.05rem; font-weight:700; font-variant-numeric:tabular-nums; }
-  .stat .l { font-size:.66rem; color:#9aa4b2; margin-top:2px; }
+  .stat .v { font-size:16px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .stat .l { font-size:16px; color:#9aa4b2; margin-top:2px; }
   .tblwrap { overflow-x:auto; border:1px solid #2a3340; border-radius:10px; }
-  table { border-collapse:collapse; width:100%; font-size:.78rem; font-variant-numeric:tabular-nums; }
+  table { border-collapse:collapse; width:100%; font-size:16px; font-variant-numeric:tabular-nums; }
   th, td { padding:5px 8px; text-align:right; border-bottom:1px solid #232b36; white-space:nowrap; }
   th { background:#1a2029; color:#9aa4b2; position:sticky; top:0; text-align:left; }
   td.tl { text-align:left; }
@@ -52,18 +52,17 @@
   .tblwrap::-webkit-scrollbar-thumb { background:#4a5668; border-radius:6px; border:2px solid #1a2029; }
   tr.new td { animation: fadein .8s; }
   @keyframes fadein { from { background:#23456e55; } to { background:transparent; } }
-  details { background:#1a2029; border:1px solid #2a3340; border-radius:10px; padding:10px 12px; margin:10px 0; font-size:.85rem; }
+  details { background:#1a2029; border:1px solid #2a3340; border-radius:10px; padding:10px 12px; margin:10px 0; font-size:16px; }
   summary { cursor:pointer; font-weight:700; }
   details ol, details ul { margin:8px 0 4px 18px; padding:0; }
   details li { margin:6px 0; }
-  code { background:#242c38; border-radius:4px; padding:1px 5px; font-size:.8em; }
-  .foot { color:#6d7684; font-size:.72rem; margin-top:14px; line-height:1.5; }
-  .filt { display:flex; align-items:center; gap:8px; margin:6px 0 10px; font-size:.85rem; color:#9aa4b2; }
-  select { background:#1a2029; color:#e6e9ee; border:1px solid #2a3340; border-radius:8px; padding:8px; font-size:.88rem; flex:1; min-width:0; }
+  code { background:#242c38; border-radius:4px; padding:1px 5px; font-size:16px; }
+  .foot { color:#6d7684; font-size:16px; margin-top:14px; line-height:1.5; }
+  .filt { display:flex; align-items:center; gap:8px; margin:6px 0 10px; font-size:16px; color:#9aa4b2; }
+  select { background:#1a2029; color:#e6e9ee; border:1px solid #2a3340; border-radius:8px; padding:8px; font-size:16px; flex:1; min-width:0; }
   #mapBox { margin:10px 0; }
   #map { height:62vh; min-height:320px; border:1px solid #2a3340; border-radius:10px; background:#1a2029; }
-  #mapInfo { font-size:.8rem; color:#9aa4b2; margin:6px 0; }
-  .legend { display:flex; flex-wrap:wrap; gap:10px; font-size:.75rem; color:#c9d1db; margin:6px 0; }
+  .legend { display:flex; flex-wrap:wrap; gap:10px; font-size:16px; color:#c9d1db; margin:6px 0; }
   .relay-sq { background:#000; border:2px solid #fff; box-sizing:border-box; box-shadow:0 0 0 1px #000a; }
   .legend i { display:inline-block; width:11px; height:11px; border-radius:50%; margin-right:4px; vertical-align:-1px; border:1px solid #0008; }
   .hdr { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; }
@@ -72,37 +71,37 @@
             font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
             font-size:1.125rem; font-weight:600; }
   .hdr .logo { width:44px; height:44px; flex:none; }
-  #btnHelp { width:40px; height:40px; padding:0; border-radius:50%; font-size:1.1rem; flex:none; }
+  #btnHelp { width:40px; height:40px; padding:0; border-radius:50%; font-size:16px; flex:none; }
   /* ayuda: ventana con páginas, como máximo la altura disponible */
   .modal { position:fixed; inset:0; z-index:3000; background:#000b; display:flex; align-items:center; justify-content:center; padding:12px; }
   .modal[hidden] { display:none; }
   .sheet { background:#1a2029; border:1px solid #2a3340; border-radius:14px; width:100%; max-width:640px;
            max-height:calc(100vh - 24px); max-height:calc(100dvh - 24px); display:flex; flex-direction:column; overflow:hidden; }
   .mhead { display:flex; align-items:center; justify-content:space-between; padding:10px 12px 6px 14px; }
-  .mhead b { font-size:1rem; }
+  .mhead b { font-size:16px; }
   .mhead button { width:38px; height:38px; padding:0; border-radius:50%; }
   .tabs { display:flex; gap:6px; padding:0 12px 8px; overflow-x:auto; border-bottom:1px solid #2a3340; flex:none; }
-  .tabs button { padding:7px 11px; font-size:.8rem; border-radius:999px; background:#2a3340; white-space:nowrap; }
+  .tabs button { padding:7px 11px; font-size:16px; border-radius:999px; background:#2a3340; white-space:nowrap; }
   .tabs button.on { background:#23456e; }
-  .mbody { overflow-y:auto; padding:12px 14px; font-size:.85rem; line-height:1.5; flex:1; min-height:0; overscroll-behavior:contain; }
-  .mbody h3 { font-size:.9rem; margin:14px 0 6px; }
+  .mbody { overflow-y:auto; padding:12px 14px; font-size:16px; line-height:1.5; flex:1; min-height:0; overscroll-behavior:contain; }
+  .mbody h3 { font-size:16px; margin:14px 0 6px; }
   .mbody h3:first-child { margin-top:0; }
   .mbody ol, .mbody ul { margin:6px 0 4px 18px; padding:0; }
   .mbody li { margin:5px 0; }
   .mfoot { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 12px; border-top:1px solid #2a3340; flex:none; }
-  .mfoot span { color:#9aa4b2; font-size:.8rem; }
-  .mfoot button { padding:9px 12px; font-size:.85rem; }
+  .mfoot span { color:#9aa4b2; font-size:16px; }
+  .mfoot button { padding:9px 12px; font-size:16px; }
   .page[hidden] { display:none; }
   button.on { background:#1f6b45; }
   /* mapa maximizado */
   #mapBox.max { position:fixed; inset:0; z-index:2000; margin:0; background:#0e1116; display:flex; flex-direction:column;
                 padding:8px 8px calc(8px + env(safe-area-inset-bottom)); }
   #mapBox.max #map { flex:1; height:auto; min-height:0; }
-  #mapBox.max #mapInfo, #mapBox.max .legend { margin:4px 2px; }
+  #mapBox.max .legend { margin:4px 2px; }
   #mapBox.max .btns { margin:6px 0 0; }
   body.noscroll { overflow:hidden; }
-  .mapopts { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:0 0 6px; font-size:.82rem; color:#9aa4b2; }
-  .mapopts select { flex:none; padding:6px 8px; font-size:.82rem; }
+  .mapopts { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:0 0 6px; font-size:16px; color:#9aa4b2; }
+  .mapopts select { flex:none; padding:6px 8px; font-size:16px; }
   .filt input[type=range] { flex:1; min-width:90px; accent-color:#2f7df6; }
   .filt .hv { color:#e6e9ee; font-weight:700; min-width:1.2em; text-align:center; }
   /* Deslizador doble (mínimo y máximo de saltos): dos «range» superpuestos */
@@ -111,10 +110,10 @@
   #hopsVal { min-width:2.4em; }
   .filt.nodesel { display:inline-flex; margin:0; gap:6px; flex:2 1 200px; min-width:0; }
   .filt.nodesel select { flex:1 1 auto; min-width:0; width:100%; padding:5px 8px; height:29px; box-sizing:border-box; }
-  .filt.hops { display:inline-flex; margin:0; gap:6px; flex:1 1 100px; min-width:0; max-width:280px; }
+  .filt.hops { display:inline-flex; margin:0; gap:6px; flex:1 1 100px; min-width:max-content; max-width:280px; }
   .filt.hops .dual { min-width:60px; }
   @media (max-width:380px) { .seg button { padding:0 7px; } .filt.hops { gap:4px; } .filt.hops .lbl { display:none; } }
-  .filt .dual input[type=range] { position:absolute; left:0; top:0; width:100%; height:29px; margin:0; background:none;
+  .filt .dual input[type=range] { position:absolute; left:0; top:0; width:100%; min-width:0; height:29px; margin:0; background:none;
     pointer-events:none; -webkit-appearance:none; appearance:none; }
   .filt .dual input[type=range]::-webkit-slider-runnable-track { background:none; }
   .filt .dual input[type=range]::-moz-range-track { background:none; }
@@ -127,7 +126,7 @@
   .filt .dual-track { left:8px; right:8px; background:#3a4150; }
   .filt .dual-fill { background:#2f7df6; }
   .seg { display:inline-flex; border-radius:10px; overflow:hidden; border:1px solid #2a3340; }
-  .seg button { box-sizing:border-box; height:27px; display:inline-flex; align-items:center; gap:5px; border-radius:0; padding:0 11px; font-size:.82rem; background:#1a2029; }
+  .seg button { box-sizing:border-box; height:27px; display:inline-flex; align-items:center; gap:5px; border-radius:0; padding:0 11px; font-size:16px; background:#1a2029; }
   .seg button.on { background:#23456e; }
   #cellWrap { display:inline-flex; align-items:center; gap:6px; }
   #cellWrap[hidden] { display:none; }
@@ -136,9 +135,10 @@
   .mapbtns { margin:6px 0; }
   .leaflet-control-layers-toggle, .leaflet-touch .leaflet-control-layers-toggle { width:30px !important; height:30px !important; background-size:18px 18px; background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMjIyIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0xMiAzIDIgOGwxMCA1IDEwLTV6Ii8+PHBhdGggZD0ibTIgMTIuNSAxMCA1IDEwLTUiLz48cGF0aCBkPSJtMiAxNyAxMCA1IDEwLTUiLz48L3N2Zz4=") !important; }
   .leaflet-touch .leaflet-control-layers { border:2px solid rgba(0,0,0,.2); }
-  .leaflet-control-layers-expanded { font-size:.8rem; }
+  .leaflet-control-layers-expanded { font-size:16px; }
   .leaflet-control-max a { display:flex !important; align-items:center; justify-content:center; color:#222 !important; }
-  .leaflet-popup-content { font-size:.8rem; line-height:1.45; color:#111; }
+  #map.leaflet-container, #map .leaflet-control-scale-line, #map .leaflet-control-attribution { font-size:16px; }
+  .leaflet-popup-content { font-size:16px; line-height:1.45; color:#111; }
 </style>
 </head>
 <body>
@@ -187,7 +187,6 @@
     <span id="lgRelay" hidden></span>
     <span>📡 <span data-i18n="nodeIcon">Node</span></span>
   </div>
-  <div id="mapInfo"></div>
 </div>
 
 <div class="stats">
@@ -392,7 +391,7 @@ const I18N = {
     thDate: "Date and time", thType: "Type",
     tabWhat: "What for", tabHow: "How to use", tabFix: "Troubleshooting", prev: "Previous", next: "Next",
     packets: n => n === 1 ? "packet" : "packets",
-    offline: "no connection", mapLoading: "Loading map…",
+    offline: "no connection",
     mapUnavailable: m => "Map not available (" + m + "): an internet connection is needed to load it. It will appear when the connection is back.",
     layer_topo: "ESRI topographic", layer_sat: "ESRI satellite imagery", layer_otm: "OpenTopoMap topographic",
     layer_osm: "OpenStreetMap classic", layer_relief: "High-resolution hillshade",
@@ -404,10 +403,6 @@ const I18N = {
     noRxText: "You passed here and no packet arrived.", expected: n => "About " + n + " packets were expected",
     gpsPos: "GPS position", lastHop: "from the last hop, not the origin node", distance: "distance",
     direct: "direct", nHops: n => n + (n === 1 ? " hop" : " hops"), routePos: "position of the route node",
-    emptyInfo: "Open the log exported from the Meshtastic app (.txt) with 📂 Open Logs.",
-    file: "File", nFiles: n => n + " files open", rxWithGps: n => n + " receptions with GPS",
-    cellsInfo: (c, e) => c + " cells, " + e + " with no reception", noGps: n => n + " without GPS (not drawn)",
-    nTracks: n => n + (n === 1 ? " track" : " tracks"),
     errEmpty: "the file is empty", errCsv: "it does not look like a CSV from this page",
     errNoPkts: "there are no packets received over the radio in the file", errGpx: "the file is not a valid GPX",
     errNoTrack: "it has no track points", errOpen: (f, m) => "Could not open " + f + ": " + m,
@@ -427,7 +422,7 @@ const I18N = {
     thDate: "Fecha y hora", thType: "Tipo",
     tabWhat: "Para qué", tabHow: "Cómo usar", tabFix: "Soluciones", prev: "Anterior", next: "Siguiente",
     packets: n => n === 1 ? "packet" : "packets",
-    offline: "sin conexión", mapLoading: "Cargando mapa…",
+    offline: "sin conexión",
     mapUnavailable: m => "Mapa no disponible (" + m + "): hace falta conexión a internet para cargarlo. Aparecerá solo al volver la conexión.",
     layer_topo: "Topográfico ESRI", layer_sat: "Imágenes satélite ESRI", layer_otm: "Topográfico OpenTopoMap",
     layer_osm: "OpenStreetMap clásico", layer_relief: "Relieve sombreado de alta resolución",
@@ -439,10 +434,6 @@ const I18N = {
     noRxText: "Pasaste por aquí y no llegó ningún paquete.", expected: n => "Se esperaban ≈ " + n + " paquetes",
     gpsPos: "Posición GPS", lastHop: "del último salto, no del nodo de origen", distance: "distancia",
     direct: "directo", nHops: n => n + (n === 1 ? " salto" : " saltos"), routePos: "posición del nodo de ruta",
-    emptyInfo: "Abre con 📂 Abrir registros el registro exportado de la app Meshtastic (.txt).",
-    file: "Archivo", nFiles: n => n + " archivos abiertos", rxWithGps: n => n + " recepciones con GPS",
-    cellsInfo: (c, e) => c + " celdas, " + e + " sin recepción", noGps: n => n + " sin GPS (no se pintan)",
-    nTracks: n => n + (n === 1 ? " recorrido" : " recorridos"),
     errEmpty: "el archivo está vacío", errCsv: "no parece un CSV de esta página",
     errNoPkts: "no hay paquetes recibidos por radio en el archivo", errGpx: "el archivo no es un GPX válido",
     errNoTrack: "no tiene puntos de recorrido", errOpen: (f, m) => "No se pudo abrir " + f + ": " + m,
@@ -647,14 +638,13 @@ async function startMap() {
   if (map || mapStarting) return;
   mapStarting = true;
   try { await initMap(); mapOn = true; mapDirty = true; drawMap(false); }
-  catch (e) { $("mapInfo").textContent = t("mapUnavailable", e.message); }
+  catch (e) { say(t("mapUnavailable", e.message)); }
   mapStarting = false;
 }
 window.addEventListener("online", startMap);
 setInterval(() => { if (!map) startMap(); }, 30000);
 async function initMap() {
   if (map) { setTimeout(() => map.invalidateSize(), 50); return; }
-  $("mapInfo").textContent = t("mapLoading");
   await loadLeaflet();
   installSmoothWheelZoom();
   map = L.map("map", {
@@ -989,14 +979,8 @@ function drawMap(fit, fromZoom) {
       .addTo(mapLayer);
   }
 
-  if (!fileRows && !fileTracks.length) { $("mapInfo").textContent = t("emptyInfo"); $("lgRelay").hidden = maxHops === 0; return; }
-  const src = fileNames.length === 1 ? t("file") + ": " + fileNames[0] : t("nFiles", fileNames.length);
-  const info = [src, t("rxWithGps", n)];
-  if (grid) info.push(t("cellsInfo", nCells, nEmpty));
-  if (sinGps) info.push(t("noGps", sinGps));
+  if (!fileRows && !fileTracks.length) { $("lgRelay").hidden = maxHops === 0; return; }
   $("lgRelay").hidden = maxHops === 0;
-  if (fileTracks.length) info.push(t("nTracks", fileTracks.length));
-  $("mapInfo").textContent = info.join(" · ");
 
   if (pts.length && (fit || !mapFitted)) {
     if (pts.length === 1) map.flyTo(pts[0], 15, { duration: 0.8 });
