@@ -49,6 +49,7 @@
   #map { height:62vh; min-height:320px; border:1px solid #2a3340; border-radius:10px; background:#1a2029; }
   #mapInfo { font-size:.8rem; color:#9aa4b2; margin:6px 0; }
   .legend { display:flex; flex-wrap:wrap; gap:10px; font-size:.75rem; color:#c9d1db; margin:6px 0; }
+  .relay-sq { background:#000; border:2px solid #fff; box-sizing:border-box; box-shadow:0 0 0 1px #000a; }
   .legend i { display:inline-block; width:11px; height:11px; border-radius:50%; margin-right:4px; vertical-align:-1px; border:1px solid #0008; }
   .hdr { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; }
   .hdr h1 { margin:0; display:flex; align-items:center; gap:10px;
@@ -182,7 +183,6 @@
       <button id="vGrid" title="Ver la cobertura por celdas">🔳 Cuadrícula</button>
     </span>
     <span id="cellWrap" hidden>Celda: <input type="range" id="rngCell" min="0" max="4" step="1" value="2" aria-label="Tamaño de celda"><b id="cellVal">250 m</b></span>
-    Track: <select id="selTrack"><option value="movil">Móvil</option><option value="nodo">Nodo</option></select>
   </div>
   <div class="btns mapbtns">
     <button id="btnOpen" class="sec" title="Abrir CSV y/o GPX en el mapa">📂 Abrir</button>
@@ -201,7 +201,7 @@
     <span><i style="background:#2f7df6;border-radius:2px;height:4px;width:16px;vertical-align:3px;border:0"></i>Track</span>
     <span id="lgNone" hidden><i style="background:#2b2f36;border-radius:2px;border:1px solid #d7352b"></i>No info</span>
     <span id="lgImp" hidden><i style="background:#b45cf0;border-radius:2px;height:4px;width:16px;vertical-align:3px;border:0"></i>track importado</span>
-    <span id="lgRelay" hidden><i style="background:#9acd32;border:1.5px dashed #fff"></i>llegó por otro nodo (saltos ≥ 1)</span>
+    <span id="lgRelay" hidden><i style="background:#000;border:1.5px solid #fff;border-radius:1px"></i>llegó por otro nodo (saltos ≥ 1, sin SNR útil)</span>
     <span><i style="background:#2f7df6;border:2px solid #fff"></i>Mi posición</span>
     <span>📡 Nodo</span>
   </div>
@@ -276,8 +276,8 @@
       <h3>Controles</h3>
       <ul>
         <li><b>Nodo</b>: muestra solo los paquetes de un nodo (si hay varios cerca).</li>
-        <li><b>Saltos</b>: deslizador doble con mínimo y máximo. 0–0 = solo lo que llega <b>directo</b> de cada nodo, que es lo que mide su cobertura propia. Sube el máximo para ver también lo que llega repetido por otros nodos, o sube el mínimo para ver <b>solo</b> lo repetido.</li>
-        <li><b>Track: Móvil / Nodo</b>: recorrido según el GPS del móvil (normal) o según la posición del nodo de ruta.</li>
+        <li><b>Saltos</b>: deslizador doble con mínimo y máximo. 0–0 = solo lo que llega <b>directo</b> de cada nodo, que es lo que mide su cobertura propia. Sube el máximo para ver también lo que llega repetido por otros nodos, o sube el mínimo para ver <b>solo</b> lo repetido. Lo repetido sale como <b>cuadrado negro</b>: su SNR es el del último salto (el nodo que lo repitió), no el del nodo fijo, así que no dice nada de la cobertura de este.</li>
+        <li><b>Track</b> (línea azul): recorrido del GPS del móvil; si el móvil no tiene GPS, se usa la posición del nodo de ruta. Se elige solo.</li>
         <li><b>🗑 Limpiar</b>: deja el mapa vacío (avisa si hay registros sin guardar).</li>
         <li>En el mapa: capas (mapa topográfico, satélite, relieve…), ⛶ pantalla completa y ⌖ ir a tu posición.</li>
       </ul>
@@ -771,11 +771,12 @@ const LS_TRACK = "rangetest_track_v1";
 const LS_NODETRACK = "rangetest_nodetrack_v1";
 st.track = [];          // recorrido del móvil [{ms, lat, lon}]
 st.nodeTrack = [];      // recorrido del nodo de ruta (sus posiciones) [{ms, lat, lon}]
-function liveTrack() { return trackSrc === "nodo" ? st.nodeTrack : st.track; }
+// track dibujado: el del GPS del móvil; si tiene menos puntos que el del nodo de ruta, el del nodo
+function liveTrackIsNode() { return st.nodeTrack.length > st.track.length; }
+function liveTrack() { return liveTrackIsNode() ? st.nodeTrack : st.track; }
 let selFrom = "";       // filtro de nodo ("" = todos)
 let maxHops = 0;        // saltos máximos mostrados (0 = solo directos)
 let minHops = 0;        // saltos mínimos mostrados
-let trackSrc = "movil"; // fuente del track dibujado: "movil" | "nodo"
 let lastMapSig = "";
 // sin dato de saltos (firmware antiguo) se muestra siempre
 function passHops(r) {
@@ -1029,7 +1030,7 @@ function render() {
   $("dbgList").textContent = dbg.join("\n");
   // solo se redibuja el mapa si cambian los datos (si no, se cerraría el popup abierto)
   const sig = [rows.length, lastR ? lastR.ms : 0, liveTrack().length, fileRows ? fileRows.length : 0,
-               fileTracks.length, selFrom, minHops, maxHops, mapView, cellSize, trackSrc].join("|");
+               fileTracks.length, selFrom, minHops, maxHops, mapView, cellSize].join("|");
   if (sig !== lastMapSig) { lastMapSig = sig; mapDirty = true; }
   if (map) drawMap(false);
 }
@@ -1214,19 +1215,18 @@ const LEAFLET_SRC = [
 let map = null, mapLayer = null, mapOn = false, mapDirty = true, mapFitted = false;
 let fileRows = null, fileNames = [], fileTracks = [];
 let mapView = "dots", cellSize = 250, autoFollow = false, lastFollow = null;
-function saveMapPrefs() { try { localStorage.setItem("rangetest_mapprefs_v1", JSON.stringify({ mapView, cellSize, trackSrc, minHops, maxHops, autoFollow })); } catch (e) {} }
+function saveMapPrefs() { try { localStorage.setItem("rangetest_mapprefs_v1", JSON.stringify({ mapView, cellSize, minHops, maxHops, autoFollow })); } catch (e) {} }
 function loadMapPrefs() {
   try {
     const p = JSON.parse(localStorage.getItem("rangetest_mapprefs_v1") || "{}");
     if (p.mapView === "grid" || p.mapView === "dots") mapView = p.mapView;
     if ([50, 100, 250, 500, 1000].includes(p.cellSize)) cellSize = p.cellSize;
-    if (p.trackSrc === "nodo" || p.trackSrc === "movil") trackSrc = p.trackSrc;
     if (typeof p.autoFollow === "boolean") autoFollow = p.autoFollow;
     if (Number.isInteger(p.maxHops) && p.maxHops >= 0 && p.maxHops <= 7) maxHops = p.maxHops;
     if (Number.isInteger(p.minHops) && p.minHops >= 0 && p.minHops <= maxHops) minHops = p.minHops;
   } catch (e) {}
   showView(); showCell();
-  $("selTrack").value = trackSrc; $("rngHops").value = String(maxHops); $("rngHopsMin").value = String(minHops); showHops();
+  $("rngHops").value = String(maxHops); $("rngHopsMin").value = String(minHops); showHops();
   $("btnAuto").classList.toggle("on", autoFollow);
 }
 const CELL_SIZES = [50, 100, 250, 500, 1000];
@@ -1423,6 +1423,10 @@ function typicalInterval(rows) {
   gaps.sort((a, b) => a - b);
   return gaps[Math.floor(gaps.length / 2)];
 }
+let RELAY_ICON = null;
+function relayIcon() { return RELAY_ICON || (RELAY_ICON = L.divIcon({ className: "relay-sq", iconSize: [12, 12], iconAnchor: [6, 6], popupAnchor: [0, -6] })); }
+// los cuadrados van debajo de los círculos de recepción directa, para no taparlos
+function relayPane() { if (!map.getPane("relay")) map.createPane("relay").style.zIndex = 390; return "relay"; }
 function median(a) { if (!a.length) return null; const b = a.slice().sort((x, y) => x - y), m = b.length >> 1; return b.length % 2 ? b[m] : (b[m - 1] + b[m]) / 2; }
 function fmtDur(ms) { const s = Math.round(ms / 1000); return s >= 60 ? Math.floor(s / 60) + " min " + (s % 60) + " s" : s + " s"; }
 
@@ -1546,11 +1550,13 @@ function drawMap(fit) {
     if (grid) continue;
     const relayed = r.hops != null && r.hops > 0;
     if (relayed) nRelay++;
-    L.circleMarker([r.rxLat, r.rxLon], relayed
-      ? { radius: 6, color: "#ffffff", weight: 1.5, dashArray: "3 3", fillColor: snrColor(r.snr), fillOpacity: .75 }
-      : { radius: 7, color: "#0b0d10", weight: 1, fillColor: snrColor(r.snr), fillOpacity: .9 })
+    // repetido por otro nodo: cuadrado negro (su SNR es del último salto, no del nodo de origen)
+    (relayed
+      ? L.marker([r.rxLat, r.rxLon], { icon: relayIcon(), keyboard: false, pane: relayPane() })
+      : L.circleMarker([r.rxLat, r.rxLon], { radius: 7, color: "#0b0d10", weight: 1, fillColor: snrColor(r.snr), fillOpacity: .9 }))
       .bindPopup("<b>" + RT.fmtDate(r.ms) + " " + RT.fmtTime(r.ms) + "</b><br>" +
-        "SNR " + fmtN(r.snr, 1) + " dB · RSSI " + fmtN(r.rssi) + " dBm<br>" +
+        (relayed ? "SNR " + fmtN(r.snr, 1) + " dB · RSSI " + fmtN(r.rssi) + " dBm <i>(del último salto, no del nodo de origen)</i><br>"
+                 : "SNR " + fmtN(r.snr, 1) + " dB · RSSI " + fmtN(r.rssi) + " dBm<br>") +
         "distancia " + (r.dist == null || isNaN(r.dist) ? "—" : (r.dist >= 1000 ? (r.dist / 1000).toFixed(2) + " km" : Math.round(r.dist) + " m")) +
         " · " + (r.hops == null ? "saltos —" : r.hops === 0 ? "directo" : r.hops + (r.hops === 1 ? " salto" : " saltos")) + "<br>" +
         esc(r.name || (r.from != null ? hexId(r.from) : "")) + " · " + esc(r.seq != null ? "seq " + r.seq : (r.kind || "")) +
@@ -1563,7 +1569,7 @@ function drawMap(fit) {
   if (grid) info.push(nCells + " celdas, " + nEmpty + " sin recepción");
   if (sinGps) info.push(sinGps + " sin GPS (no se pintan)");
   $("lgRelay").hidden = grid || maxHops === 0;
-  if (!fileRows) info.push("track del " + (trackSrc === "nodo" ? "nodo" : "móvil") + ": " + liveTrack().length + " puntos");
+  if (!fileRows) info.push("track del " + (liveTrackIsNode() ? "nodo" : "móvil") + ": " + liveTrack().length + " puntos");
   if (fileTracks.length) info.push(fileTracks.length + " track" + (fileTracks.length > 1 ? "s" : "") + " importado" + (fileTracks.length > 1 ? "s" : ""));
   $("mapInfo").textContent = info.join(" · ");
 
@@ -1992,7 +1998,6 @@ $("rngHopsMin").addEventListener("input", e => {
   minHops = Math.min(Number(e.target.value), maxHops); e.target.value = String(minHops);
   showHops(); saveMapPrefs(); mapDirty = true; dirtyRender = true;
 });
-$("selTrack").addEventListener("change", e => { trackSrc = e.target.value; saveMapPrefs(); dirtyRender = true; });
 loadMapPrefs();
 $("selFrom").addEventListener("change", e => { selFrom = e.target.value; mapDirty = true; mapFitted = false; dirtyRender = true; if (mapOn) setTimeout(() => drawMap(true), 0); });
 setDbgOrigin("permiso GPS: consultando…");
