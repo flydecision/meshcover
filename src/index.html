@@ -1630,6 +1630,9 @@ function debugTxtToRows(text) {
   if (!pkts.length) throw new Error("no hay paquetes recibidos por radio en el archivo");
   own.sort((a, b) => a.ms - b.ms); pkts.sort((a, b) => a.ms - b.ms);
   for (const t of senderTrack.values()) t.sort((a, b) => a.ms - b.ms);
+  // Solo cuenta como «nodo que se mueve» el emisor cuyas posiciones se separan más de 100 m
+  const moving = new Set();
+  for (const [n, t] of senderTrack) if (t.length >= 3 && t.some(q => RT.haversineM(t[0].lat, t[0].lon, q.lat, q.lon) > 100)) moving.add(n);
   // Posición en una lista a una hora dada: interpola entre dos puntos cercanos o usa el más próximo (< 2 min)
   const posAt = (list, ms) => {
     if (!list || !list.length) return null;
@@ -1650,7 +1653,7 @@ function debugTxtToRows(text) {
   for (const p of pkts) {
     if (p.pos) senderPos.set(p.from, p.pos);
     let sp = senderPos.get(p.from) || null, rx = posAt(own, p.ms), rxSrc = rx ? "nodo" : "";
-    if (!rx) {
+    if (!rx && moving.has(p.from)) {
       const e = posAt(senderTrack.get(p.from), p.ms);
       if (e) { rx = e; rxSrc = "emisor"; sp = null; }
     }
@@ -1666,11 +1669,7 @@ function debugTxtToRows(text) {
   // Recorrido: el del nodo propio; si no lo hay, el de los emisores que se han movido
   const tracks = [];
   if (own.length) tracks.push(own);
-  else for (const t of senderTrack.values()) {
-    if (t.length < 3) continue;
-    const moved = t.some(q => RT.haversineM(t[0].lat, t[0].lon, q.lat, q.lon) > 100);
-    if (moved) tracks.push(t);
-  }
+  else for (const n of moving) tracks.push(senderTrack.get(n));
   return { rows, own, tracks, myNum, myName: names.get(myNum) || "" };
 }
 async function openDebugTxt(file) {
