@@ -137,6 +137,8 @@ function rate_ok(string $dir): bool {
   $h = substr(hash('sha256', $salt . ($_SERVER['REMOTE_ADDR'] ?? '')), 0, 24);
   $f = "$dir/rate/$h";
   $now = time();
+  // borrar huellas de más de una hora, para no guardar nada más tiempo del necesario
+  foreach (glob("$dir/rate/*") ?: [] as $old) if (@filemtime($old) < $now - RATE_WINDOW) @unlink($old);
   $times = array_filter(array_map('intval', explode(',', (string)@file_get_contents($f))), fn($t) => $t > $now - RATE_WINDOW);
   if (count($times) >= RATE_MAX) return false;
   $times[] = $now;
