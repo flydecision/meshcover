@@ -1060,8 +1060,9 @@ function debugTxtToRows(text) {
   for (const m of text.matchAll(/relay_node=([^,(]*[^\s,(][^,(]*) \(!([0-9a-f]{8})\)/g)) {
     const n = hexNum(m[2]), nm = m[1].trim(); if (nm && !/^\d+$/.test(nm) && !names.has(n)) names.set(n, nm);
   }
-  // Cada bloque empieza por «24 Nov, 08:13 [Packet]»
-  const parts = text.split(/(?=\d{1,2} [^\s,]{3,5}, \d\d:\d\d \[Packet\])/);
+  // Cada bloque empieza por una línea con la fecha y «[Packet]»: «24 Nov, 08:13 [Packet]» o
+  // «Nov 24, 14:16 [Packet]» según el idioma del móvil
+  const parts = text.split(/(?=^[^\n]*\[Packet\][ \t\r]*$)/m);
   for (const b of parts) {
     const h = b.match(/MeshPacket\{from=-?\d+ \(!([0-9a-f]{8})\)([^\n]*)/);
     if (!h) continue;
