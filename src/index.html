@@ -929,14 +929,20 @@ function computeStats(rows) {
   return { lastSeq, missing: seqMiss + timeMiss, duplicates: seqDup };
 }
 function refreshFromSelect() {
-  const sel = $("selFrom"), seen = new Map();
-  for (const r of st.rows) if (r.from !== null && r.from !== undefined && !seen.has(r.from)) seen.set(r.from, r.name || "");
-  for (const r of st.rows) if (r.name && seen.get(r.from) === "") seen.set(r.from, r.name);
-  const want = ["", ...seen.keys()].map(String).join("|");
+  // Nodos de lo recibido en vivo y de los archivos abiertos (CSV o registro de la app), los más oídos primero
+  const sel = $("selFrom"), seen = new Map(), count = new Map();
+  const all = fileRows ? st.rows.concat(fileRows) : st.rows;
+  for (const r of all) {
+    if (r.from === null || r.from === undefined) continue;
+    if (!seen.has(r.from) || (r.name && !seen.get(r.from))) seen.set(r.from, r.name || "");
+    count.set(r.from, (count.get(r.from) || 0) + 1);
+  }
+  const keys = [...seen.keys()].sort((a, b) => count.get(b) - count.get(a));
+  const want = ["", ...keys.map(k => k + ":" + count.get(k))].join("|");
   if (sel.dataset.keys === want) return;
   sel.dataset.keys = want;
   sel.innerHTML = '<option value="">Todos los nodos</option>' +
-    [...seen.entries()].map(([n, name]) => '<option value="' + n + '">' + esc((name ? name + " " : "") + "(" + hexId(n) + ")") + "</option>").join("");
+    keys.map(n => { const name = seen.get(n); return '<option value="' + n + '">' + esc((name ? name + " " : "") + "(" + hexId(n) + ") · " + count.get(n)) + "</option>"; }).join("");
   sel.value = seen.has(Number(selFrom)) ? selFrom : "";
   if (sel.value !== selFrom) { selFrom = sel.value; }
 }
@@ -1572,7 +1578,7 @@ async function openCsvFile(file) {
     const rows = csvToRows(await file.text());
     fileRows = (fileRows || []).concat(rows); fileNames.push(file.name);
     if (!map) await startMap();
-    mapDirty = true; drawMap(true);
+    mapDirty = true; drawMap(true); refreshFromSelect();
     say("Abierto " + file.name + " (" + rows.length + " filas). En el mapa: " + fileNames.length + " CSV, " + fileRows.length + " filas.");
   } catch (e) { say("No se pudo abrir " + file.name + ": " + e.message); }
 }
@@ -1655,7 +1661,7 @@ async function openDebugTxt(file) {
       fileTracks.push({ name: file.name, segs }); $("lgImp").hidden = false;
     }
     if (!map) await startMap();
-    mapDirty = true; drawMap(true);
+    mapDirty = true; drawMap(true); refreshFromSelect();
     const conPos = r.rows.filter(x => x.rxLat !== null).length;
     say("Abierto registro de la app " + file.name + ": " + r.rows.length + " paquetes por radio (" + conPos +
         " con tu posición), " + r.own.length + " puntos de tu recorrido" + (r.myName ? " (nodo " + r.myName + ")" : "") + ".");
