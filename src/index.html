@@ -100,7 +100,6 @@
   #mapBox.max #map { flex:1; height:auto; min-height:0; }
   #mapBox.max #mapInfo, #mapBox.max .legend { margin:4px 2px; }
   #mapBox.max .btns { margin:6px 0 0; }
-  #mapBox.max > .filt { margin:4px 0 6px; }
   body.noscroll { overflow:hidden; }
   .mapopts { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:0 0 6px; font-size:.82rem; color:#9aa4b2; }
   .mapopts select { flex:none; padding:6px 8px; font-size:.82rem; }
@@ -110,6 +109,8 @@
   .filt .dual { position:relative; flex:1 1 140px; min-width:80px; max-width:170px; height:29px; }
   /* anchos fijos para que el deslizador no cambie de tamaño mientras se arrastra */
   #hopsVal { min-width:2.4em; }
+  .filt.nodesel { display:inline-flex; margin:0; gap:6px; flex:2 1 200px; min-width:0; }
+  .filt.nodesel select { flex:1 1 auto; min-width:0; width:100%; padding:5px 8px; height:29px; box-sizing:border-box; }
   .filt.hops { display:inline-flex; margin:0; gap:6px; flex:1 1 100px; min-width:0; max-width:280px; }
   .filt.hops .dual { min-width:60px; }
   @media (max-width:380px) { .seg button { padding:0 7px; } .filt.hops { gap:4px; } .filt.hops .lbl { display:none; } }
@@ -158,8 +159,8 @@
 <div id="toast" hidden role="alert"></div>
 
 <div id="mapBox">
-  <div class="filt"><span class="colon" data-i18n="node">Node</span> <select id="selFrom"><option value="" data-i18n="allNodes">All nodes</option></select></div>
   <div class="mapopts">
+    <span class="filt nodesel">📡 <span class="colon" data-i18n="node">Node</span> <select id="selFrom"><option value="" data-i18n="allNodes">All nodes</option></select></span>
     <span class="seg" role="group" data-i18n-aria="view">
       <button id="vDots" data-i18n-title="dotsTitle">🔵 <span data-i18n="dots">Dots</span></button>
       <button id="vGrid" data-i18n-title="gridTitle">🔳 <span data-i18n="grid">Grid</span></button>
@@ -800,6 +801,13 @@ function typicalInterval(rows) {
   return gaps[Math.floor(gaps.length / 2)];
 }
 let RELAY_ICON = null;
+// Hace cuánto: «-25 min», «-3:07» (h:mm) o «-2 d 3:07»
+function agoText(ms) {
+  const m = Math.max(0, Math.round((Date.now() - ms) / 60000));
+  if (m < 60) return "-" + m + " min";
+  const d = Math.floor(m / 1440), h = Math.floor(m % 1440 / 60), mm = String(m % 60).padStart(2, "0");
+  return "-" + (d ? d + " d " : "") + h + ":" + mm;
+}
 // Ficha del nodo emisor: nombre «corto - largo», id, última posición y resumen de lo recibido de él
 function nodePopup(r, rows) {
   const mine = rows.filter(x => x.from === r.from), direct = mine.filter(x => !(x.hops > 0));
@@ -807,10 +815,10 @@ function nodePopup(r, rows) {
   const dists = mine.map(x => x.dist).filter(v => v != null && !isNaN(v));
   const last = mine.filter(x => x.senderLat != null).reduce((a, x) => (!a || x.ms > a.ms) ? x : a, null) || r;
   const maxD = dists.length ? Math.max(...dists) : null;
-  return "<b>📡 " + t("nodeIcon") + ": " + esc(nodeName(r)) + "</b><br>" +
+  return '<div style="font-weight:700;margin-bottom:6px">📡 ' + t("nodeIcon") + ": " + esc(nodeName(r)) + "</div>" +
     "ID " + hexId(r.from) + "<br>" +
     t("lastPos") + ": " + last.senderLat.toFixed(5) + ", " + last.senderLon.toFixed(5) + "<br>" +
-    t("lastHeard") + ": " + RT.fmtDate(last.ms) + " " + RT.fmtTime(last.ms) + "<br>" +
+    t("lastHeard") + ": " + RT.fmtDate(last.ms) + " " + RT.fmtTime(last.ms) + " (" + agoText(last.ms) + ")<br>" +
     t("pktsRx") + ": " + mine.length + " (" + direct.length + " " + t("directPl") + ", " + (mine.length - direct.length) + " " + t("relayedWord") + ")" +
     (snrs.length ? "<br>" + t("medSnr", fmtN(median(snrs), 1), fmtN(Math.min(...snrs), 1), fmtN(Math.max(...snrs), 1)) + " <i>(" + t("directOnly") + ")</i>" : "") +
     (maxD != null ? "<br>" + t("maxDist") + ": " + (maxD >= 1000 ? (maxD / 1000).toFixed(2) + " km" : Math.round(maxD) + " m") : "");
