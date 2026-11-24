@@ -521,6 +521,12 @@
   }
 
   // -------------------------------------------------------------- geometria
+  // Nombre de nodo para mostrar: «corto - largo» (o el que haya)
+  function nodeLabel(shortName, longName) {
+    if (shortName && longName && shortName !== longName) return shortName + " - " + longName;
+    return longName || shortName || "";
+  }
+
   function haversineM(lat1, lon1, lat2, lon2) {
     var R = 6371000.0, toRad = Math.PI / 180;
     var dLat = (lat2 - lat1) * toRad, dLon = (lon2 - lon1) * toRad;
@@ -643,7 +649,7 @@
                ? haversineM(sender.lat, sender.lon, fix.lat, fix.lon) : null;
 
     var row = { ms: nowMs, seq: seq, from: pkt.from,
-                name: sender ? (sender.name || "") : "",
+                name: sender ? nodeLabel(sender.shortName, sender.name) : "",
                 senderLat: sender ? sender.lat : null,
                 senderLon: sender ? sender.lon : null,
                 rxLat: fix ? fix.lat : null, rxLon: fix ? fix.lon : null,
@@ -711,7 +717,7 @@
     decodeMyNodeInfo: decodeMyNodeInfo, seqFromPayload: seqFromPayload,
     isRangeTestPort: isRangeTestPort, isRangeTestPacket: isRangeTestPacket,
     isMeshRx: isMeshRx, portName: portName, CSV_HEADER: CSV_HEADER,
-    haversineM: haversineM, dbGet: dbGet, updateDbFromPacket: updateDbFromPacket,
+    haversineM: haversineM, nodeLabel: nodeLabel, dbGet: dbGet, updateDbFromPacket: updateDbFromPacket,
     newState: newState, processFromRadio: processFromRadio,
     rowsToCsv: rowsToCsv, rowToCsv: rowToCsv, fmtDate: fmtDate, fmtTime: fmtTime,
     toRadioWantConfig: toRadioWantConfig, toRadioDisconnect: toRadioDisconnect,
@@ -1596,7 +1602,7 @@ function debugTxtToRows(text) {
   let myNum = null;
   const mi = text.match(/my_node_num=(-?\d+)/); if (mi) myNum = Number(mi[1]) >>> 0;
   for (const m of text.matchAll(/User\{id=!([0-9a-f]{8}), long_name=([^,]*), short_name=([^,]*)/g)) {
-    const n = hexNum(m[1]); if (m[2] && !names.has(n)) names.set(n, m[2]);
+    const n = hexNum(m[1]), label = RT.nodeLabel(m[3].trim(), m[2].trim()); if (label && !names.has(n)) names.set(n, label);
   }
   // Nombres también del campo relay_node («relay_node=VI - AL2 (!98f15ecb)»), por si el registro es corto y no trae NodeInfo
   for (const m of text.matchAll(/relay_node=([^,(]*[^\s,(][^,(]*) \(!([0-9a-f]{8})\)/g)) {
