@@ -1411,6 +1411,7 @@ async function openDebugTxt(file) {
 // Formato «meshtastic-coverage» v1: solo celdas (centro, nº de paquetes y, por nodo oído directamente,
 // nº de paquetes, SNR y RSSI medianos y SF). Sin recorrido, sin horas y sin celdas cerca del inicio/fin.
 let expLayer = null;
+const EXPORT_CELL = 250;   // tamaño fijo de las celdas exportadas: así los archivos de todos encajan
 function privacyPoints() {
   // inicio y fin de cada tramo del recorrido (se corta en cada parada de más de 5 min: un registro de
   // varios días empieza y acaba muchas veces en casa); si no hay recorrido, la primera y la última recepción
@@ -1484,9 +1485,9 @@ function coverageCells(size, radius) {
 function privRadius() { return Number($("rngPriv").value); }
 function fmtM(m) { return m >= 1000 ? (m / 1000).toFixed(m % 1000 ? 2 : 0).replace(/\.?0+$/, "") + " km" : m + " m"; }
 function updateExport() {
-  const r = privRadius(), res = coverageCells(cellSize, r);
+  const r = privRadius(), res = coverageCells(EXPORT_CELL, r);
   $("privVal").textContent = fmtM(r);
-  $("expInfo").textContent = res.cells.length ? t("expInfo", res.cells.length, fmtM(cellSize), res.removed) : t("expEmpty");
+  $("expInfo").textContent = res.cells.length ? t("expInfo", res.cells.length, fmtM(EXPORT_CELL), res.removed) : t("expEmpty");
   $("btnExpGo").disabled = !res.cells.length;
   if (!map) return;
   if (!expLayer) expLayer = L.layerGroup();
@@ -1504,10 +1505,10 @@ function openExport() {
 }
 function closeExport() { $("expPanel").hidden = true; if (expLayer) expLayer.clearLayers(); }
 function downloadCoverage() {
-  const res = coverageCells(cellSize, privRadius());
+  const res = coverageCells(EXPORT_CELL, privRadius());
   if (!res.cells.length) return;
   const d = new Date(), p = n => String(n).padStart(2, "0");
-  const data = { format: "meshtastic-coverage", version: 1, cellSize, date: d.getFullYear() + "-" + p(d.getMonth() + 1), cells: res.cells };
+  const data = { format: "meshtastic-coverage", version: 1, cellSize: EXPORT_CELL, date: d.getFullYear() + "-" + p(d.getMonth() + 1), cells: res.cells };
   const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -1542,6 +1543,9 @@ async function importCoverage(file) {
         hops: 0, hopLimit: null, port: null, kind: "coverage", payload: "" });
     }
     fileRows = (fileRows || []).concat(rows); fileNames.push(file.name);
+    // con celdas más pequeñas que las del archivo, cada celda importada saldría como un cuadradito suelto
+    const fsz = Number(data.cellSize) || EXPORT_CELL;
+    if (cellSize < fsz && CELL_SIZES.includes(fsz)) { cellSize = fsz; showCell(); saveMapPrefs(); }
     if (!map) await startMap();
     mapDirty = true; refreshFromSelect(); dirtyRender = true; drawMap(true);
   } catch (e) { say(t("errOpen", file.name, e.message)); }
@@ -1672,7 +1676,7 @@ $("fileAny").addEventListener("change", async e => { const fs = [...(e.target.fi
 
 $("vDots").addEventListener("click", () => setView("dots"));
 $("vGrid").addEventListener("click", () => setView("grid"));
-$("rngCell").addEventListener("input", e => { cellSize = CELL_SIZES[Number(e.target.value)] || 250; showCell(); saveMapPrefs(); mapDirty = true; dirtyRender = true; if (!$("expPanel").hidden) updateExport(); });
+$("rngCell").addEventListener("input", e => { cellSize = CELL_SIZES[Number(e.target.value)] || 250; showCell(); saveMapPrefs(); mapDirty = true; dirtyRender = true; });
 function showHops() {
   $("hopsVal").textContent = minHops === maxHops ? String(maxHops) : minHops + "–" + maxHops;
   // franja azul entre los dos extremos (los 12 px son medio botón)
