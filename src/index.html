@@ -906,7 +906,9 @@ function fmtFecha(ms) { const d = new Date(ms), p = n => String(n).padStart(2, "
 function hexId(n) { return "!" + (n >>> 0).toString(16).padStart(8, "0"); }
 function rowsView() {
   const f = selFrom ? Number(selFrom) : null;
-  return st.rows.filter(r => (f === null || r.from === f) && passHops(r));
+  // Lo recibido en vivo más los archivos abiertos (CSV o registro de la app), en orden de hora
+  const src = fileRows ? st.rows.concat(fileRows).sort((a, b) => a.ms - b.ms) : st.rows;
+  return src.filter(r => (f === null || r.from === f) && passHops(r));
 }
 // Perdidos: por «seq» si lo hay; si no, por huecos de tiempo de cada emisor
 function computeStats(rows) {
@@ -1584,7 +1586,7 @@ async function openCsvFile(file) {
     const rows = csvToRows(await file.text());
     fileRows = (fileRows || []).concat(rows); fileNames.push(file.name);
     if (!map) await startMap();
-    mapDirty = true; drawMap(true); refreshFromSelect();
+    mapDirty = true; drawMap(true); refreshFromSelect(); dirtyRender = true;
     say("Abierto " + file.name + " (" + rows.length + " filas). En el mapa: " + fileNames.length + " CSV, " + fileRows.length + " filas.");
   } catch (e) { say("No se pudo abrir " + file.name + ": " + e.message); }
 }
@@ -1693,7 +1695,7 @@ async function openDebugTxt(file) {
       fileTracks.push({ name: file.name, segs }); $("lgImp").hidden = false;
     }
     if (!map) await startMap();
-    mapDirty = true; drawMap(true); refreshFromSelect();
+    mapDirty = true; drawMap(true); refreshFromSelect(); dirtyRender = true;
     const conPos = r.rows.filter(x => x.rxLat !== null).length;
     say("Abierto registro de la app " + file.name + ": " + r.rows.length + " paquetes por radio (" + conPos +
         " situados en el mapa), " + r.tracks.reduce((a, t) => a + t.length, 0) + " puntos de recorrido" + (r.myName ? ". Móvil conectado a " + r.myName : "") + ".");
