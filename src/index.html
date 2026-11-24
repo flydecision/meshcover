@@ -1586,11 +1586,15 @@ function isDebugTxt(head) { return /MeshPacket\{/.test(head) && /\[(Packet|MyInf
 function debugTxtToRows(text) {
   const hexNum = h => parseInt(h, 16) >>> 0;
   const kv = (k, s) => { const m = s.match(new RegExp("\\b" + k + "=(-?[\\w.]+)")); return m ? m[1] : null; };
-  const names = new Map(), senderPos = new Map(), own = [], pkts = [], seen = new Set();
+  const names = new Map(), senderPos = new Map(), senderTrack = new Map(), own = [], pkts = [], seen = new Set();
   let myNum = null;
   const mi = text.match(/my_node_num=(-?\d+)/); if (mi) myNum = Number(mi[1]) >>> 0;
   for (const m of text.matchAll(/User\{id=!([0-9a-f]{8}), long_name=([^,]*), short_name=([^,]*)/g)) {
     const n = hexNum(m[1]); if (m[2] && !names.has(n)) names.set(n, m[2]);
+  }
+  // Nombres también del campo relay_node («relay_node=VI - AL2 (!98f15ecb)»), por si el registro es corto y no trae NodeInfo
+  for (const m of text.matchAll(/relay_node=([^,(]*[^\s,(][^,(]*) \(!([0-9a-f]{8})\)/g)) {
+    const n = hexNum(m[2]), nm = m[1].trim(); if (nm && !/^\d+$/.test(nm) && !names.has(n)) names.set(n, nm);
   }
   // Cada bloque empieza por «24 Nov, 08:13 [Packet]»
   const parts = text.split(/(?=\d{1,2} [^\s,]{3,5}, \d\d:\d\d \[Packet\])/);
@@ -1614,16 +1618,24 @@ function debugTxtToRows(text) {
     const port = kv("portnum", b);
     const hs = Number(kv("hop_start", s)), hl = Number(kv("hop_limit", s));
     const rssi = kv("rx_rssi", s), snr = kv("rx_snr", s);
+    // Posiciones precisas del emisor (para cuando el que se mueve es el emisor y el móvil va con el nodo fijo)
+    const pb = Number(kv("precision_bits", b));
+    if (pos && (isNaN(pb) || pb >= 24)) {
+      if (!senderTrack.has(from)) senderTrack.set(from, []);
+      senderTrack.get(from).push({ ms, lat: pos.lat, lon: pos.lon, alt: null });
+    }
     pkts.push({ ms, from, pos, port, hops: (!isNaN(hs) && !isNaN(hl) && hs >= hl) ? hs - hl : null, hopLimit: isNaN(hl) ? null : hl,
                 snr: snr === null ? null : Number(snr), rssi: rssi === null ? null : Number(rssi) });
   }
   if (!pkts.length) throw new Error("no hay paquetes recibidos por radio en el archivo");
   own.sort((a, b) => a.ms - b.ms); pkts.sort((a, b) => a.ms - b.ms);
-  // Posición propia a una hora dada: interpola entre dos puntos cercanos o usa el más próximo (< 2 min)
-  const ownAt = ms => {
-    let lo = 0, hi = own.length;
-    while (lo < hi) { const mid = (lo + hi) >> 1; if (own[mid].ms < ms) lo = mid + 1; else hi = mid; }
-    const a = own[lo - 1], b = own[lo];
+  for (const t of senderTrack.values()) t.sort((a, b) => a.ms - b.ms);
+  // Posición en una lista a una hora dada: interpola entre dos puntos cercanos o usa el más próximo (< 2 min)
+  const posAt = (list, ms) => {
+    if (!list || !list.length) return null;
+    let lo = 0, hi = list.length;
+    while (lo < hi) { const mid = (lo + hi) >> 1; if (list[mid].ms < ms) lo = mid + 1; else hi = mid; }
+    const a = list[lo - 1], b = list[lo];
     if (a && b && b.ms - a.ms <= 180000) {
       const f = b.ms === a.ms ? 0 : (ms - a.ms) / (b.ms - a.ms);
       return { lat: a.lat + (b.lat - a.lat) * f, lon: a.lon + (b.lon - a.lon) * f, alt: a.alt };
@@ -1631,34 +1643,49 @@ function debugTxtToRows(text) {
     const c = [a, b].filter(p => p && Math.abs(p.ms - ms) <= 120000).sort((x, y) => Math.abs(x.ms - ms) - Math.abs(y.ms - ms))[0];
     return c || null;
   };
+  // Dos formas de salir a medir:
+  //  · el móvil va con el nodo que se mueve → el punto es tu posición (la del nodo propio);
+  //  · el móvil se queda con el nodo fijo → el punto es la posición que manda el nodo que se mueve.
   const rows = [];
   for (const p of pkts) {
     if (p.pos) senderPos.set(p.from, p.pos);
-    const sp = senderPos.get(p.from) || null, rx = ownAt(p.ms);
+    let sp = senderPos.get(p.from) || null, rx = posAt(own, p.ms), rxSrc = rx ? "nodo" : "";
+    if (!rx) {
+      const e = posAt(senderTrack.get(p.from), p.ms);
+      if (e) { rx = e; rxSrc = "emisor"; sp = null; }
+    }
     const DBG_KIND = { TEXT_MESSAGE_APP: "text", RANGE_TEST_APP: "rangetest" };
     const kind = DBG_KIND[p.port] || (p.port || "").replace(/_APP$/, "").toLowerCase();
     rows.push({ ms: p.ms, seq: null, from: p.from, name: names.get(p.from) || "",
       senderLat: sp ? sp.lat : null, senderLon: sp ? sp.lon : null,
       rxLat: rx ? rx.lat : null, rxLon: rx ? rx.lon : null, rxAlt: rx ? rx.alt : null, rxAcc: null,
-      rxSrc: rx ? "nodo" : "", snr: p.snr, rssi: p.rssi,
+      rxSrc, snr: p.snr, rssi: p.rssi,
       dist: (rx && sp) ? RT.haversineM(sp.lat, sp.lon, rx.lat, rx.lon) : null,
       hopLimit: p.hopLimit, hops: p.hops, port: null, kind: fixKind(kind), payload: "" });
   }
-  return { rows, own, myNum, myName: names.get(myNum) || "" };
+  // Recorrido: el del nodo propio; si no lo hay, el de los emisores que se han movido
+  const tracks = [];
+  if (own.length) tracks.push(own);
+  else for (const t of senderTrack.values()) {
+    if (t.length < 3) continue;
+    const moved = t.some(q => RT.haversineM(t[0].lat, t[0].lon, q.lat, q.lon) > 100);
+    if (moved) tracks.push(t);
+  }
+  return { rows, own, tracks, myNum, myName: names.get(myNum) || "" };
 }
 async function openDebugTxt(file) {
   try {
     const r = debugTxtToRows(await file.text());
     fileRows = (fileRows || []).concat(r.rows); fileNames.push(file.name);
-    if (r.own.length) {
-      const segs = trackSegments(r.own).map(seg => seg.map(p => ({ lat: p.lat, lon: p.lon, ms: p.ms })));
+    for (const t of r.tracks) {
+      const segs = trackSegments(t).map(seg => seg.map(p => ({ lat: p.lat, lon: p.lon, ms: p.ms })));
       fileTracks.push({ name: file.name, segs }); $("lgImp").hidden = false;
     }
     if (!map) await startMap();
     mapDirty = true; drawMap(true);
     const conPos = r.rows.filter(x => x.rxLat !== null).length;
     say("Abierto registro de la app " + file.name + ": " + r.rows.length + " paquetes por radio (" + conPos +
-        " con tu posición), " + r.own.length + " puntos de tu recorrido" + (r.myName ? " (nodo " + r.myName + ")" : "") + ".");
+        " situados en el mapa), " + r.tracks.reduce((a, t) => a + t.length, 0) + " puntos de recorrido" + (r.myName ? ". Móvil conectado a " + r.myName : "") + ".");
   } catch (e) { say("No se pudo abrir " + file.name + ": " + e.message); }
 }
 
