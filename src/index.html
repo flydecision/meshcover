@@ -123,6 +123,11 @@
 </div>
 
 
+<div class="btns">
+  <button id="btnOpen" title="Abrir el registro de paquetes exportado de la app Meshtastic (.txt), o CSV y GPX">📂 Abrir Registro Packets</button>
+  <button id="btnClear" class="sec" title="Quitar del mapa todo lo abierto">🗑 Limpiar</button>
+  <input type="file" id="fileAny" accept=".csv,.gpx,.txt,text/csv,text/plain,application/gpx+xml,application/xml,text/xml" multiple hidden>
+</div>
 <div id="msg"></div>
 
 <div class="stats">
@@ -138,7 +143,7 @@
   <span class="dual" id="hopsDual">
     <span class="dual-track"></span><span class="dual-fill" id="hopsFill"></span>
     <input type="range" id="rngHopsMin" min="0" max="7" step="1" value="0" aria-label="Saltos mínimos">
-    <input type="range" id="rngHops" min="0" max="7" step="1" value="0" aria-label="Saltos máximos">
+    <input type="range" id="rngHops" min="0" max="7" step="1" value="7" aria-label="Saltos máximos">
   </span>
   <span class="hint" id="hopsHint">solo directos</span>
 </div>
@@ -151,11 +156,6 @@
     </span>
     <span id="cellWrap" hidden>Celda: <input type="range" id="rngCell" min="0" max="4" step="1" value="2" aria-label="Tamaño de celda"><b id="cellVal">250 m</b></span>
   </div>
-  <div class="btns mapbtns">
-    <button id="btnOpen" class="sec" title="Abrir el registro de la app Meshtastic (.txt), o CSV y GPX">📂 Abrir</button>
-    <button id="btnClear" class="sec" title="Quitar del mapa todo lo abierto">🗑 Limpiar</button>
-    <input type="file" id="fileAny" accept=".csv,.gpx,.txt,text/csv,text/plain,application/gpx+xml,application/xml,text/xml" multiple hidden>
-  </div>
   <div id="map"></div>
   <div class="legend">
     <span><i style="background:#1fa64a"></i>SNR ≥ 5</span>
@@ -164,7 +164,7 @@
     <span><i style="background:#f07f2e"></i>−10 a −5</span>
     <span><i style="background:#d7352b"></i>&lt; −10</span>
     <span><i style="background:#2f7df6;border-radius:2px;height:4px;width:16px;vertical-align:3px;border:0"></i>Recorrido</span>
-    <span id="lgNone" hidden><i style="background:#2b2f36;border-radius:2px;border:1px solid #d7352b"></i>No info</span>
+    <span id="lgNone" hidden><i style="background:#000;border-radius:1px;border:1.5px solid #fff"></i>sin recepción</span>
     <span id="lgRelay" hidden><i style="background:#000;border:1.5px solid #fff;border-radius:1px"></i>llegó por otro nodo (saltos ≥ 1, sin SNR útil)</span>
     <span>📡 Nodo</span>
   </div>
@@ -204,7 +204,7 @@
       <h3>📊 Qué obtienes</h3>
       <ul>
         <li>Un punto por paquete recibido, de color según la señal: <b>verde</b> buena, <b>amarillo</b> justa, <b>rojo</b> al límite.</li>
-        <li>La vista <b>🔳 Cuadrícula</b>: la zona en celdas con la señal de cada una, y en gris con borde rojo las celdas por las que pasaste sin recibir nada. El color usa solo lo recibido en directo; una celda <b>negra con borde blanco</b> es que allí solo llegó lo repetido por otro nodo.</li>
+        <li>La vista <b>🔳 Cuadrícula</b>: la zona en celdas con la señal de cada una, y en <b>negro con borde blanco</b> las celdas por las que pasaste sin recibir nada. El color usa solo lo recibido en directo; una celda <b>gris con borde de color</b> es que allí solo llegó lo repetido por otro nodo (el borde es la señal del último salto).</li>
         <li>Puedes abrir varios registros a la vez (de varios días o de otras personas): se suman en el mapa.</li>
       </ul>
     </div>
@@ -222,13 +222,13 @@
       <h3>3. Al volver</h3>
       <ol>
         <li>En la app: Ajustes → panel de depuración → <b>exportar</b>. Mejor sin filtros.</li>
-        <li>Aquí, <b>📂 Abrir</b> y elige el <code>.txt</code>. También abre CSV y GPX de versiones anteriores de esta página.</li>
+        <li>Aquí, <b>📂 Abrir Registro Packets</b> y elige el <code>.txt</code>. También abre CSV y GPX de versiones anteriores de esta página.</li>
         <li>En <b>Nodo</b>, elige el nodo fijo y pulsa <b>🔳 Cuadrícula</b> para ver la cobertura por zonas.</li>
       </ol>
       <h3>Controles</h3>
       <ul>
         <li><b>Nodo</b>: muestra solo los paquetes de un nodo.</li>
-        <li><b>Saltos</b>: deslizador doble con mínimo y máximo. 0–0 = solo lo que llega <b>directo</b>, que es lo que mide la cobertura de cada nodo. Sube el máximo para ver también lo repetido por otros nodos, o el mínimo para ver <b>solo</b> lo repetido. Lo repetido sale como <b>cuadrado negro</b>: su SNR es el del último salto, no el del nodo de origen.</li>
+        <li><b>Saltos</b>: deslizador doble con mínimo y máximo. Al abrir la página empieza en 0–7 (todo). 0–0 = solo lo que llega <b>directo</b>, que es lo que mide la cobertura de cada nodo. Sube el máximo para ver también lo repetido por otros nodos, o el mínimo para ver <b>solo</b> lo repetido. Lo repetido sale como <b>cuadrado negro</b>: su SNR es el del último salto, no el del nodo de origen.</li>
         <li><b>🗑 Limpiar</b>: quita del mapa todo lo abierto.</li>
         <li>En el mapa: capas (topográfico, satélite, relieve…) y ⛶ pantalla completa.</li>
       </ul>
@@ -248,7 +248,7 @@
         <li>Con SF altos, envía con menos frecuencia: en Europa solo se puede transmitir el 10 % del tiempo.</li>
         <li>El nodo de ruta en <b>CLIENT_MUTE</b>, no TRACKER (TRACKER duerme y deja de escuchar).</li>
       </ul>
-      <h3>🔳 En la cuadrícula salen celdas grises sueltas</h3>
+      <h3>🔳 En la cuadrícula salen celdas negras sueltas</h3>
       <div>La celda es más pequeña que lo que avanzas entre dos paquetes: súbele el tamaño.</div>
     </div>
     </div>
@@ -293,7 +293,7 @@ let dirtyRender = true;
 // Versiones anteriores grababan en vivo y lo guardaban en el navegador: se libera ese espacio
 try { ["rangetest_rows_v1", "rangetest_track_v1", "rangetest_nodetrack_v1", "rangetest_savedcount_v1"].forEach(k => localStorage.removeItem(k)); } catch (e) {}
 let selFrom = "";       // filtro de nodo ("" = todos)
-let maxHops = 0;        // saltos máximos mostrados (0 = solo directos)
+let maxHops = 7;        // saltos máximos mostrados (al cargar: todos)
 let minHops = 0;        // saltos mínimos mostrados
 let lastMapSig = "";
 // sin dato de saltos (firmware antiguo) se muestra siempre
@@ -333,7 +333,7 @@ function refreshFromSelect() {
   if (sel.dataset.keys === want) return;
   sel.dataset.keys = want;
   sel.innerHTML = '<option value="">Todos los nodos</option>' +
-    keys.map(n => { const name = seen.get(n); return '<option value="' + n + '">' + esc((name ? name + " " : "") + "(" + hexId(n) + ") · " + count.get(n)) + "</option>"; }).join("");
+    keys.map(n => { const name = seen.get(n); return '<option value="' + n + '">' + esc((name ? name + " " : "") + "(" + hexId(n) + ") · " + count.get(n) + (count.get(n) === 1 ? " paquete" : " paquetes")) + "</option>"; }).join("");
   sel.value = seen.has(Number(selFrom)) ? selFrom : "";
   if (sel.value !== selFrom) { selFrom = sel.value; }
 }
@@ -395,14 +395,12 @@ const LEAFLET_SRC = [
 let map = null, mapLayer = null, mapOn = false, mapDirty = true, mapFitted = false;
 let fileRows = null, fileNames = [], fileTracks = [];
 let mapView = "dots", cellSize = 250;
-function saveMapPrefs() { try { localStorage.setItem("rangetest_mapprefs_v1", JSON.stringify({ mapView, cellSize, minHops, maxHops })); } catch (e) {} }
+function saveMapPrefs() { try { localStorage.setItem("rangetest_mapprefs_v1", JSON.stringify({ mapView, cellSize })); } catch (e) {} }
 function loadMapPrefs() {
   try {
     const p = JSON.parse(localStorage.getItem("rangetest_mapprefs_v1") || "{}");
     if (p.mapView === "grid" || p.mapView === "dots") mapView = p.mapView;
     if ([50, 100, 250, 500, 1000].includes(p.cellSize)) cellSize = p.cellSize;
-    if (Number.isInteger(p.maxHops) && p.maxHops >= 0 && p.maxHops <= 7) maxHops = p.maxHops;
-    if (Number.isInteger(p.minHops) && p.minHops >= 0 && p.minHops <= maxHops) minHops = p.minHops;
   } catch (e) {}
   showView(); showCell();
   $("rngHops").value = String(maxHops); $("rngHopsMin").value = String(minHops); showHops();
@@ -613,13 +611,13 @@ function buildGrid(rows, tracks, size) {
   const mLat = 111320, mLon = 111320 * Math.cos(latRef * Math.PI / 180);
   const key = (lat, lon) => Math.floor(lat * mLat / size) + ":" + Math.floor(lon * mLon / size);
   const cells = new Map();
-  const cell = k => { if (!cells.has(k)) cells.set(k, { k, snr: [], rssi: [], n: 0, nRelay: 0, ms: 0, visited: false }); return cells.get(k); };
+  const cell = k => { if (!cells.has(k)) cells.set(k, { k, snr: [], rssi: [], snrRelay: [], n: 0, nRelay: 0, ms: 0, visited: false }); return cells.get(k); };
   for (const r of rows) {
     if (r.rxLat == null || r.rxLon == null || isNaN(r.rxLat)) continue;
     const c = cell(key(r.rxLat, r.rxLon));
     c.n++; c.visited = true;
     // repetido por otro nodo: cuenta como recibido, pero su SNR/RSSI es del último salto y no entra en la mediana
-    if (r.hops != null && r.hops > 0) { c.nRelay++; continue; }
+    if (r.hops != null && r.hops > 0) { c.nRelay++; if (r.snr != null && !isNaN(r.snr)) c.snrRelay.push(r.snr); continue; }
     if (r.snr != null && !isNaN(r.snr)) c.snr.push(r.snr);
     if (r.rssi != null && !isNaN(r.rssi)) c.rssi.push(r.rssi);
   }
@@ -665,6 +663,9 @@ function drawMap(fit) {
   const grid = mapView === "grid";
   showView();
   $("lgNone").hidden = !grid;
+  $("lgRelay").innerHTML = grid
+    ? '<i style="background:#2b2f36;border-radius:1px;border:2.5px solid #9acd32"></i>solo llegó por otro nodo (borde = señal del último salto)'
+    : '<i style="background:#000;border:1.5px solid #fff;border-radius:1px"></i>llegó por otro nodo (saltos ≥ 1, sin SNR útil)';
 
   // cuadrícula (debajo de todo)
   let nCells = 0, nEmpty = 0;
@@ -678,16 +679,18 @@ function drawMap(fit) {
       const expected = (iv && c.ms) ? c.ms / iv : null;
       const pct = (expected && expected >= 1) ? Math.min(100, Math.round(100 * c.n / expected)) : null;
       const sorted = c.snr.slice().sort((a, b) => a - b);
+      // solo repetidos: gris con borde grueso del color de su señal (la del último salto)
+      // sin nada recibido: negra con borde blanco
       L.rectangle(c.bounds, onlyRelay
-        ? { color: "#ffffff", weight: 1, fillColor: "#000000", fillOpacity: .7 }
+        ? { color: snrColor(median(c.snrRelay)), weight: 3, fillColor: "#2b2f36", fillOpacity: .6 }
         : has
         ? { color: "#0b0d10", weight: .5, fillColor: snrColor(med), fillOpacity: .65 }
-        : { color: "#d7352b", weight: 1, fillColor: "#2b2f36", fillOpacity: .55 })
+        : { color: "#ffffff", weight: 1, fillColor: "#000000", fillOpacity: .7 })
         .bindPopup(has
           ? "<b>Celda de " + (cellSize >= 1000 ? cellSize / 1000 + " km" : cellSize + " m") + "</b><br>" +
             "Paquetes recibidos: " + c.n + (c.nRelay ? " (" + c.nRelay + " por otro nodo)" : "") + (pct !== null ? " · recepción ≈ " + pct + " %" : "") + "<br>" +
             (onlyRelay
-              ? "Solo llegaron repetidos por otro nodo: sin SNR útil del nodo de origen"
+              ? "Solo llegaron repetidos por otro nodo. SNR mediano del último salto: " + fmtN(median(c.snrRelay), 1) + " dB <i>(no es el del nodo de origen)</i>"
               : "SNR mediano " + fmtN(med, 1) + " dB (peor " + fmtN(sorted[0], 1) + ", mejor " + fmtN(sorted[sorted.length - 1], 1) + ")<br>" +
                 "RSSI mediano " + fmtN(median(c.rssi)) + " dBm" + (c.nRelay ? " <i>(solo directos)</i>" : "")) + (c.ms ? "<br>Tiempo en la celda: " + fmtDur(c.ms) : "")
           : "<b>Sin recepción</b><br>Pasaste por aquí y no llegó ningún paquete." + (c.ms ? "<br>Tiempo en la celda: " + fmtDur(c.ms) : "") +
@@ -739,7 +742,7 @@ function drawMap(fit) {
       .addTo(mapLayer);
   }
 
-  if (!fileRows && !fileTracks.length) { $("mapInfo").textContent = "Abre con 📂 Abrir el registro exportado de la app Meshtastic (.txt)."; $("lgRelay").hidden = maxHops === 0; return; }
+  if (!fileRows && !fileTracks.length) { $("mapInfo").textContent = "Abre con 📂 Abrir Registro Packets el registro exportado de la app Meshtastic (.txt)."; $("lgRelay").hidden = maxHops === 0; return; }
   const src = fileNames.length === 1 ? "Archivo: " + fileNames[0] : fileNames.length + " archivos abiertos";
   const info = [src, n + " recepciones con GPS"];
   if (grid) info.push(nCells + " celdas, " + nEmpty + " sin recepción");
