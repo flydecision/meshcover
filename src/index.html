@@ -127,7 +127,10 @@
   .exphead { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; }
   .exphead button { width:32px; height:32px; padding:0; border-radius:50%; flex:none; }
   .exprow { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin:10px 0 6px; }
-  .exprow input[type=range] { flex:1 1 140px; min-width:120px; max-width:320px; accent-color:#d7352b; }
+  .filt.privf { margin:0; flex:1 1 140px; min-width:120px; max-width:320px; }
+  .filt.privf .dual { max-width:none; }
+  #privFill { background:#d7352b; }
+  #privVal { color:#e6e9ee; min-width:3.6em; }
   #expInfo { color:#9aa4b2; }
   .exppanel a, #helpBody a { color:#7fb8ff; }
   .expbtns { margin-top:8px; display:flex; flex-wrap:wrap; gap:8px; }
@@ -218,7 +221,7 @@
   <div id="expPanel" class="exppanel" hidden>
     <div class="exphead"><b>📤 <span data-i18n="expTitle">Export anonymous coverage</span></b><button id="btnExpClose" class="sec" data-i18n-aria="close">✕</button></div>
     <div><span data-i18n="expWhat"></span> <a href="#" id="lnkPriv" data-i18n="expPrivLink">What is uploaded?</a></div>
-    <div class="exprow"><span data-i18n="expRadius">Remove around start and end</span> <input type="range" id="rngPriv" min="0" max="2000" step="50" value="300" data-i18n-aria="expRadius"> <b id="privVal">300 m</b></div>
+    <div class="exprow"><span data-i18n="expRadius">Remove around start and end</span> <span class="filt privf"><span class="dual single"><span class="dual-track"></span><span class="dual-fill" id="privFill"></span><input type="range" id="rngPriv" min="0" max="2000" step="50" value="300" data-i18n-aria="expRadius"></span></span> <b id="privVal">300 m</b></div>
     <div id="expInfo"></div>
     <div class="expbtns"><button id="btnExpGo">💾 <span data-i18n="expGo">Download file</span></button><button id="btnExpUp">☁️ <span data-i18n="expUp">Upload to community</span></button></div>
     <div id="expUpMsg" hidden></div>
@@ -522,7 +525,7 @@ const I18N = {
     errNoTrack: "it has no track points", errOpen: (f, m) => "Could not open " + f + ": " + m,
     nodeSearch: "Search node", noMatch: "No node matches",
     communityBtn: "Community map", communityTitle: "Add the shared coverage map uploaded by everyone",
-    expUp: "Upload to community", expPrivLink: "What exactly is saved or uploaded?", upConfirm: n => "Upload these " + n + " cells to the public community map? They are added for everyone and cannot be removed from the page.\n\nPrivacy: the uploaded file contains no personal data, but you can check it first by downloading it with the «Download file» button and opening it with any text editor, or by reviewing the open source code, yourself or with an AI, at https://github.com/flydecision/meshtastic",
+    expUp: "Upload to community", expPrivLink: "What exactly is saved or uploaded?", upConfirm: n => "Upload these " + n + " cells to the public community map? They are added for everyone.\n\nPrivacy: the uploaded file contains no personal data, but you can check it first by downloading it with the «Download file» button and opening it with any text editor, or by reviewing the open source code, yourself or with an AI, at https://github.com/flydecision/meshtastic",
     upOk: n => "✅ Uploaded: " + n + " cells added to the community map. Thanks!", upBusy: "Uploading…",
     upErr: m => "Could not upload (" + m + ").", upRate: "too many uploads from your connection, try again in an hour",
     commEmpty: "The community map is still empty.", commErr: m => "Could not load the community map (" + m + ").", commName: "Community map",
@@ -571,7 +574,7 @@ const I18N = {
     errNoTrack: "no tiene puntos de recorrido", errOpen: (f, m) => "No se pudo abrir " + f + ": " + m,
     nodeSearch: "Buscar nodo", noMatch: "Ningún nodo coincide",
     communityBtn: "Mapa comunitario", communityTitle: "Añadir el mapa de cobertura compartido que ha subido todo el mundo",
-    expUp: "Subir a la comunidad", expPrivLink: "¿Qué se guarda o sube exactamente?", upConfirm: n => "¿Subir estas " + n + " celdas al mapa comunitario público? Se suman para todos y no se pueden quitar desde la página.\n\nPrivacidad: el archivo que se sube no lleva ningún dato personal, pero puedes revisarlo antes descargándolo con el botón «Descargar archivo» y abriéndolo con cualquier editor de texto, o consultando el código abierto, tú mismo o con una IA, en https://github.com/flydecision/meshtastic",
+    expUp: "Subir a la comunidad", expPrivLink: "¿Qué se guarda o sube exactamente?", upConfirm: n => "¿Subir estas " + n + " celdas al mapa comunitario público? Se suman para todos.\n\nPrivacidad: el archivo que se sube no lleva ningún dato personal, pero puedes revisarlo antes descargándolo con el botón «Descargar archivo» y abriéndolo con cualquier editor de texto, o consultando el código abierto, tú mismo o con una IA, en https://github.com/flydecision/meshtastic",
     upOk: n => "✅ Subido: " + n + " celdas añadidas al mapa comunitario. ¡Gracias!", upBusy: "Subiendo…",
     upErr: m => "No se pudo subir (" + m + ").", upRate: "demasiadas subidas desde tu conexión, prueba dentro de una hora",
     commEmpty: "El mapa comunitario aún está vacío.", commErr: m => "No se pudo cargar el mapa comunitario (" + m + ").", commName: "Mapa comunitario",
@@ -1140,9 +1143,15 @@ function buildGrid(rows, tracks, size) {
     }
   }
   const out = [];
+  // vista previa de la exportación: sin las celdas que se recortan por privacidad
+  const cut = exportPreviewOn() ? privRadius() : 0, priv = cut > 0 ? privacyPoints() : [], half = size * Math.SQRT1_2;
   for (const c of cells.values()) {
     const [iy, ix] = c.k.split(":").map(Number);
     c.bounds = [[iy * size / mLat, ix * size / mLon], [(iy + 1) * size / mLat, (ix + 1) * size / mLon]];
+    if (cut > 0) {
+      const lat = (iy + .5) * size / mLat, lon = (ix + .5) * size / mLon;
+      if (priv.some(q => RT.haversineM(q.lat, q.lon, lat, lon) < cut + half)) continue;
+    }
     out.push(c);
   }
   return out;
@@ -1554,6 +1563,8 @@ function fmtM(m) { return m >= 1000 ? (m / 1000).toFixed(m % 1000 ? 2 : 0).repla
 function updateExport() {
   const r = privRadius(), res = coverageCells(EXPORT_CELL, r);
   $("privVal").textContent = fmtM(r);
+  $("privFill").style.left = "12px";
+  $("privFill").style.width = "calc((100% - 24px) * " + r / Number($("rngPriv").max) + ")";
   $("expInfo").textContent = res.cells.length ? t("expInfo", res.cells.length, fmtM(EXPORT_CELL), res.removed) : t("expEmpty");
   $("btnExpGo").disabled = $("btnExpUp").disabled = !res.cells.length;
   $("expUpMsg").hidden = true;
@@ -1562,16 +1573,33 @@ function updateExport() {
   expLayer.clearLayers(); expLayer.addTo(map);
   if (r > 0) for (const q of res.priv) L.circle([q.lat, q.lon], { radius: r, color: "#d7352b", weight: 2, dashArray: "6 6", fillColor: "#d7352b", fillOpacity: .18, interactive: false }).addTo(expLayer);
 }
+// Vista previa: mientras el panel está abierto el mapa muestra justo lo que se exporta
+// («Mejor señal de cualquier nodo», cuadrícula de 250 m, todos los saltos, sin las celdas recortadas).
+// Al cerrar se vuelve a lo que había.
+let expPreview = null;
+function exportPreviewOn() { return !!expPreview && !$("expPanel").hidden; }
 function openExport() {
   if (!(fileRows && fileRows.length) && !fileTracks.length && !fileVisited.length) { say(t("expNoData")); return; }
+  if (!expPreview) expPreview = { selFrom, cellSize, mapView, minHops, maxHops };
   $("expPanel").hidden = false;
+  if ([...$("selFrom").options].some(o => o.value === "h*")) selFrom = "h*";
+  cellSize = EXPORT_CELL; minHops = 0; maxHops = 7;
+  $("rngHopsMin").value = "0"; $("rngHops").value = "7"; showHops();
+  mapView = "grid"; showView(); showCell();
   updateExport();
-  // para ver qué se exporta, la vista de cuadrícula
-  if (mapView !== "grid") { setView("grid"); if (map) drawMap(false); }
+  mapDirty = true; mapFitted = true; dirtyRender = true; render(); if (map) drawMap(false);
   const pts = privacyPoints();
   if (map && pts.length && privRadius() > 0) map.flyToBounds(L.latLngBounds(pts.map(p => [p.lat, p.lon])).pad(0.5), { maxZoom: 15, duration: 0.6 });
 }
-function closeExport() { $("expPanel").hidden = true; if (expLayer) expLayer.clearLayers(); }
+function closeExport() {
+  $("expPanel").hidden = true; if (expLayer) expLayer.clearLayers();
+  if (!expPreview) return;
+  const p = expPreview; expPreview = null;
+  selFrom = p.selFrom; cellSize = p.cellSize; mapView = p.mapView; minHops = p.minHops; maxHops = p.maxHops;
+  $("rngHopsMin").value = String(minHops); $("rngHops").value = String(maxHops); showHops();
+  showView(); showCell();
+  mapDirty = true; mapFitted = true; dirtyRender = true; render(); if (map) drawMap(false);
+}
 function coverageData() {
   const res = coverageCells(EXPORT_CELL, privRadius());
   if (!res.cells.length) return null;
@@ -1764,7 +1792,7 @@ function closeHelp() {
 $("btnClear").addEventListener("click", clearAll);
 $("btnExport").addEventListener("click", () => $("expPanel").hidden ? openExport() : closeExport());
 $("btnExpClose").addEventListener("click", closeExport);
-$("rngPriv").addEventListener("input", updateExport);
+$("rngPriv").addEventListener("input", () => { updateExport(); mapDirty = true; if (map) drawMap(false); });
 $("btnExpGo").addEventListener("click", downloadCoverage);
 $("btnExpUp").addEventListener("click", uploadCoverage);
 $("btnCommunity").addEventListener("click", loadCommunity);
