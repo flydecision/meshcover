@@ -89,20 +89,21 @@
   .filt input[type=range] { flex:1; min-width:90px; accent-color:#2f7df6; }
   .filt .hv { color:#e6e9ee; font-weight:700; min-width:1.2em; text-align:center; }
   /* Deslizador doble (mínimo y máximo de saltos): dos «range» superpuestos */
-  .filt .dual { position:relative; flex:1 1 140px; min-width:80px; max-width:170px; height:24px; }
+  .filt .dual { position:relative; flex:1 1 140px; min-width:80px; max-width:170px; height:29px; }
   /* anchos fijos para que el deslizador no cambie de tamaño mientras se arrastra */
   #hopsVal { min-width:2.4em; }
   #hopsHint { flex:0 0 12.6em; white-space:nowrap; font-size:.78rem; }
-  .filt .dual input[type=range] { position:absolute; left:0; top:0; width:100%; height:24px; margin:0; background:none;
+  .filt .dual input[type=range] { position:absolute; left:0; top:0; width:100%; height:29px; margin:0; background:none;
     pointer-events:none; -webkit-appearance:none; appearance:none; }
   .filt .dual input[type=range]::-webkit-slider-runnable-track { background:none; }
   .filt .dual input[type=range]::-moz-range-track { background:none; }
-  .filt .dual input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; pointer-events:auto; width:20px; height:20px;
-    border-radius:50%; background:#2f7df6; border:2px solid #fff; cursor:pointer; margin-top:2px; }
-  .filt .dual input[type=range]::-moz-range-thumb { pointer-events:auto; width:16px; height:16px; border-radius:50%;
+  /* botones del deslizador: misma altura que «Puntos» / «Cuadrícula» (29 px) */
+  .filt .dual input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; pointer-events:auto; width:16px; height:29px;
+    border-radius:4px; background:#2f7df6; border:2px solid #fff; box-sizing:border-box; cursor:pointer; margin-top:0; }
+  .filt .dual input[type=range]::-moz-range-thumb { pointer-events:auto; width:12px; height:25px; border-radius:4px;
     background:#2f7df6; border:2px solid #fff; cursor:pointer; }
-  .filt .dual-track, .filt .dual-fill { position:absolute; top:10px; height:4px; border-radius:2px; }
-  .filt .dual-track { left:10px; right:10px; background:#3a4150; }
+  .filt .dual-track, .filt .dual-fill { position:absolute; top:12.5px; height:4px; border-radius:2px; }
+  .filt .dual-track { left:8px; right:8px; background:#3a4150; }
   .filt .dual-fill { background:#2f7df6; }
   .filt .hint { font-size:.75rem; color:#6d7684; }
   .seg { display:inline-flex; border-radius:10px; overflow:hidden; border:1px solid #2a3340; }
@@ -1973,10 +1974,10 @@ function showHops() {
   else if (minHops === maxHops) hint = "solo con " + maxHops + (maxHops === 1 ? " salto" : " saltos");
   else hint = "de " + minHops + " a " + maxHops + " saltos";
   $("hopsHint").textContent = hint;
-  // franja azul entre los dos extremos (los 10 px son medio botón)
+  // franja azul entre los dos extremos (los 8 px son medio botón)
   const f = $("hopsFill"), pct = v => v / 7;
-  f.style.left = "calc(10px + (100% - 20px) * " + pct(minHops) + ")";
-  f.style.width = "calc((100% - 20px) * " + (pct(maxHops) - pct(minHops)) + ")";
+  f.style.left = "calc(8px + (100% - 16px) * " + pct(minHops) + ")";
+  f.style.width = "calc((100% - 16px) * " + (pct(maxHops) - pct(minHops)) + ")";
   // el botón de mínimo encima cuando los dos están arriba del todo, para poder bajarlo
   $("rngHopsMin").style.zIndex = minHops >= 7 ? "3" : "1";
   $("rngHops").style.zIndex = "2";
