@@ -2,7 +2,7 @@
 // Mapa comunitario de cobertura: utilidades comunes a upload.php y community.php.
 // Los datos se guardan en ../data (fuera del alcance de la web gracias a su .htaccess).
 
-const BUILD = 2;                  // versión de community.json: al cambiarla se rehace
+const BUILD = 3;                  // versión de community.json: al cambiarla se rehace
 const CELL_SIZE = 250;            // tamaño fijo de celda de los archivos exportados por la página
 const MAX_BYTES = 524288;         // 512 KB por subida
 const MAX_CELLS = 20000;
@@ -71,18 +71,28 @@ function clean_coverage($data): array {
   return ['format' => 'meshtastic-coverage', 'version' => 1, 'cellSize' => CELL_SIZE, 'date' => $date, 'cells' => $out];
 }
 
-// Suma todas las subidas en un solo archivo: por celda se suman los paquetes y, por nodo,
-// SNR y RSSI se combinan con la media ponderada por nº de paquetes; el SF es el de más paquetes
-function build_community(string $dir): array {
+// Antigüedades que se pueden pedir (meses; 0 = todo)
+const AGES = [0, 3, 6, 12];
+
+// Suma las subidas en un solo archivo: por celda se suman los paquetes y, por nodo,
+// SNR y RSSI se combinan con la media ponderada por nº de paquetes; el SF es el de más paquetes.
+// Cada celda lleva también cuántas subidas la tocan (f) y el mes más reciente (last).
+// Con $months > 0 solo cuentan las subidas de los últimos $months meses (por el mes de los datos).
+function build_community(string $dir, int $months = 0): array {
   $cells = []; $files = 0;
+  $since = $months > 0 ? gmdate('Y-m', strtotime('first day of -' . ($months - 1) . ' month')) : '';
   foreach (glob("$dir/uploads/*.json") ?: [] as $f) {
     $d = json_decode((string)@file_get_contents($f), true);
     if (!is_array($d) || !is_array($d['cells'] ?? null)) continue;
+    $date = (string)($d['date'] ?? '');
+    if ($since !== '' && strcmp($date, $since) < 0) continue;
     $files++;
     foreach ($d['cells'] as $c) {
       $k = sprintf('%.6f,%.6f', $c['lat'], $c['lon']);
-      if (!isset($cells[$k])) $cells[$k] = ['lat' => $c['lat'], 'lon' => $c['lon'], 'n' => 0, 'nodes' => []];
+      if (!isset($cells[$k])) $cells[$k] = ['lat' => $c['lat'], 'lon' => $c['lon'], 'n' => 0, 'f' => 0, 'last' => '', 'nodes' => []];
       $cells[$k]['n'] += $c['n'];
+      $cells[$k]['f']++;
+      if (strcmp($date, $cells[$k]['last']) > 0) $cells[$k]['last'] = $date;
       foreach ($c['nodes'] as $o) {
         $id = $o['id'];
         if (!isset($cells[$k]['nodes'][$id])) $cells[$k]['nodes'][$id] = ['id' => $id, 'n' => 0, 'ws' => 0, 'snr' => 0, 'wr' => 0, 'rssi' => 0, 'sf' => []];
@@ -105,25 +115,27 @@ function build_community(string $dir): array {
       if ($a['sf']) { arsort($a['sf']); [$sf, $bw] = explode('|', (string)array_key_first($a['sf'])); $o['sf'] = (int)$sf; if ($bw !== '') $o['bw'] = (float)$bw; }
       $nodes[] = $o;
     }
-    $out[] = ['lat' => $c['lat'], 'lon' => $c['lon'], 'n' => $c['n'], 'nodes' => $nodes];
+    $out[] = ['lat' => $c['lat'], 'lon' => $c['lon'], 'n' => $c['n'], 'f' => $c['f'], 'last' => $c['last'], 'nodes' => $nodes];
   }
   return ['format' => 'meshtastic-coverage', 'version' => 1, 'build' => BUILD, 'cellSize' => CELL_SIZE, 'date' => gmdate('Y-m'),
-          'files' => $files, 'cells' => $out];
+          'months' => $months, 'files' => $files, 'cells' => $out];
 }
 
 // Recalcula community.json si falta o si ha cambiado la carpeta de subidas (también al borrar una a mano)
-function community_file(string $dir): string {
-  $f = "$dir/community.json";
+function community_file(string $dir, int $months = 0): string {
+  $f = $months > 0 ? "$dir/community_$months.json" : "$dir/community.json";
   clearstatcache();
   $newest = filemtime("$dir/uploads") ?: 0;
   foreach (glob("$dir/uploads/*.json") ?: [] as $u) $newest = max($newest, filemtime($u) ?: 0);
   // también se rehace si se hizo con otra versión de este archivo (por si cambia el formato)
   $old = is_file($f) && strpos((string)@file_get_contents($f, false, null, 0, 300), '"build":' . BUILD . ',') === false;
-  if (!is_file($f) || $old || filemtime($f) <= $newest) {
+  // con antigüedad, además una vez al día (al cambiar de mes salen subidas)
+  $day = $months > 0 && is_file($f) && filemtime($f) < time() - 86400;
+  if (!is_file($f) || $old || $day || filemtime($f) <= $newest) {
     $lock = fopen("$dir/.lock", 'c');
     if ($lock) flock($lock, LOCK_EX);
     $tmp = "$f." . bin2hex(random_bytes(4));
-    file_put_contents($tmp, json_encode(build_community($dir), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    file_put_contents($tmp, json_encode(build_community($dir, $months), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     rename($tmp, $f);
     if ($lock) { flock($lock, LOCK_UN); fclose($lock); }
   }
