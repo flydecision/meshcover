@@ -56,9 +56,8 @@ function clean_coverage($data): array {
       if (!is_string($id) || !preg_match('/^![0-9a-f]{8}$/', $id)) throw new Exception('node id');
       $nn = num($o['n'] ?? null, 1, 1000000);
       if ($nn === null || floor($nn) != $nn) throw new Exception('node n');
-      $name = is_string($o['name'] ?? null) ? $o['name'] : '';
-      $name = mb_substr(preg_replace('/[\x00-\x1F\x7F<>]/u', '', $name) ?? '', 0, 60);
-      $node = ['id' => $id, 'name' => $name, 'n' => (int)$nn];
+      // sin nombre del nodo: el id basta para sumar y los nombres los pone la página con los registros propios
+      $node = ['id' => $id, 'n' => (int)$nn];
       if (array_key_exists('snr', $o)) { $v = num($o['snr'], -40, 30); if ($v === null) throw new Exception('snr'); $node['snr'] = round($v, 1); }
       if (array_key_exists('rssi', $o)) { $v = num($o['rssi'], -200, 10); if ($v === null) throw new Exception('rssi'); $node['rssi'] = (int)round($v); }
       if (array_key_exists('sf', $o)) { $v = num($o['sf'], 5, 12); if ($v === null || floor($v) != $v) throw new Exception('sf'); $node['sf'] = (int)$v; }
@@ -85,9 +84,8 @@ function build_community(string $dir): array {
       $cells[$k]['n'] += $c['n'];
       foreach ($c['nodes'] as $o) {
         $id = $o['id'];
-        if (!isset($cells[$k]['nodes'][$id])) $cells[$k]['nodes'][$id] = ['id' => $id, 'name' => '', 'n' => 0, 'ws' => 0, 'snr' => 0, 'wr' => 0, 'rssi' => 0, 'sf' => []];
+        if (!isset($cells[$k]['nodes'][$id])) $cells[$k]['nodes'][$id] = ['id' => $id, 'n' => 0, 'ws' => 0, 'snr' => 0, 'wr' => 0, 'rssi' => 0, 'sf' => []];
         $a = &$cells[$k]['nodes'][$id];
-        if ($o['name'] !== '') $a['name'] = $o['name'];
         $a['n'] += $o['n'];
         if (isset($o['snr'])) { $a['snr'] += $o['snr'] * $o['n']; $a['ws'] += $o['n']; }
         if (isset($o['rssi'])) { $a['rssi'] += $o['rssi'] * $o['n']; $a['wr'] += $o['n']; }
@@ -100,7 +98,7 @@ function build_community(string $dir): array {
   foreach ($cells as $c) {
     $nodes = [];
     foreach ($c['nodes'] as $a) {
-      $o = ['id' => $a['id'], 'name' => $a['name'], 'n' => $a['n']];
+      $o = ['id' => $a['id'], 'n' => $a['n']];
       if ($a['ws']) $o['snr'] = round($a['snr'] / $a['ws'], 1);
       if ($a['wr']) $o['rssi'] = (int)round($a['rssi'] / $a['wr']);
       if ($a['sf']) { arsort($a['sf']); [$sf, $bw] = explode('|', (string)array_key_first($a['sf'])); $o['sf'] = (int)$sf; if ($bw !== '') $o['bw'] = (float)$bw; }
@@ -116,7 +114,8 @@ function build_community(string $dir): array {
 function community_file(string $dir): string {
   $f = "$dir/community.json";
   clearstatcache();
-  $newest = filemtime("$dir/uploads") ?: 0;
+  // también se rehace al subir una versión nueva de este archivo (por si cambia el formato)
+  $newest = max(filemtime("$dir/uploads") ?: 0, filemtime(__FILE__) ?: 0);
   foreach (glob("$dir/uploads/*.json") ?: [] as $u) $newest = max($newest, filemtime($u) ?: 0);
   if (!is_file($f) || filemtime($f) <= $newest) {
     $lock = fopen("$dir/.lock", 'c');

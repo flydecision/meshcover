@@ -353,7 +353,7 @@
       <h3>💡 Consejos</h3>
       <ul>
         <li>Mejor si no empiezas ni acabas en casa; si lo haces, el recorte por defecto (300 m) quita esa zona. Las paradas de más de 5 min también se recortan.</li>
-        <li>Varias pasadas por la misma zona se suman: cuanta más gente, más fiable el mapa.</li>
+        <li>Varias pasadas por la misma zona se suman: cuanta más gente, más fiable el mapa. Un archivo idéntico a otro ya subido no se vuelve a sumar.</li>
         <li>Todo se guarda siempre en celdas de 250 m, para que los archivos de todo el mundo encajen.</li>
         <li>Para evitar abusos, como mucho 6 subidas por hora desde la misma conexión.</li>
         <li>Qué se sube exactamente y cómo comprobarlo: pestaña <b>Privacidad</b>.</li>
@@ -365,7 +365,7 @@
       <h3>📦 Qué se sube</h3>
       <ul>
         <li>Celdas de <b>250 m</b>: el centro de cada celda y cuántos paquetes se recibieron en ella (0 si pasaste sin recibir).</li>
-        <li>Por cada nodo oído en la celda: su <b>id</b> (<code>!xxxxxxxx</code>), su <b>nombre</b> público en la malla, nº de paquetes, SNR y RSSI medios, SF y ancho de banda.</li>
+        <li>Por cada nodo oído en la celda: su <b>id</b> (<code>!xxxxxxxx</code>, sin el nombre), nº de paquetes, SNR y RSSI medios, SF y ancho de banda.</li>
         <li>El <b>mes</b> (año-mes) de la exportación.</li>
       </ul>
       <h3>🚫 Qué no se sube</h3>
@@ -382,7 +382,6 @@
         <li>Cada subida se guarda como un archivo aparte. Para evitar abusos, el servidor guarda durante una hora una huella (hash) de la IP (no la IP), solo para limitar a 6 subidas por hora. El alojamiento web, como cualquier web, puede guardar registros técnicos de acceso.</li>
         <li>No hay cuentas, así que la página no puede saber qué subida es tuya. Si quieres que se retire algo, abre una incidencia en <a href="https://github.com/flydecision/meshtastic/issues" target="_blank" rel="noopener">GitHub</a> indicando la zona y la fecha aproximada.</li>
       </ul>
-      <div style="margin-top:6px">Los nombres de nodo son los que cada persona emite en abierto por la malla. Si no quieres que el tuyo aparezca, ponle un nombre que no te identifique.</div>
     </div>
     <div class="page" data-p="0" data-lang="en" hidden>
       <h3>🎯 What it is for</h3>
@@ -470,7 +469,7 @@
       <h3>💡 Tips</h3>
       <ul>
         <li>Better not to start or end at home; if you do, the default cut (300 m) removes that area. Stops longer than 5 min are cut too.</li>
-        <li>Several passes over the same area add up: the more people, the more reliable the map.</li>
+        <li>Several passes over the same area add up: the more people, the more reliable the map. A file identical to one already uploaded is not added again.</li>
         <li>Everything is always stored in 250 m cells, so everyone's files fit together.</li>
         <li>To prevent abuse, at most 6 uploads per hour from the same connection.</li>
         <li>What exactly is uploaded and how to check it: <b>Privacy</b> tab.</li>
@@ -482,7 +481,7 @@
       <h3>📦 What is uploaded</h3>
       <ul>
         <li><b>250 m</b> cells: the centre of each cell and how many packets were received in it (0 if you passed without reception).</li>
-        <li>For each node heard in the cell: its <b>id</b> (<code>!xxxxxxxx</code>), its public <b>name</b> on the mesh, number of packets, mean SNR and RSSI, SF and bandwidth.</li>
+        <li>For each node heard in the cell: its <b>id</b> (<code>!xxxxxxxx</code>, without the name), number of packets, mean SNR and RSSI, SF and bandwidth.</li>
         <li>The <b>month</b> (year-month) of the export.</li>
       </ul>
       <h3>🚫 What is not uploaded</h3>
@@ -499,7 +498,6 @@
         <li>Each upload is stored as a separate file. To prevent abuse, the server keeps a fingerprint (hash) of the IP (not the IP) for one hour, only to limit uploads to 6 per hour. The web host, like any website, may keep technical access logs.</li>
         <li>There are no accounts, so the page cannot tell which upload is yours. If you want something removed, open an issue on <a href="https://github.com/flydecision/meshtastic/issues" target="_blank" rel="noopener">GitHub</a> with the area and approximate date.</li>
       </ul>
-      <div style="margin-top:6px">Node names are the ones each person broadcasts openly on the mesh. If you do not want yours to appear, give it a name that does not identify you.</div>
     </div>
     </div>
     <div class="mfoot">
@@ -572,7 +570,7 @@ const I18N = {
     communityBtn: "Community map", communityTitle: "Add the shared coverage map uploaded by everyone",
     expUp: "Upload to community", expPrivLink: "What exactly is saved or uploaded?", upConfirm: n => "Upload these " + n + " cells to the public community map? They are added for everyone.\n\nPrivacy: the uploaded file contains no personal data, but you can check it first by downloading it with the «Download file» button and opening it with any text editor, or by reviewing the open source code, yourself or with an AI, at https://github.com/flydecision/meshtastic",
     upOk: n => "✅ Uploaded: " + n + " cells added to the community map. Thanks!", upBusy: "Uploading…",
-    upErr: m => "Could not upload (" + m + ").", upRate: "too many uploads from your connection, try again in an hour",
+    upErr: m => "Could not upload (" + m + ").", upRate: "too many uploads from your connection, try again in an hour", upDup: "this file is already on the community map",
     commEmpty: "The community map is still empty.", commErr: m => "Could not load the community map (" + m + ").", commName: "Community map",
     exportBtn: "Export coverage", exportTitle: "Save the coverage of what is open as an anonymous file to share",
     expTitle: "Export anonymous coverage", expRadius: "Remove around start and end", expGo: "Download file",
@@ -621,7 +619,7 @@ const I18N = {
     communityBtn: "Mapa comunitario", communityTitle: "Añadir el mapa de cobertura compartido que ha subido todo el mundo",
     expUp: "Subir a la comunidad", expPrivLink: "¿Qué se guarda o sube exactamente?", upConfirm: n => "¿Subir estas " + n + " celdas al mapa comunitario público? Se suman para todo el mundo.\n\nPrivacidad: el archivo que se sube no lleva ningún dato personal, pero puedes revisarlo antes descargándolo con el botón «Descargar archivo» y abriéndolo con cualquier editor de texto, o consultando el código abierto, por tu cuenta o con una IA, en https://github.com/flydecision/meshtastic",
     upOk: n => "✅ Subido: " + n + " celdas añadidas al mapa comunitario. ¡Gracias!", upBusy: "Subiendo…",
-    upErr: m => "No se pudo subir (" + m + ").", upRate: "demasiadas subidas desde tu conexión, prueba dentro de una hora",
+    upErr: m => "No se pudo subir (" + m + ").", upRate: "demasiadas subidas desde tu conexión, prueba dentro de una hora", upDup: "este archivo ya está en el mapa comunitario",
     commEmpty: "El mapa comunitario aún está vacío.", commErr: m => "No se pudo cargar el mapa comunitario (" + m + ").", commName: "Mapa comunitario",
     exportBtn: "Exportar cobertura", exportTitle: "Guardar la cobertura de lo abierto en un archivo anónimo para compartir",
     expTitle: "Exportar cobertura anónima", expRadius: "Quitar alrededor del inicio y del final", expGo: "Descargar archivo",
@@ -1595,7 +1593,7 @@ function coverageCells(size, radius) {
     out.push({ lat: Math.round(lat * 1e6) / 1e6, lon: Math.round(lon * 1e6) / 1e6, n: c.n,
       nodes: [...c.by].map(([id, b]) => {
         const sf = b.sf.size ? [...b.sf].sort((x, y) => y[1] - x[1])[0][0] : null;
-        const o = { id: hexId(id), name: b.name, n: b.n };
+        const o = { id: hexId(id), n: b.n };   // sin nombre: el id basta
         if (b.snr.length) o.snr = r1(median(b.snr));
         if (b.rssi.length) o.rssi = Math.round(median(b.rssi));
         if (sf) { o.sf = sf; if (b.bw) o.bw = b.bw; }
@@ -1661,7 +1659,7 @@ async function uploadCoverage() {
   try {
     const r = await fetch("api/upload.php", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
     let j = null; try { j = await r.json(); } catch (e) {}
-    if (!r.ok || !j || !j.ok) throw new Error(r.status === 429 ? t("upRate") : (j && j.error ? j.error + (j.detail ? ": " + j.detail : "") : "HTTP " + r.status));
+    if (!r.ok || !j || !j.ok) throw new Error(r.status === 429 ? t("upRate") : r.status === 409 ? t("upDup") : (j && j.error ? j.error + (j.detail ? ": " + j.detail : "") : "HTTP " + r.status));
     msg.textContent = t("upOk", j.cells);
   } catch (e) { msg.style.color = "#ff8a80"; msg.textContent = t("upErr", e.message); }
   btn.disabled = false;
