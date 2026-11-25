@@ -119,7 +119,7 @@
                 overflow-y:auto; background:#1a2029; border:1px solid #2a3340; border-radius:8px; box-shadow:0 6px 22px #000a; padding:4px 0;
                 overscroll-behavior:contain; color:#e6e9ee; }
   .combo-list .cg { padding:8px 10px 4px; color:#9aa4b2; font-weight:600; }
-  .combo-list .ci { padding:6px 10px 6px 18px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .combo-list .ci { padding:6px 10px 6px 18px; cursor:pointer; overflow-wrap:anywhere; }
   .combo-list .ci.top { padding-left:10px; }
   .combo-list .ci.act { background:#23456e; }
   .combo-list .ci.sel { color:#7fb2ff; font-weight:600; }
@@ -791,9 +791,11 @@ function showInList(e) { const l = $("nodeList"); if (e.offsetTop < l.scrollTop)
 function markAct() { comboItems().forEach((e, i) => { e.classList.toggle("act", i === comboAct); if (i === comboAct) showInList(e); }); }
 function openCombo() { const i = $("nodeSearch"), l = $("nodeList"); i.value = ""; i.placeholder = t("nodeSearch") + "…"; drawCombo("");
   // la lista no se sale de la pantalla por la derecha
-  const vw = document.documentElement.clientWidth, w = Math.min(380, vw - 32), x = i.getBoundingClientRect().left;
-  l.style.width = w + "px"; l.style.left = Math.min(0, vw - 16 - x - w) + "px";
+  // ancho: lo que pidan los nombres, sin pasar del ancho de la pantalla
+  const vw = document.documentElement.clientWidth, x = i.getBoundingClientRect().left;
+  l.style.width = "max-content"; l.style.minWidth = i.offsetWidth + "px"; l.style.maxWidth = (vw - 32) + "px"; l.style.left = "0px";
   l.hidden = false; i.setAttribute("aria-expanded", "true");
+  l.style.left = Math.min(0, vw - 16 - x - l.offsetWidth) + "px";
   const s = l.querySelector(".ci.sel"); if (s) showInList(s); }
 function closeCombo() { $("nodeList").hidden = true; $("nodeSearch").setAttribute("aria-expanded", "false"); $("nodeSearch").value = selLabel(); }
 function pickCombo(v) {
