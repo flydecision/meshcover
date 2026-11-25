@@ -61,6 +61,8 @@
   .filt { display:flex; align-items:center; gap:8px; margin:6px 0 10px; font-size:16px; color:#9aa4b2; }
   select { background:#1a2029; color:#e6e9ee; border:1px solid #2a3340; border-radius:8px; padding:8px; font-size:16px; flex:1; min-width:0; }
   #mapBox { margin:10px 0; }
+  #dropZone { position:fixed; inset:0; z-index:3000; display:flex; align-items:center; justify-content:center; background:rgba(15,20,27,.82); border:4px dashed #2f7df6; color:#e8edf3; font-size:24px; font-weight:600; text-align:center; padding:16px; pointer-events:none; }
+  #dropZone[hidden] { display:none; }
   #map { height:62vh; min-height:320px; border:1px solid #2a3340; border-radius:10px; background:#1a2029; }
   #vCmp[hidden], #cmpWrap[hidden] { display:none; }
   .filt.cmpf { margin:0; gap:6px; }
@@ -200,6 +202,7 @@
 </style>
 </head>
 <body>
+<div id="dropZone" hidden data-i18n="dropHere">Drop the files here</div>
 <div class="hdr">
   <h1><img class="logo" src="logo.png" width="44" height="44" alt=""><span data-i18n="appTitle">Meshtastic Coverage Analyzer</span></h1>
   <div class="tools">
@@ -328,14 +331,14 @@
       <h3>3. Al volver</h3>
       <ol>
         <li>En la app: Ajustes → panel de depuración → <b>exportar</b>. Mejor sin filtros.</li>
-        <li>Aquí, <b>📂 Añadir registros</b> y elige el <code>.txt</code>. Cada archivo se suma a lo que ya hay en el mapa. También abre CSV y GPX de versiones anteriores de esta página.</li>
-        <li>En <b>Nodo</b>, elige el nodo fijo y pulsa <b>🔳 Cuadrícula</b> para ver la cobertura por zonas.</li>
+        <li>Aquí, <b>📂 Añadir registros</b> y elige el <code>.txt</code> (en el ordenador también puedes arrastrarlo a la página). Cada archivo se suma a lo que ya hay en el mapa. También abre CSV y GPX de versiones anteriores de esta página.</li>
+        <li>Al abrir el primer registro, si casi todo lo recibido viene de un nodo, se elige ese nodo y la <b>🔳 Cuadrícula</b> sin hacer nada. Si no, elige el nodo fijo en <b>Nodo</b>.</li>
       </ol>
       <h3>Cobertura general de la red</h3>
       <ol>
         <li>No hace falta nodo fijo. El nodo de ruta, con los <b>mismos ajustes de radio que la red</b>, en CLIENT_MUTE, con GPS activado y actualización del GPS cada 20–30 s (el intervalo de difusión da igual).</li>
         <li>Sal y exporta el registro igual que antes, y añádelo aquí.</li>
-        <li>En <b>Nodo</b>, elige <b>📶 Oído directamente → Mejor señal de cualquier nodo</b> y pulsa <b>🔳 Cuadrícula</b>. Cada celda sale del color del nodo que mejor se oye allí; al pinchar, dice cuál es. Para la cobertura de un repetidor concreto, elígelo en ese mismo grupo.</li>
+        <li>Al abrir el registro se elige sola <b>📶 Oído directamente → Mejor señal de cualquier nodo</b> en <b>🔳 Cuadrícula</b>. Cada celda sale del color del nodo que mejor se oye allí; al pinchar, dice cuál es. Para la cobertura de un repetidor concreto, elígelo en ese mismo grupo.</li>
         <li>Deja los saltos en 0–7. Suma registros de varios días o personas para completar la zona.</li>
       </ol>
       <h3>⚖️ Comparar SF (¿cuánto ganamos subiendo a SF10?)</h3>
@@ -455,14 +458,14 @@
       <h3>3. When you are back</h3>
       <ol>
         <li>In the app: Settings → debug panel → <b>export</b>. Better without filters.</li>
-        <li>Here, <b>📂 Add Logs</b> and pick the <code>.txt</code>. Each file adds to what is already on the map. It also opens CSV and GPX files from older versions of this page.</li>
-        <li>In <b>Node</b>, pick the fixed node and press <b>🔳 Grid</b> to see coverage by area.</li>
+        <li>Here, <b>📂 Add Logs</b> and pick the <code>.txt</code> (on a computer you can also drag it onto the page). Each file adds to what is already on the map. It also opens CSV and GPX files from older versions of this page.</li>
+        <li>When you open the first log, if almost everything received comes from one node, that node and <b>🔳 Grid</b> are picked for you. If not, pick the fixed node in <b>Node</b>.</li>
       </ol>
       <h3>General coverage of the mesh</h3>
       <ol>
         <li>No fixed node needed. The route node, with the <b>same radio settings as the mesh</b>, in CLIENT_MUTE, with GPS on and a GPS update every 20–30 s (the broadcast interval does not matter).</li>
         <li>Go out and export the log as before, and add it here.</li>
-        <li>In <b>Node</b>, pick <b>📶 Heard directly → Best signal of any node</b> and press <b>🔳 Grid</b>. Each cell takes the colour of the node heard best there; tap it to see which one. For the coverage of a specific repeater, pick it in that same group.</li>
+        <li>Opening the log picks <b>📶 Heard directly → Best signal of any node</b> in <b>🔳 Grid</b> for you. Each cell takes the colour of the node heard best there; tap it to see which one. For the coverage of a specific repeater, pick it in that same group.</li>
         <li>Leave hops at 0–7. Add logs from several days or people to complete the area.</li>
       </ol>
       <h3>⚖️ Compare SF (how much do we gain going up to SF10?)</h3>
@@ -626,7 +629,7 @@ const I18N = {
     direct: "direct", nHops: n => n + (n === 1 ? " hop" : " hops"), routePos: "position of the route node",
     errEmpty: "the file is empty", errCsv: "it does not look like a CSV from this page",
     errNoPkts: "there are no packets received over the radio in the file",
-    lowPrec: m => "⚠️ Your node's positions come with reduced precision (~" + m + "), so the route and the cells come out wrong. In the app, make the primary channel one of your own with a key and full position precision, and keep the public channel as secondary.", errGpx: "the file is not a valid GPX",
+    dropHere: "📂 Drop the files here", lowPrec: m => "⚠️ Your node's positions come with reduced precision (~" + m + "), so the route and the cells come out wrong. In the app, make the primary channel one of your own with a key and full position precision, and keep the public channel as secondary.", errGpx: "the file is not a valid GPX",
     errNoTrack: "it has no track points", errOpen: (f, m) => "Could not open " + f + ": " + m,
     nodeSearch: "Search node", noMatch: "No node matches",
     communityBtn: "Community map", communityTitle: "Add the shared coverage map uploaded by everyone",
@@ -687,7 +690,7 @@ const I18N = {
     direct: "directo", nHops: n => n + (n === 1 ? " salto" : " saltos"), routePos: "posición del nodo de ruta",
     errEmpty: "el archivo está vacío", errCsv: "no parece un CSV de esta página",
     errNoPkts: "no hay paquetes recibidos por radio en el archivo",
-    lowPrec: m => "⚠️ Las posiciones de tu nodo vienen con precisión reducida (~" + m + "), así que el recorrido y las celdas salen mal. En la app, pon como canal primario uno propio con clave y precisión de posición completa, y deja el público como secundario.", errGpx: "el archivo no es un GPX válido",
+    dropHere: "📂 Suelta aquí los archivos", lowPrec: m => "⚠️ Las posiciones de tu nodo vienen con precisión reducida (~" + m + "), así que el recorrido y las celdas salen mal. En la app, pon como canal primario uno propio con clave y precisión de posición completa, y deja el público como secundario.", errGpx: "el archivo no es un GPX válido",
     errNoTrack: "no tiene puntos de recorrido", errOpen: (f, m) => "No se pudo abrir " + f + ": " + m,
     nodeSearch: "Buscar nodo", noMatch: "Ningún nodo coincide",
     communityBtn: "Mapa comunitario", communityTitle: "Añadir el mapa de cobertura compartido que ha subido todo el mundo",
@@ -1722,17 +1725,37 @@ function debugTxtToRows(text) {
 async function openDebugTxt(file) {
   try {
     const r = debugTxtToRows(await file.text());
+    const first = !(fileRows && fileRows.length) && !fileVisited.length;
     fileRows = (fileRows || []).concat(r.rows); fileNames.push(file.name);
     for (const t of r.tracks) {
       const segs = trackSegments(t).map(seg => seg.map(p => ({ lat: p.lat, lon: p.lon, ms: p.ms, sf: p.sf || null })));
       fileTracks.push({ name: file.name, segs });
     }
     if (!map) await startMap();
-    mapDirty = true; drawMap(true); refreshFromSelect(); dirtyRender = true;
+    refreshFromSelect();
+    if (first && !exportPreviewOn()) autoView(r.rows);
+    mapDirty = true; drawMap(true); dirtyRender = true;
     const conPos = r.rows.filter(x => x.rxLat !== null).length;
     // aviso: posiciones propias recortadas (menos de 17 bits ≈ 180 m no sirven para celdas de 250 m)
     if (r.ownBits && r.ownBits < 17) say(t("lowPrec", fmtM(Math.round(23300 / Math.pow(2, r.ownBits - 10) / 10) * 10)), 20000);
   } catch (e) { say(t("errOpen", file.name, e.message)); }
+}
+
+// Al abrir el primer registro se elige la vista que suele hacer falta: si casi todo lo recibido directamente
+// viene de un nodo (prueba con nodo fijo), se filtra ese nodo; si no (cobertura general), «Mejor señal
+// de cualquier nodo». En los dos casos, vista Cuadrícula. Se puede cambiar después a mano.
+function autoView(rows) {
+  const cnt = new Map(); let tot = 0;
+  for (const r of rows) {
+    if (r.from == null || r.rxLat == null || isNaN(r.rxLat) || r.hops > 0) continue;
+    cnt.set(r.from, (cnt.get(r.from) || 0) + (r.w || 1)); tot += r.w || 1;
+  }
+  if (!tot) return;
+  const [top, n] = [...cnt.entries()].sort((a, b) => b[1] - a[1])[0];
+  const opts = [...$("selFrom").options].map(o => o.value);
+  const want = n >= 10 && n / tot >= 0.6 && opts.includes(String(top)) ? String(top) : opts.includes("h*") ? "h*" : "";
+  selFrom = want; $("selFrom").value = want; syncCombo();
+  mapView = "grid"; showView(); saveMapPrefs(); mapFitted = false;
 }
 
 /* ---------- exportar / importar cobertura anónima ---------- */
@@ -2086,6 +2109,16 @@ $("introCancel").addEventListener("click", () => closeIntro(false));
 $("introClose").addEventListener("click", () => closeIntro(false));
 $("intro").addEventListener("click", e => { if (e.target === $("intro")) closeIntro(false); });
 $("btnOpen").addEventListener("click", () => withIntro("Open", () => $("fileAny").click()));
+// Arrastrar archivos a la página (ordenador): igual que «Añadir registros»
+let dragDepth = 0;
+const hasFiles = e => [...(e.dataTransfer?.types || [])].includes("Files");
+window.addEventListener("dragenter", e => { if (!hasFiles(e)) return; e.preventDefault(); dragDepth++; $("dropZone").hidden = false; });
+window.addEventListener("dragover", e => { if (!hasFiles(e)) return; e.preventDefault(); e.dataTransfer.dropEffect = "copy"; });
+window.addEventListener("dragleave", e => { if (!hasFiles(e)) return; if (--dragDepth <= 0) { dragDepth = 0; $("dropZone").hidden = true; } });
+window.addEventListener("drop", async e => {
+  if (!hasFiles(e)) return; e.preventDefault(); dragDepth = 0; $("dropZone").hidden = true;
+  const fs = [...(e.dataTransfer.files || [])]; if (fs.length) await openFiles(fs);
+});
 $("fileAny").addEventListener("change", async e => { const fs = [...(e.target.files || [])]; e.target.value = ""; await openFiles(fs); });
 
 $("vDots").addEventListener("click", () => setView("dots"));
