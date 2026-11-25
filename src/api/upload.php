@@ -10,8 +10,12 @@ try { $clean = clean_coverage(json_decode($raw, true, 32)); }
 catch (Exception $e) { reply(400, ['ok' => false, 'error' => 'invalid', 'detail' => $e->getMessage()]); }
 
 $dir = data_dir();
+// el mismo contenido subido dos veces no se suma otra vez (la huella va en el nombre del archivo:
+// si se borra una subida, se puede volver a subir)
+$hash = substr(hash('sha256', json_encode($clean['cells'])), 0, 16);
+if (glob("$dir/uploads/*_$hash.json")) reply(409, ['ok' => false, 'error' => 'duplicate']);
 if (!rate_ok($dir)) reply(429, ['ok' => false, 'error' => 'rate']);
-$name = gmdate('Ymd_His') . '_' . bin2hex(random_bytes(4)) . '.json';
+$name = gmdate('Ymd_His') . '_' . $hash . '.json';
 if (@file_put_contents("$dir/uploads/$name", json_encode($clean, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) === false)
   reply(500, ['ok' => false, 'error' => 'write']);
 community_file($dir);
