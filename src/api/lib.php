@@ -2,6 +2,7 @@
 // Mapa comunitario de cobertura: utilidades comunes a upload.php y community.php.
 // Los datos se guardan en ../data (fuera del alcance de la web gracias a su .htaccess).
 
+const BUILD = 2;                  // versión de community.json: al cambiarla se rehace
 const CELL_SIZE = 250;            // tamaño fijo de celda de los archivos exportados por la página
 const MAX_BYTES = 524288;         // 512 KB por subida
 const MAX_CELLS = 20000;
@@ -106,7 +107,7 @@ function build_community(string $dir): array {
     }
     $out[] = ['lat' => $c['lat'], 'lon' => $c['lon'], 'n' => $c['n'], 'nodes' => $nodes];
   }
-  return ['format' => 'meshtastic-coverage', 'version' => 1, 'cellSize' => CELL_SIZE, 'date' => gmdate('Y-m'),
+  return ['format' => 'meshtastic-coverage', 'version' => 1, 'build' => BUILD, 'cellSize' => CELL_SIZE, 'date' => gmdate('Y-m'),
           'files' => $files, 'cells' => $out];
 }
 
@@ -114,10 +115,11 @@ function build_community(string $dir): array {
 function community_file(string $dir): string {
   $f = "$dir/community.json";
   clearstatcache();
-  // también se rehace al subir una versión nueva de este archivo (por si cambia el formato)
-  $newest = max(filemtime("$dir/uploads") ?: 0, filemtime(__FILE__) ?: 0);
+  $newest = filemtime("$dir/uploads") ?: 0;
   foreach (glob("$dir/uploads/*.json") ?: [] as $u) $newest = max($newest, filemtime($u) ?: 0);
-  if (!is_file($f) || filemtime($f) <= $newest) {
+  // también se rehace si se hizo con otra versión de este archivo (por si cambia el formato)
+  $old = is_file($f) && strpos((string)@file_get_contents($f, false, null, 0, 300), '"build":' . BUILD . ',') === false;
+  if (!is_file($f) || $old || filemtime($f) <= $newest) {
     $lock = fopen("$dir/.lock", 'c');
     if ($lock) flock($lock, LOCK_EX);
     $tmp = "$f." . bin2hex(random_bytes(4));
