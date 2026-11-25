@@ -319,7 +319,7 @@
       <h3>1. Antes de salir</h3>
       <ol>
         <li><b>Nodo fijo</b>: en la app, Posición → posición fija, «posición inteligente» desactivada e intervalo de difusión de 1 minuto.</li>
-        <li><b>Nodo de ruta</b>: rol <b>CLIENT_MUTE</b>, GPS activado, intervalo de difusión de 1 minuto y «posición inteligente» desactivada. Los ajustes de radio (LoRa) tienen que ser iguales en los dos.</li>
+        <li><b>Nodo de ruta</b>: rol <b>CLIENT_MUTE</b>, GPS activado con <b>intervalo de actualización del GPS de 20–30 s</b> y «posición inteligente» desactivada. El intervalo de difusión da igual (puede quedar en «unset»): el recorrido sale del GPS, no de lo que se emite. Los ajustes de radio (LoRa) tienen que ser iguales en los dos.</li>
         <li>Saca el nodo de ruta a cielo abierto unos minutos antes, para que coja satélites.</li>
         <li>En la app, conecta el móvil al nodo de ruta y vacía el registro: Ajustes → panel de depuración → borrar.</li>
       </ol>
@@ -333,7 +333,7 @@
       </ol>
       <h3>Cobertura general de la red</h3>
       <ol>
-        <li>No hace falta nodo fijo. El nodo de ruta, con los <b>mismos ajustes de radio que la red</b>, en CLIENT_MUTE, con GPS y posición cada minuto.</li>
+        <li>No hace falta nodo fijo. El nodo de ruta, con los <b>mismos ajustes de radio que la red</b>, en CLIENT_MUTE, con GPS activado y actualización del GPS cada 20–30 s (el intervalo de difusión da igual).</li>
         <li>Sal y exporta el registro igual que antes, y añádelo aquí.</li>
         <li>En <b>Nodo</b>, elige <b>📶 Oído directamente → Mejor señal de cualquier nodo</b> y pulsa <b>🔳 Cuadrícula</b>. Cada celda sale del color del nodo que mejor se oye allí; al pinchar, dice cuál es. Para la cobertura de un repetidor concreto, elígelo en ese mismo grupo.</li>
         <li>Deja los saltos en 0–7. Suma registros de varios días o personas para completar la zona.</li>
@@ -359,7 +359,7 @@
     <div class="page" data-p="2" data-lang="es" hidden>
       <h3>📍 Los paquetes no salen en el mapa</h3>
       <ul>
-        <li>El nodo de ruta no tenía posición: revisa que tenga el GPS activado y un intervalo de difusión puesto («unset» es un valor por defecto largo, no 1 minuto).</li>
+        <li>El nodo de ruta no tenía posición: revisa que tenga el GPS activado, con cobertura de satélites, y un intervalo de actualización del GPS corto (20–30 s).</li>
         <li>Sácalo a cielo abierto antes de salir: dentro de casa no coge satélites.</li>
       </ul>
       <h3>🚶 El nodo fijo aparece «moviéndose»</h3>
@@ -381,7 +381,7 @@
       <div>Pulsa <b>🌍 Mapa comunitario</b>. Se carga en <b>cuadrícula de 250 m</b>: cada celda sale del color del nodo que mejor se oye allí. Las celdas grises son sitios por los que alguien pasó <b>sin recibir nada</b>. Puedes sumarle tus propios registros con <b>📂 Añadir registros</b> sin subirlos.</div>
       <h3>🚶 Aportar tu recorrido</h3>
       <ol>
-        <li>Prepara el nodo de ruta como en «Cómo usar → Cobertura general de la red»: <b>mismos ajustes de radio que la red</b>, CLIENT_MUTE, GPS y posición cada minuto.</li>
+        <li>Prepara el nodo de ruta como en «Cómo usar → Cobertura general de la red»: <b>mismos ajustes de radio que la red</b>, CLIENT_MUTE, GPS activado con actualización cada 20–30 s y «posición inteligente» desactivada. El intervalo de difusión puede quedar en «unset» o largo: así tampoco emites tu recorrido en directo.</li>
         <li><b>Canal primario propio</b>: crea un canal tuyo con clave (PSK) y ponlo como <b>primario</b> (canal 0), con precisión de posición completa; deja el canal público de la red como <b>secundario</b>. Así tu recorrido se registra con precisión completa (en un canal público el firmware la limita a unos 730 m), solo lo ve quien tenga tu clave, y sigues oyendo a toda la red por el secundario.</li>
         <li>En la app, vacía el registro (Ajustes → panel de depuración → borrar), haz el recorrido con la pantalla apagada y al volver <b>exporta</b> el registro.</li>
         <li>Aquí, <b>📂 Añadir registros</b> con ese <code>.txt</code>.</li>
@@ -445,7 +445,7 @@
       <h3>1. Before you leave</h3>
       <ol>
         <li><b>Fixed node</b>: in the app, Position → fixed position, «smart position» off and broadcast interval of 1 minute.</li>
-        <li><b>Route node</b>: role <b>CLIENT_MUTE</b>, GPS on, broadcast interval of 1 minute and «smart position» off. Radio (LoRa) settings must be the same on both.</li>
+        <li><b>Route node</b>: role <b>CLIENT_MUTE</b>, GPS on with a <b>GPS update interval of 20–30 s</b> and «smart position» off. The broadcast interval does not matter (it can stay «unset»): the track comes from the GPS, not from what is broadcast. Radio (LoRa) settings must be the same on both.</li>
         <li>Take the route node outdoors a few minutes before, so it gets a satellite fix.</li>
         <li>In the app, connect the phone to the route node and clear the log: Settings → debug panel → clear.</li>
       </ol>
@@ -459,7 +459,7 @@
       </ol>
       <h3>General coverage of the mesh</h3>
       <ol>
-        <li>No fixed node needed. The route node, with the <b>same radio settings as the mesh</b>, in CLIENT_MUTE, with GPS and position every minute.</li>
+        <li>No fixed node needed. The route node, with the <b>same radio settings as the mesh</b>, in CLIENT_MUTE, with GPS on and a GPS update every 20–30 s (the broadcast interval does not matter).</li>
         <li>Go out and export the log as before, and add it here.</li>
         <li>In <b>Node</b>, pick <b>📶 Heard directly → Best signal of any node</b> and press <b>🔳 Grid</b>. Each cell takes the colour of the node heard best there; tap it to see which one. For the coverage of a specific repeater, pick it in that same group.</li>
         <li>Leave hops at 0–7. Add logs from several days or people to complete the area.</li>
@@ -485,7 +485,7 @@
     <div class="page" data-p="2" data-lang="en" hidden>
       <h3>📍 Packets do not show on the map</h3>
       <ul>
-        <li>The route node had no position: check its GPS is on and a broadcast interval is set («unset» is a long default value, not 1 minute).</li>
+        <li>The route node had no position: check its GPS is on, has satellite coverage, and a short GPS update interval (20–30 s).</li>
         <li>Take it outdoors before leaving: indoors it does not get satellites.</li>
       </ul>
       <h3>🚶 The fixed node appears to be «moving»</h3>
@@ -506,7 +506,7 @@
       <div>Press <b>🌍 Community map</b>. It loads as a <b>250 m grid</b>: each cell takes the colour of the node heard best there. Grey cells are places someone passed <b>without receiving anything</b>. You can add your own logs on top with <b>📂 Add Logs</b> without uploading them.</div>
       <h3>🚶 Contributing your route</h3>
       <ol>
-        <li>Set up the route node as in «How to use → General coverage of the mesh»: <b>same radio settings as the network</b>, CLIENT_MUTE, GPS and position every minute.</li>
+        <li>Set up the route node as in «How to use → General coverage of the mesh»: <b>same radio settings as the network</b>, CLIENT_MUTE, GPS on with updates every 20–30 s and «smart position» off. The broadcast interval can stay «unset» or long: that way you do not broadcast your route live either.</li>
         <li><b>Your own primary channel</b>: create a channel of your own with a key (PSK) and make it the <b>primary</b> (channel 0), with full position precision; keep the network's public channel as <b>secondary</b>. That way your track is logged with full precision (on a public channel the firmware limits it to about 730 m), only people with your key see it, and you still hear the whole network on the secondary.</li>
         <li>In the app, clear the log (Settings → debug panel → clear), do the route with the screen off and, back home, <b>export</b> the log.</li>
         <li>Here, <b>📂 Add Logs</b> with that <code>.txt</code>.</li>
