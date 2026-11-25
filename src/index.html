@@ -88,6 +88,12 @@
   .mbody h3:first-child { margin-top:0; }
   .mbody ol, .mbody ul { margin:6px 0 4px 18px; padding:0; }
   .mbody li { margin:5px 0; }
+  /* aviso previo a «Añadir registros» y «Exportar cobertura» */
+  #intro .sheet { max-width:520px; }
+  .ifoot { flex-wrap:wrap; }
+  .ifoot label { display:inline-flex; align-items:center; gap:8px; color:#9aa4b2; cursor:pointer; margin-right:auto; }
+  .ifoot input { width:18px; height:18px; accent-color:#2f7df6; }
+  .ifoot .ibtns { display:flex; gap:8px; margin-left:auto; }
   .mfoot { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 12px; border-top:1px solid #2a3340; flex:none; }
   .mfoot span { color:#9aa4b2; font-size:16px; }
   .mfoot button { padding:9px 12px; font-size:16px; }
@@ -255,6 +261,16 @@
 
 
 
+<div id="intro" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="introTitle">
+  <div class="sheet">
+    <div class="mhead"><b id="introTitle"></b><button id="introClose" class="sec" data-i18n-aria="close">✕</button></div>
+    <div class="mbody" id="introBody"></div>
+    <div class="mfoot ifoot">
+      <label><input type="checkbox" id="introNoShow"> <span data-i18n="noShow">Don't show again</span></label>
+      <span class="ibtns"><button id="introCancel" class="sec" data-i18n="cancel">Cancel</button><button id="introGo"></button></span>
+    </div>
+  </div>
+</div>
 <div id="help" class="modal" hidden role="dialog" aria-modal="true" data-i18n-aria="help">
   <div class="sheet">
     <div class="mhead"><b data-i18n="help">Help</b><button id="btnHelpClose" class="sec" data-i18n-aria="close">✕</button></div>
@@ -549,7 +565,11 @@ const I18N = {
     cell: "Cell", cellSize: "Cell size", to: "to", track: "Track", noRx: "No reception", nodeIcon: "Node",
     statRows: "Records", statSnr: "Best SNR dB", statDist: "Max dist. km", statDur: "Duration",
     thDate: "Date and time", thType: "Type",
-    tabWhat: "What for", tabHow: "How to use", tabFix: "Troubleshooting", tabComm: "Community map", tabPriv: "Privacy", prev: "Previous", next: "Next",
+    tabWhat: "What for", tabHow: "How to use", tabFix: "Troubleshooting", tabComm: "Community map", noShow: "Don't show again", cancel: "Cancel",
+    introOpenTitle: "📂 Add Logs", introOpenGo: "Choose file",
+    introOpenBody: "<div>Open the <code>.txt</code> log exported from the official <b>Meshtastic</b> app:</div><div style=\"margin:8px 0\"><b>Settings › Debug panel › Packets › «Export logs»</b> button.</div><div>Each file is added to what is already on the map. You can also open coverage files (<code>.json</code>) shared by other people, and CSV/GPX from older versions of this page. Nothing leaves your device: the file is read in the browser.</div>",
+    introExpTitle: "📤 Export coverage", introExpGo: "Continue",
+    introExpBody: "<ol><li>The map will show <b>exactly what will be shared</b>: best signal of any node, in 250 m cells.</li><li>Move the <b>«Remove around start and end»</b> slider until no cell is left near your home (red circles).</li><li>Then <b>💾 Download file</b> to share it yourself, or <b>☁️ Upload to community</b> to add it to the shared map.</li></ol><div>Only cells are saved: no track, no times and no node names.</div>", tabPriv: "Privacy", prev: "Previous", next: "Next",
     packets: n => n === 1 ? "packet" : "packets",
     offline: "no connection",
     mapUnavailable: m => "Map not available (" + m + "): an internet connection is needed to load it. It will appear when the connection is back.",
@@ -598,7 +618,11 @@ const I18N = {
     cell: "Celda", cellSize: "Tamaño de celda", to: "a", track: "Recorrido", noRx: "Sin recepción", nodeIcon: "Nodo",
     statRows: "Registros", statSnr: "Mejor SNR dB", statDist: "Dist. máx km", statDur: "Duración",
     thDate: "Fecha y hora", thType: "Tipo",
-    tabWhat: "Para qué", tabHow: "Cómo usar", tabFix: "Soluciones", tabComm: "Mapa comunitario", tabPriv: "Privacidad", prev: "Anterior", next: "Siguiente",
+    tabWhat: "Para qué", tabHow: "Cómo usar", tabFix: "Soluciones", tabComm: "Mapa comunitario", noShow: "No volver a mostrar", cancel: "Cancelar",
+    introOpenTitle: "📂 Añadir registros", introOpenGo: "Elegir archivo",
+    introOpenBody: "<div>Abre el registro <code>.txt</code> exportado desde la app oficial de <b>Meshtastic</b>:</div><div style=\"margin:8px 0\"><b>Configuración › Panel de depuración › Packets ›</b> botón <b>«Exportar registros»</b>.</div><div>Cada archivo se suma a lo que ya hay en el mapa. También puedes abrir archivos de cobertura (<code>.json</code>) compartidos por otras personas, y CSV/GPX de versiones anteriores de esta página. Nada sale de tu dispositivo: el archivo se lee en el navegador.</div>",
+    introExpTitle: "📤 Exportar cobertura", introExpGo: "Continuar",
+    introExpBody: "<ol><li>El mapa mostrará <b>exactamente lo que se va a compartir</b>: la mejor señal de cualquier nodo, en celdas de 250 m.</li><li>Mueve el deslizador <b>«Quitar alrededor del inicio y del final»</b> hasta que no quede ninguna celda cerca de tu casa (círculos rojos).</li><li>Después, <b>💾 Descargar archivo</b> para compartirlo tú, o <b>☁️ Subir a la comunidad</b> para sumarlo al mapa común.</li></ol><div>Solo se guardan celdas: sin recorrido, sin horas y sin nombres de nodos.</div>", tabPriv: "Privacidad", prev: "Anterior", next: "Siguiente",
     packets: n => n === 1 ? "packet" : "packets",
     offline: "sin conexión",
     mapUnavailable: m => "Mapa no disponible (" + m + "): hace falta conexión a internet para cargarlo. Aparecerá solo al volver la conexión.",
@@ -1807,7 +1831,8 @@ async function setMapMax(on) {
 document.addEventListener("fullscreenchange", () => { if (!document.fullscreenElement && mapMax) setMapMax(false); });
 document.addEventListener("keydown", e => {
   if (e.key !== "Escape") return;
-  if (!$("help").hidden) closeHelp();
+  if (!$("intro").hidden) closeIntro(false);
+  else if (!$("help").hidden) closeHelp();
   else if (mapMax) setMapMax(false);
 });
 
@@ -1836,7 +1861,11 @@ function closeHelp() {
 
 /* ---------- arranque ---------- */
 $("btnClear").addEventListener("click", clearAll);
-$("btnExport").addEventListener("click", () => $("expPanel").hidden ? openExport() : closeExport());
+$("btnExport").addEventListener("click", () => {
+  if (!$("expPanel").hidden) { closeExport(); return; }
+  if (!(fileRows && fileRows.length) && !fileTracks.length && !fileVisited.length) { say(t("expNoData")); return; }
+  withIntro("Exp", openExport);
+});
 $("btnExpClose").addEventListener("click", closeExport);
 $("rngPriv").addEventListener("input", () => { updateExport(); mapDirty = true; if (map) drawMap(false); });
 $("btnExpGo").addEventListener("click", downloadCoverage);
@@ -1849,7 +1878,32 @@ $("lnkPriv").addEventListener("click", e => { e.preventDefault(); openHelp(4); }
 $("hPrev").addEventListener("click", () => showHelpPage(helpPage - 1));
 $("hNext").addEventListener("click", () => showHelpPage(helpPage + 1));
 document.querySelectorAll("#helpTabs button").forEach(b => b.addEventListener("click", () => showHelpPage(Number(b.dataset.p))));
-$("btnOpen").addEventListener("click", () => $("fileAny").click());
+/* ---------- aviso previo (con «No volver a mostrar») ---------- */
+let introAction = null;
+function withIntro(key, go) {
+  let skip = false; try { skip = localStorage.getItem("meshtastic_intro_" + key) === "1"; } catch (e) {}
+  if (skip) { go(); return; }
+  introAction = { key, go };
+  $("introTitle").textContent = t("intro" + key + "Title");
+  $("introBody").innerHTML = t("intro" + key + "Body");
+  $("introGo").textContent = t("intro" + key + "Go");
+  $("introNoShow").checked = false;
+  $("intro").hidden = false; document.body.classList.add("noscroll");
+  $("introGo").focus();
+}
+function closeIntro(run) {
+  const a = introAction; introAction = null;
+  $("intro").hidden = true;
+  if (!mapMax) document.body.classList.remove("noscroll");
+  if (!a || !run) return;
+  if ($("introNoShow").checked) { try { localStorage.setItem("meshtastic_intro_" + a.key, "1"); } catch (e) {} }
+  a.go();
+}
+$("introGo").addEventListener("click", () => closeIntro(true));
+$("introCancel").addEventListener("click", () => closeIntro(false));
+$("introClose").addEventListener("click", () => closeIntro(false));
+$("intro").addEventListener("click", e => { if (e.target === $("intro")) closeIntro(false); });
+$("btnOpen").addEventListener("click", () => withIntro("Open", () => $("fileAny").click()));
 $("fileAny").addEventListener("change", async e => { const fs = [...(e.target.files || [])]; e.target.value = ""; await openFiles(fs); });
 
 $("vDots").addEventListener("click", () => setView("dots"));
