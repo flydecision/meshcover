@@ -62,6 +62,17 @@
   select { background:#1a2029; color:#e6e9ee; border:1px solid #2a3340; border-radius:8px; padding:8px; font-size:16px; flex:1; min-width:0; }
   #mapBox { margin:10px 0; }
   #map { height:62vh; min-height:320px; border:1px solid #2a3340; border-radius:10px; background:#1a2029; }
+  #vCmp[hidden], #cmpWrap[hidden] { display:none; }
+  .filt.cmpf { margin:0; gap:6px; }
+  .filt.cmpf select { height:29px; padding:0 6px; font-size:16px; }
+  #cmpBox { margin:8px 0; font-size:16px; color:#c9d1db; }
+  #cmpBox .cmphead { font-weight:700; color:#e6e9ee; margin-bottom:6px; }
+  #cmpBox .cmpscroll { overflow-x:auto; }
+  #cmpBox table { border-collapse:collapse; width:100%; }
+  #cmpBox th, #cmpBox td { padding:6px 8px; border-bottom:1px solid #2a3340; text-align:right; white-space:nowrap; }
+  #cmpBox th:first-child, #cmpBox td:first-child { text-align:left; }
+  #cmpBox th { color:#9aa4b2; font-weight:600; }
+  #cmpBox .cmpnote { color:#9aa4b2; margin-top:6px; line-height:1.4; }
   .legend { display:flex; flex-wrap:wrap; gap:10px; font-size:16px; color:#c9d1db; margin:6px 0; }
   .relay-sq { background:#000; border:2px solid #fff; box-sizing:border-box; box-shadow:0 0 0 1px #000a; }
   .legend i { display:inline-block; width:11px; height:11px; border-radius:50%; margin-right:4px; vertical-align:-1px; border:1px solid #0008; }
@@ -213,7 +224,9 @@
     <span class="seg" role="group" data-i18n-aria="view">
       <button id="vDots" data-i18n-title="dotsTitle">🔵 <span data-i18n="dots">Dots</span></button>
       <button id="vGrid" data-i18n-title="gridTitle">🔳 <span data-i18n="grid">Grid</span></button>
+      <button id="vCmp" data-i18n-title="cmpTitle" hidden>⚖️ <span data-i18n="cmp">Compare</span></button>
     </span>
+    <span id="cmpWrap" class="filt cmpf" hidden>SF <select id="cmpA" data-i18n-aria="cmpA"></select> <span data-i18n="vs">vs</span> SF <select id="cmpB" data-i18n-aria="cmpB"></select></span>
     <span class="filt hops" data-i18n-title="hopsTitle">
       <span class="lbl"><span data-i18n="hops">Hops</span>:</span> <span class="hv" id="hopsVal">0–7</span>
       <span class="dual" id="hopsDual">
@@ -240,6 +253,7 @@
     <span id="lgRelay" hidden></span>
     <span>📡 <span data-i18n="nodeIcon">Node</span></span>
   </div>
+  <div id="cmpBox" hidden></div>
 </div>
 
 <div class="stats">
@@ -323,6 +337,14 @@
         <li>Sal y exporta el registro igual que antes, y añádelo aquí.</li>
         <li>En <b>Nodo</b>, elige <b>📶 Oído directamente → Mejor señal de cualquier nodo</b> y pulsa <b>🔳 Cuadrícula</b>. Cada celda sale del color del nodo que mejor se oye allí; al pinchar, dice cuál es. Para la cobertura de un repetidor concreto, elígelo en ese mismo grupo.</li>
         <li>Deja los saltos en 0–7. Suma registros de varios días o personas para completar la zona.</li>
+      </ol>
+      <h3>⚖️ Comparar SF (¿cuánto ganamos subiendo a SF10?)</h3>
+      <ol>
+        <li>Con el nodo fijo y el de ruta en <b>SF7</b>, haz una ruta. Cambia <b>los dos</b> a <b>SF10</b> (mismo BW, CR y frecuencia) y repite <b>la misma ruta</b>, mejor el mismo día y despacio (andando o en bici).</li>
+        <li>Exporta el registro (o los dos) y añádelos aquí. No hay que apuntar nada: la página sabe con qué SF iba cada paquete y cada tramo del recorrido.</li>
+        <li>En <b>Nodo</b>, elige el nodo fijo y pulsa <b>⚖️ Comparar</b> (solo sale si hay dos SF o más).</li>
+        <li>Cada celda sale verde si recibieron <b>los dos</b>, azul si <b>solo el SF alto</b>, naranja si <b>solo el bajo</b> y gris si <b>ninguno</b>. Debajo, una tabla con el % de celdas con recepción, la distancia máxima y el margen mediano de cada SF.</li>
+        <li>Solo cuentan las celdas por las que pasaste con los dos SF. Con más de dos SF, elige cuáles comparar.</li>
       </ol>
       <h3>Controles</h3>
       <ul>
@@ -440,6 +462,14 @@
         <li>Go out and export the log as before, and add it here.</li>
         <li>In <b>Node</b>, pick <b>📶 Heard directly → Best signal of any node</b> and press <b>🔳 Grid</b>. Each cell takes the colour of the node heard best there; tap it to see which one. For the coverage of a specific repeater, pick it in that same group.</li>
         <li>Leave hops at 0–7. Add logs from several days or people to complete the area.</li>
+      </ol>
+      <h3>⚖️ Compare SF (how much do we gain going up to SF10?)</h3>
+      <ol>
+        <li>With the fixed and the route node on <b>SF7</b>, do a route. Switch <b>both</b> to <b>SF10</b> (same BW, CR and frequency) and repeat <b>the same route</b>, ideally the same day and slowly (walking or cycling).</li>
+        <li>Export the log (or both) and add them here. No need to note anything: the page knows which SF each packet and each part of the track used.</li>
+        <li>In <b>Node</b>, choose the fixed node and press <b>⚖️ Compare</b> (it only appears with two or more SF).</li>
+        <li>Each cell is green if <b>both</b> received, blue if <b>only the higher SF</b>, orange if <b>only the lower</b> and grey if <b>neither</b>. Below, a table with the % of cells with reception, the maximum distance and the median margin of each SF.</li>
+        <li>Only cells you passed with both SF count. With more than two SF, choose which ones to compare.</li>
       </ol>
       <h3>Controls</h3>
       <ul>
@@ -559,7 +589,14 @@ const I18N = {
     openTitle: "Add the packet log exported from the Meshtastic app (.txt), or CSV and GPX files. Each file adds to what is already on the map",
     clearTitle: "Remove everything opened from the map",
     node: "Node", allNodes: "All nodes", view: "View",
-    dots: "Dots", grid: "Grid", dotsTitle: "Show each reception as a dot", gridTitle: "Show coverage by cells",
+    dots: "Dots", grid: "Grid", cmp: "Compare", cmpTitle: "Compare two spreading factors (SF) cell by cell", vs: "vs", cmpA: "First SF", cmpB: "Second SF",
+    cmpBoth: "Both", cmpOnly: sf => "Only SF" + sf, cmpNone: "Neither",
+    cmpHead: (a, b) => "SF" + a + " vs SF" + b + " on the same route",
+    cmpThSf: "SF", cmpThCells: "Cells with reception", cmpThDist: "Max. distance", cmpThMargin: "Median margin", cmpThPkts: "Packets",
+    cmpNote: n => "Only the " + n + " cells travelled with both SF count, so the comparison is fair. Distance: to the sending node. Margin: SNR above the decoding limit of each SF.",
+    cmpGain: (b, d, a) => d > 0 ? "SF" + b + " receives in " + d + (d === 1 ? " more cell" : " more cells") + " than SF" + a + "." : d < 0 ? "SF" + b + " receives in " + (-d) + (d === -1 ? " fewer cell" : " fewer cells") + " than SF" + a + "." : "Both receive in the same number of cells.",
+    cmpNoCommon: "No cell was travelled with both SF: do the same route with each one.",
+    cmpCell: (sf, n, m) => "SF" + sf + ": " + (n ? n + (n === 1 ? " packet" : " packets") + (m !== null ? " · margin " + m + " dB" : "") : "nothing received"), dotsTitle: "Show each reception as a dot", gridTitle: "Show coverage by cells",
     hops: "Hops", hopsMin: "Minimum hops", hopsMax: "Maximum hops",
     hopsTitle: "Hops. 0 = received directly; 1, 2… = relayed by other nodes. Drag both ends to pick a minimum and a maximum",
     cell: "Cell", cellSize: "Cell size", to: "to", track: "Track", noRx: "No reception", nodeIcon: "Node",
@@ -612,7 +649,14 @@ const I18N = {
     openTitle: "Añadir el registro de paquetes exportado de la app Meshtastic (.txt), o CSV y GPX. Cada archivo se suma a lo que ya hay en el mapa",
     clearTitle: "Quitar del mapa todo lo abierto",
     node: "Nodo", allNodes: "Todos los nodos", view: "Vista",
-    dots: "Puntos", grid: "Cuadrícula", dotsTitle: "Ver cada recepción como un punto", gridTitle: "Ver la cobertura por celdas",
+    dots: "Puntos", grid: "Cuadrícula", cmp: "Comparar", cmpTitle: "Comparar dos factores de dispersión (SF) celda a celda", vs: "frente a", cmpA: "Primer SF", cmpB: "Segundo SF",
+    cmpBoth: "Los dos", cmpOnly: sf => "Solo SF" + sf, cmpNone: "Ninguno",
+    cmpHead: (a, b) => "SF" + a + " frente a SF" + b + " en la misma ruta",
+    cmpThSf: "SF", cmpThCells: "Celdas con recepción", cmpThDist: "Distancia máx.", cmpThMargin: "Margen mediano", cmpThPkts: "Paquetes",
+    cmpNote: n => "Solo cuentan las " + n + " celdas recorridas con los dos SF, para que la comparación sea justa. Distancia: al nodo emisor. Margen: SNR por encima del límite de descodificación de cada SF.",
+    cmpGain: (b, d, a) => d > 0 ? "SF" + b + " recibe en " + d + (d === 1 ? " celda" : " celdas") + " más que SF" + a + "." : d < 0 ? "SF" + b + " recibe en " + (-d) + (d === -1 ? " celda" : " celdas") + " menos que SF" + a + "." : "Los dos reciben en el mismo número de celdas.",
+    cmpNoCommon: "Ninguna celda se recorrió con los dos SF: haz la misma ruta con cada uno.",
+    cmpCell: (sf, n, m) => "SF" + sf + ": " + (n ? n + (n === 1 ? " paquete" : " paquetes") + (m !== null ? " · margen " + m + " dB" : "") : "nada recibido"), dotsTitle: "Ver cada recepción como un punto", gridTitle: "Ver la cobertura por celdas",
     hops: "Saltos", hopsMin: "Saltos mínimos", hopsMax: "Saltos máximos",
     hopsTitle: "Saltos. 0 = recibido en directo; 1, 2… = llegó repetido por otros nodos. Mueve los dos extremos para elegir un mínimo y un máximo",
     cell: "Celda", cellSize: "Tamaño de celda", to: "a", track: "Recorrido", noRx: "Sin recepción", nodeIcon: "Nodo",
@@ -917,7 +961,7 @@ function saveMapPrefs() { try { localStorage.setItem("rangetest_mapprefs_v1", JS
 function loadMapPrefs() {
   try {
     const p = JSON.parse(localStorage.getItem("rangetest_mapprefs_v1") || "{}");
-    if (p.mapView === "grid" || p.mapView === "dots") mapView = p.mapView;
+    if (["grid", "dots", "cmp"].includes(p.mapView)) mapView = p.mapView;
     if ([50, 100, 250, 500, 1000].includes(p.cellSize)) cellSize = p.cellSize;
   } catch (e) {}
   showView(); showCell();
@@ -927,7 +971,9 @@ const CELL_SIZES = [50, 100, 250, 500, 1000];
 function showView() {
   $("vDots").classList.toggle("on", mapView === "dots");
   $("vGrid").classList.toggle("on", mapView === "grid");
-  $("cellWrap").hidden = mapView !== "grid";
+  $("vCmp").classList.toggle("on", mapView === "cmp");
+  $("cellWrap").hidden = mapView === "dots";
+  $("cmpWrap").hidden = mapView !== "cmp" || $("vCmp").hidden;
 }
 function showCell() {
   $("rngCell").value = String(Math.max(0, CELL_SIZES.indexOf(cellSize)));
@@ -1227,6 +1273,97 @@ function buildGrid(rows, tracks, size) {
   return out;
 }
 
+/* ---------- comparar dos SF ---------- */
+let cmpPick = { cmpA: null, cmpB: null };
+const CMP_COLORS = { both: "#1fa64a", b: "#2f7df6", a: "#f07f2e" };
+// SF presentes en lo visible (paquetes reales con hora, o tramos de recorrido)
+function cmpSfList(rows, tracks) {
+  const set = new Set();
+  for (const r of rows) if (r.sf && r.ms) set.add(r.sf);
+  for (const t of tracks) for (const p of t.pts) if (p.sf) set.add(p.sf);
+  return [...set].sort((a, b) => a - b);
+}
+function compareSf(rows, tracks, size, a, b) {
+  const lats = rows.filter(r => r.rxLat != null && !isNaN(r.rxLat)).map(r => r.rxLat).concat(...tracks.map(t => t.pts.map(p => p.lat)));
+  if (!lats.length) return null;
+  const latRef = Math.round(lats.reduce((x, y) => x + y, 0) / lats.length);
+  const mLat = 111320, mLon = 111320 * Math.cos(latRef * Math.PI / 180);
+  const key = (lat, lon) => Math.floor(lat * mLat / size) + ":" + Math.floor(lon * mLon / size);
+  const cells = new Map();
+  const cell = k => { if (!cells.has(k)) cells.set(k, { k, v: { [a]: false, [b]: false }, n: { [a]: 0, [b]: 0 }, m: { [a]: [], [b]: [] } }); return cells.get(k); };
+  const heard = heardMode();
+  const st = {};
+  for (const sf of [a, b]) st[sf] = { n: 0, dist: null, margins: [], ms: 0 };
+  for (const r of rows) {
+    if (r.sf !== a && r.sf !== b) continue;
+    const s = st[r.sf], w = r.w || 1;
+    s.n += w;
+    const d = distFor(r); if (d != null && !isNaN(d) && (s.dist === null || d > s.dist)) s.dist = d;
+    const direct = heard || !(r.hops > 0), m = direct ? marginOf(r) : null;
+    if (m !== null) s.margins.push(m);
+    if (r.rxLat == null || isNaN(r.rxLat)) continue;
+    const c = cell(key(r.rxLat, r.rxLon));
+    c.v[r.sf] = true; c.n[r.sf] += w; if (m !== null) c.m[r.sf].push(m);
+  }
+  for (const t of tracks) {
+    const p = t.pts;
+    for (let i = 0; i < p.length; i++) {
+      const sf = p[i].sf;
+      if (sf !== a && sf !== b) continue;
+      cell(key(p[i].lat, p[i].lon)).v[sf] = true;
+      const q = p[i + 1];
+      if (!q || q.sf !== sf) continue;
+      const dt = q.ms - p[i].ms; if (dt > 0 && dt < 5 * 60000) st[sf].ms += dt;
+      const d = RT.haversineM(p[i].lat, p[i].lon, q.lat, q.lon);
+      const steps = Math.min(200, Math.floor(d / (size / 2)));
+      for (let j = 1; j <= steps; j++) { const f = j / (steps + 1); cell(key(p[i].lat + (q.lat - p[i].lat) * f, p[i].lon + (q.lon - p[i].lon) * f)).v[sf] = true; }
+    }
+  }
+  const out = [];
+  let common = 0; const rx = { [a]: 0, [b]: 0 };
+  for (const c of cells.values()) {
+    if (!c.v[a] || !c.v[b]) continue;   // solo las celdas recorridas con los dos SF
+    common++;
+    if (c.n[a]) rx[a]++; if (c.n[b]) rx[b]++;
+    const [iy, ix] = c.k.split(":").map(Number);
+    c.bounds = [[iy * size / mLat, ix * size / mLon], [(iy + 1) * size / mLat, (ix + 1) * size / mLon]];
+    c.cat = c.n[a] && c.n[b] ? "both" : c.n[b] ? "b" : c.n[a] ? "a" : "none";
+    out.push(c);
+  }
+  return { cells: out, common, rx, st };
+}
+function drawCompare(rows, tracks, sfList) {
+  // por defecto, el SF más bajo frente al más alto
+  let a = sfList.includes(cmpPick.cmpA) ? cmpPick.cmpA : sfList[0];
+  let b = sfList.includes(cmpPick.cmpB) ? cmpPick.cmpB : sfList[sfList.length - 1];
+  if (a === b) b = sfList.find(x => x !== a);
+  const opts = v => sfList.map(sf => '<option value="' + sf + '"' + (sf === v ? " selected" : "") + ">" + sf + "</option>").join("");
+  $("cmpA").innerHTML = opts(a); $("cmpB").innerHTML = opts(b);
+  const res = compareSf(rows, tracks, cellSize, a, b), pts = [];
+  const sw = (c, txt) => '<span><i style="background:' + c + ';border-radius:1px"></i>' + esc(txt) + "</span>";
+  $("lgScale").innerHTML = sw(CMP_COLORS.both, t("cmpBoth")) + sw(CMP_COLORS.b, t("cmpOnly", b)) + sw(CMP_COLORS.a, t("cmpOnly", a)) + sw("rgba(26,29,34,.6)", t("cmpNone"));
+  if (!res) { $("cmpBox").innerHTML = ""; return pts; }
+  const med = arr => arr.length ? median(arr) : null, sign = v => v === null ? "—" : (v >= 0 ? "+" : "") + fmtN(v, 1) + " dB";
+  for (const c of res.cells) {
+    const style = c.cat === "none" ? { stroke: false, fillColor: "#1a1d22", fillOpacity: .45 }
+      : { color: "#0b0d10", weight: .5, fillColor: CMP_COLORS[c.cat], fillOpacity: .65 };
+    const m = sf => { const v = med(c.m[sf]); return v === null ? null : (v >= 0 ? "+" : "") + fmtN(v, 1); };
+    L.rectangle(c.bounds, style).bindPopup("<b>" + t("cellOf", cellSize >= 1000 ? cellSize / 1000 + " km" : cellSize + " m") + "</b><br>" +
+      t("cmpCell", a, c.n[a], m(a)) + "<br>" + t("cmpCell", b, c.n[b], m(b))).addTo(mapLayer);
+    pts.push(c.bounds[0], c.bounds[1]);
+  }
+  // tabla por SF
+  const row = sf => { const s = res.st[sf], pct = res.common ? Math.round(100 * res.rx[sf] / res.common) : 0;
+    return "<tr><td><b>SF" + sf + "</b></td><td>" + res.rx[sf] + " / " + res.common + " (" + pct + " %)</td><td>" + fmtDist(s.dist) + "</td><td>" +
+      sign(med(s.margins)) + "</td><td>" + s.n + "</td></tr>"; };
+  $("cmpBox").innerHTML = '<div class="cmphead">⚖️ ' + esc(t("cmpHead", a, b)) + "</div>" +
+    (res.common ? '<div class="cmpscroll"><table><thead><tr><th>' + esc(t("cmpThSf")) + "</th><th>" + esc(t("cmpThCells")) + "</th><th>" + esc(t("cmpThDist")) +
+      "</th><th>" + esc(t("cmpThMargin")) + "</th><th>" + esc(t("cmpThPkts")) + "</th></tr></thead><tbody>" + row(a) + row(b) + "</tbody></table></div>" +
+      '<div class="cmpnote"><b>' + esc(t("cmpGain", b, res.rx[b] - res.rx[a], a)) + "</b> " + esc(t("cmpNote", res.common)) + "</div>"
+      : '<div class="cmpnote">' + esc(t("cmpNoCommon")) + "</div>");
+  return pts;
+}
+
 let pendingRedraw = false;
 // Si cambias un filtro o la vista con un popup abierto, se cierra y se redibuja al momento.
 // Solo el redibujo por zoom (bordes de la cuadrícula) espera a que cierres el popup.
@@ -1238,13 +1375,20 @@ function drawMap(fit, fromZoom) {
   mapDirty = false;
   mapLayer.clearLayers();
   const rows = mapRows(), tracks = mapTracks(), pts = [];
-  const grid = mapView === "grid", heard = heardMode(), best = selFrom === "h*";
+  const heard = heardMode(), best = selFrom === "h*";
+  // «Comparar» solo si lo visible tiene al menos dos SF; si no, se ve como cuadrícula
+  const sfList = cmpSfList(rows, tracks);
+  $("vCmp").hidden = sfList.length < 2;
+  const cmp = mapView === "cmp" && sfList.length >= 2, grid = mapView === "grid" || (mapView === "cmp" && !cmp);
   const withSnr = rows.filter(r => r.snr != null && !isNaN(r.snr));
   useMargin = withSnr.length > 0 && withSnr.every(r => r.sf);
   drawLegendScale(useMargin ? [...new Set(withSnr.map(r => r.sf))].sort((a, b) => a - b) : null);
   showView();
+  if (mapView === "cmp" && !cmp) { $("vGrid").classList.add("on"); $("cellWrap").hidden = false; }
   $("lgNone").hidden = !grid;
-  $("lgRelay").innerHTML = grid
+  $("cmpBox").hidden = !cmp;
+  if (cmp) pts.push(...drawCompare(rows, tracks, sfList));
+  $("lgRelay").innerHTML = grid || cmp
     ? '<i style="background:#2b2f36;border-radius:1px;border:3px solid rgba(154,205,50,.65)"></i>' + esc(t("lgRelayGrid"))
     : '<i style="background:#000;border:1.5px solid #fff;border-radius:1px"></i>' + esc(t("lgRelayDots"));
 
@@ -1323,7 +1467,7 @@ function drawMap(fit, fromZoom) {
     if (r.rxLat == null || r.rxLon == null || isNaN(r.rxLat)) { sinGps++; continue; }
     n++;
     pts.push([r.rxLat, r.rxLon]);
-    if (grid) continue;
+    if (grid || cmp) continue;
     const relayed = r.hops != null && r.hops > 0, square = relayed && !heard, v = sigOf(r);
     if (relayed) nRelay++;
     // repetido por otro nodo: cuadrado negro (su SNR es del último salto, no del nodo de origen)
@@ -1342,8 +1486,8 @@ function drawMap(fit, fromZoom) {
       .addTo(mapLayer);
   }
 
-  if (!fileRows && !fileTracks.length) { $("lgRelay").hidden = maxHops === 0 || heard; return; }
-  $("lgRelay").hidden = maxHops === 0 || heard;
+  if (!fileRows && !fileTracks.length) { $("lgRelay").hidden = maxHops === 0 || heard || cmp; return; }
+  $("lgRelay").hidden = maxHops === 0 || heard || cmp;
 
   if (pts.length && (fit || !mapFitted)) {
     if (pts.length === 1) map.flyTo(pts[0], 15, { duration: 0.8 });
@@ -1450,7 +1594,7 @@ function debugTxtToRows(text) {
     const alt = pos ? Number(kv("altitude", b.slice(b.indexOf("Position{")))) : NaN;
     if (tr === "TRANSPORT_INTERNAL") {
       if (myNum === null) myNum = from;
-      if (from === myNum && pos) own.push({ ms, lat: pos.lat, lon: pos.lon, alt: isNaN(alt) ? null : alt });
+      if (from === myNum && pos) own.push({ ms, lat: pos.lat, lon: pos.lon, alt: isNaN(alt) ? null : alt, at });
       continue;
     }
     if (tr !== "TRANSPORT_LORA") continue;
@@ -1465,7 +1609,7 @@ function debugTxtToRows(text) {
     const pb = Number(kv("precision_bits", b));
     if (pos && (isNaN(pb) || pb >= 24)) {
       if (!senderTrack.has(from)) senderTrack.set(from, []);
-      senderTrack.get(from).push({ ms, lat: pos.lat, lon: pos.lon, alt: null });
+      senderTrack.get(from).push({ ms, lat: pos.lat, lon: pos.lon, alt: null, at });
     }
     pkts.push({ ms, from, pos, port, hops: (!isNaN(hs) && !isNaN(hl) && hs >= hl) ? hs - hl : null, hopLimit: isNaN(hl) ? null : hl,
                 snr: snr === null ? null : Number(snr), rssi: rssi === null ? null : Number(rssi), relay, at });
@@ -1474,15 +1618,18 @@ function debugTxtToRows(text) {
   // SF de cada paquete: el de la última conexión anterior a él. El registro suele ir del más nuevo
   // al más antiguo, así que es el volcado que queda justo debajo (o encima, si va al revés)
   const newestFirst = pkts.length > 1 && pkts[0].ms > pkts[pkts.length - 1].ms;
-  for (const p of pkts) {
+  const cfgAt = at => {
     let c = null;
     for (const l of loras) {
-      const older = newestFirst ? l.at > p.at : l.at < p.at;
-      if (older && (!c || Math.abs(l.at - p.at) < Math.abs(c.at - p.at))) c = l;
+      const older = newestFirst ? l.at > at : l.at < at;
+      if (older && (!c || Math.abs(l.at - at) < Math.abs(c.at - at))) c = l;
     }
-    if (!c) for (const l of loras) if (!c || Math.abs(l.at - p.at) < Math.abs(c.at - p.at)) c = l;
-    p.sf = c ? c.sf : null; p.bw = c ? c.bw : null;
-  }
+    if (!c) for (const l of loras) if (!c || Math.abs(l.at - at) < Math.abs(c.at - at)) c = l;
+    return c;
+  };
+  for (const p of pkts) { const c = cfgAt(p.at); p.sf = c ? c.sf : null; p.bw = c ? c.bw : null; }
+  // también cada punto del recorrido lleva el SF con el que se iba en ese momento (para comparar SF)
+  for (const q of own.concat(...senderTrack.values())) { const c = cfgAt(q.at); q.sf = c ? c.sf : null; }
   // Nodo oído directamente: el emisor si llegó en directo; si llegó con saltos, el del último salto.
   // Si solo se conoce el último byte del id, se busca entre los nodos conocidos (si hay uno solo)
   const known8 = new Set([...names.keys(), ...pkts.map(p => p.from), ...pkts.map(p => p.relay).filter(r => r > 255)]);
@@ -1544,7 +1691,7 @@ async function openDebugTxt(file) {
     const r = debugTxtToRows(await file.text());
     fileRows = (fileRows || []).concat(r.rows); fileNames.push(file.name);
     for (const t of r.tracks) {
-      const segs = trackSegments(t).map(seg => seg.map(p => ({ lat: p.lat, lon: p.lon, ms: p.ms })));
+      const segs = trackSegments(t).map(seg => seg.map(p => ({ lat: p.lat, lon: p.lon, ms: p.ms, sf: p.sf || null })));
       fileTracks.push({ name: file.name, segs });
     }
     if (!map) await startMap();
@@ -1908,6 +2055,8 @@ $("fileAny").addEventListener("change", async e => { const fs = [...(e.target.fi
 
 $("vDots").addEventListener("click", () => setView("dots"));
 $("vGrid").addEventListener("click", () => setView("grid"));
+$("vCmp").addEventListener("click", () => setView("cmp"));
+for (const id of ["cmpA", "cmpB"]) $(id).addEventListener("change", e => { cmpPick[id] = Number(e.target.value); mapDirty = true; dirtyRender = true; if (map) drawMap(false); });
 $("rngCell").addEventListener("input", e => { cellSize = CELL_SIZES[Number(e.target.value)] || 250; showCell(); saveMapPrefs(); mapDirty = true; dirtyRender = true; });
 function showHops() {
   $("hopsVal").textContent = minHops === maxHops ? String(maxHops) : minHops + "–" + maxHops;
