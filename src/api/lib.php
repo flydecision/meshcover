@@ -2,7 +2,8 @@
 // Mapa comunitario de cobertura: utilidades comunes a upload.php y community.php.
 // Los datos se guardan en ../data (fuera del alcance de la web gracias a su .htaccess).
 
-const BUILD = 6;                  // versión de community.json: al cambiarla se rehace
+const BUILD = 7;
+const MIN_FILES_INFO = 5;        // con menos subidas en total, no se publican pasadas ni recepción por celda (privacidad)                  // versión de community.json: al cambiarla se rehace
 const CELL_SIZE = 250;            // tamaño fijo de celda de los archivos exportados por la página
 const MAX_BYTES = 524288;         // 512 KB por subida
 const MAX_CELLS = 20000;
@@ -108,7 +109,7 @@ function build_community(string $dir, int $months = 0): array {
       }
     }
   }
-  $out = [];
+  $out = []; $info = $files >= MIN_FILES_INFO;
   foreach ($cells as $c) {
     $nodes = [];
     foreach ($c['nodes'] as $a) {
@@ -118,7 +119,10 @@ function build_community(string $dir, int $months = 0): array {
       if ($a['sf']) { arsort($a['sf']); [$sf, $bw] = explode('|', (string)array_key_first($a['sf'])); $o['sf'] = (int)$sf; if ($bw !== '') $o['bw'] = (float)$bw; }
       $nodes[] = $o;
     }
-    $out[] = ['lat' => $c['lat'], 'lon' => $c['lon'], 'n' => $c['n'], 'f' => $c['f'] >= 5 ? 5 : ($c['f'] >= 2 ? 2 : 1), 'rx' => $c['fr'] == 0 ? 0 : ($c['fr'] >= $c['f'] ? 2 : 1), 'last' => $c['last'], 'nodes' => $nodes];
+    $o = ['lat' => $c['lat'], 'lon' => $c['lon'], 'n' => $c['n']];
+    if ($info) { $o['f'] = $c['f'] >= 5 ? 5 : ($c['f'] >= 2 ? 2 : 1); $o['rx'] = $c['fr'] == 0 ? 0 : ($c['fr'] >= $c['f'] ? 2 : 1); }
+    $o['last'] = $c['last']; $o['nodes'] = $nodes;
+    $out[] = $o;
   }
   return ['format' => 'meshcover-coverage', 'version' => 1, 'build' => BUILD, 'cellSize' => CELL_SIZE, 'date' => gmdate('Y-m'),
           'months' => $months, 'files' => $files, 'cells' => $out];

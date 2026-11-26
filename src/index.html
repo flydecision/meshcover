@@ -418,7 +418,7 @@
       <ul>
         <li>Ni el recorrido, ni horas, ni días, ni el orden en que pasaste.</li>
         <li>Nada cerca de donde empieza y acaba cada ruta, ni de donde te paraste más de 5 min (círculos rojos; tú eliges el radio). Cada círculo se desplaza al azar y crece un poco, para que el centro del hueco no coincida con tu casa.</li>
-        <li>El mapa comunitario no publica números exactos de pasadas, solo franjas (1, 2–4, 5 o más) y si se recibió siempre, a veces o nunca: con pocas personas subiendo, los números exactos alrededor de un hueco darían pistas.</li>
+        <li>El mapa comunitario no publica números exactos de pasadas, solo franjas (1, 2–4, 5 o más) y si se recibió siempre, a veces o nunca: con pocas personas subiendo, los números exactos alrededor de un hueco darían pistas. Y mientras haya menos de 5 subidas en total, no publica ni eso.</li>
         <li>Ni tu nombre, ni tu nodo, ni tu móvil, ni ningún dato de cuenta.</li>
       </ul>
       <h3>🔍 Cómo comprobarlo antes</h3>
@@ -551,7 +551,7 @@
       <ul>
         <li>No track, no times, no days, no order in which you passed.</li>
         <li>Nothing near where each route starts and ends, or where you stopped for more than 5 min (red circles; you choose the radius). Each circle is shifted at random and grows a little, so the centre of the gap is not your home.</li>
-        <li>The community map does not publish exact numbers of passes, only ranges (1, 2–4, 5 or more) and whether reception was always, sometimes or never: with few people uploading, exact numbers around a gap would give clues.</li>
+        <li>The community map does not publish exact numbers of passes, only ranges (1, 2–4, 5 or more) and whether reception was always, sometimes or never: with few people uploading, exact numbers around a gap would give clues. And while there are fewer than 5 uploads in total, it does not publish even that.</li>
         <li>Not your name, your node, your phone or any account data.</li>
       </ul>
       <h3>🔍 How to check it first</h3>
@@ -642,7 +642,7 @@ const I18N = {
     noRxText: "You passed here and no packet arrived.", noRxComm: "Routes passed here and nothing was heard directly from a relaying node.",
     txTitle: "Transmission", txCell: (a, n) => a + " of " + n + " messages reached the mesh", txMsg: "Message sent",
     txOk: "✓ The mesh heard it: a node relayed or acknowledged it.", txKo: "✗ Nobody relayed it after 3 tries.", lgTx: "Message sent: mesh heard it / nobody",
-    commPass1: "1 pass", commPass2: "2–4 passes", commPass5: "5 or more passes", commRx: "reception", rxNever: "never", rxSome: "sometimes", rxAll: "always", reliability: "Reliability",
+    commFew: "There are still few uploads: passes and reliability will show when there are more.", commPass1: "1 pass", commPass2: "2–4 passes", commPass5: "5 or more passes", commRx: "reception", rxNever: "never", rxSome: "sometimes", rxAll: "always", reliability: "Reliability",
     relLow: "low (a single pass, just a hint)", relMid: "medium (few passes)", relHigh: "good (5 or more passes)", lastData: "Newest data", expected: n => "About " + n + " packets were expected",
     gpsPos: "GPS position", lastHop: "from the last hop, not the origin node", distance: "distance",
     direct: "direct", nHops: n => n + (n === 1 ? " hop" : " hops"), routePos: "position of the route node",
@@ -714,7 +714,7 @@ const I18N = {
     noRxText: "Pasaste por aquí y no llegó ningún paquete.", noRxComm: "Han pasado recorridos por aquí y no se oyó directamente a ningún nodo que repita.",
     txTitle: "Transmisión", txCell: (a, n) => a + " de " + n + " mensajes llegaron a la red", txMsg: "Mensaje enviado",
     txOk: "✓ La red lo oyó: un nodo lo retransmitió o lo confirmó.", txKo: "✗ Nadie lo retransmitió tras 3 intentos.", lgTx: "Mensaje enviado: la red lo oyó / nadie",
-    commPass1: "1 pasada", commPass2: "2–4 pasadas", commPass5: "5 pasadas o más", commRx: "recepción", rxNever: "nunca", rxSome: "a veces", rxAll: "siempre", reliability: "Fiabilidad",
+    commFew: "Aún hay pocas subidas: las pasadas y la fiabilidad se mostrarán cuando haya más.", commPass1: "1 pasada", commPass2: "2–4 pasadas", commPass5: "5 pasadas o más", commRx: "recepción", rxNever: "nunca", rxSome: "a veces", rxAll: "siempre", reliability: "Fiabilidad",
     relLow: "baja (una sola pasada, solo orientativo)", relMid: "media (pocas pasadas)", relHigh: "buena (5 pasadas o más)", lastData: "Dato más reciente", expected: n => "Se esperaban ≈ " + n + " paquetes",
     gpsPos: "Posición GPS", lastHop: "del último salto, no del nodo de origen", distance: "distancia",
     direct: "directo", nHops: n => n + (n === 1 ? " salto" : " saltos"), routePos: "posición del nodo de ruta",
@@ -1351,7 +1351,8 @@ function buildGrid(rows, tracks, size) {
 
 // datos del mapa comunitario en una celda: nº de subidas que pasan por ella (f), en cuántas se recibió algo (fr) y último mes
 function commCell(c, r) {
-  c.cf = Math.max(c.cf || 0, r.cf || 1);
+  c.comm = true;
+  if (r.cf != null) c.cf = Math.max(c.cf || 0, r.cf);
   if (r.cfr != null) c.cfr = r.cfr;
   if (r.clast && (!c.clast || r.clast > c.clast)) c.clast = r.clast;
 }
@@ -1362,7 +1363,9 @@ function txInfo(c) {
   return n ? "<hr style='border:0;border-top:1px solid #8884;margin:6px 0'>📤 <b>" + t("txTitle") + "</b>: " + t("txCell", c.txOk, n) : "";
 }
 function commInfo(c) {
-  if (!c.cf) return "";
+  if (!c.comm) return "";
+  // con pocas subidas en total el servidor no publica pasadas ni recepción (privacidad)
+  if (!c.cf) return "<hr style='border:0;border-top:1px solid #8884;margin:6px 0'>🌍 <b>" + t("commName") + "</b><br>" + t("commFew");
   const lvl = c.cf >= 5 ? "relHigh" : c.cf >= 2 ? "relMid" : "relLow";
   return "<hr style='border:0;border-top:1px solid #8884;margin:6px 0'>🌍 <b>" + t("commName") + "</b><br>" +
     t(c.cf >= 5 ? "commPass5" : c.cf >= 2 ? "commPass2" : "commPass1") + (c.cfr != null ? " · " + t("commRx") + ": " + t(["rxNever", "rxSome", "rxAll"][c.cfr]) : "") + "<br>" +
@@ -2112,7 +2115,7 @@ async function addCoverage(data, name, community) {
     for (const c of data.cells) {
       const lat = Number(c.lat), lon = Number(c.lon);
       if (!isFinite(lat) || !isFinite(lon)) continue;
-      const n = Math.max(0, Number(c.n) || 0), cf = Math.max(1, Number(c.f) || 1),
+      const n = Math.max(0, Number(c.n) || 0), cf = c.f != null && Number(c.f) >= 1 ? Number(c.f) : null,
         cfr = [0, 1, 2].includes(c.rx) ? c.rx : null, clast = /^\d{4}-\d{2}$/.test(String(c.last || "")) ? String(c.last) : "";
       if (!n) { fileVisited.push({ lat, lon, community: !!community, cf, cfr, clast }); continue; }
       let known = 0;
