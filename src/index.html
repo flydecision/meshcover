@@ -648,6 +648,7 @@ const I18N = {
     direct: "direct", nHops: n => n + (n === 1 ? " hop" : " hops"), routePos: "position of the route node",
     errEmpty: "the file is empty", errCsv: "it does not look like a CSV from this page",
     errNoPkts: "there are no packets received over the radio in the file",
+    noOwnPos: "⚠️ Your node did not send a single position of its own in this log, so what was received cannot be placed on the map. Usually the node's GPS had no signal (indoors or in a pocket): before setting off, leave it under open sky until its position updates in the app.",
     lowPrecSome: (n, tot, m) => "⚠️ " + n + " of " + tot + " positions of your node came with reduced precision (~" + m + ", probably while position was shared on the public channel). They have been discarded, and the packets received at those times are left off the map.",
     sfAskTxt: "has no LoRa settings. Which SF was it recorded with?",
     dropHere: "📂 Drop the files here", lowPrec: m => "⚠️ Your node's positions come with reduced precision (~" + m + "), so they are not used for the route or the cells. In the app, turn on position with full precision only on a channel of your own with a key (primary or secondary), and turn it off on the public channel.", errGpx: "the file is not a valid GPX",
@@ -720,6 +721,7 @@ const I18N = {
     direct: "directo", nHops: n => n + (n === 1 ? " salto" : " saltos"), routePos: "posición del nodo de ruta",
     errEmpty: "el archivo está vacío", errCsv: "no parece un CSV de esta página",
     errNoPkts: "no hay paquetes recibidos por radio en el archivo",
+    noOwnPos: "⚠️ Tu nodo no ha mandado ni una posición propia en este registro, así que lo recibido no se puede colocar en el mapa. Casi siempre es que el GPS del nodo no tenía señal (dentro de un edificio o en el bolsillo): antes de salir, déjalo a cielo abierto hasta que en la app se actualice su posición.",
     lowPrecSome: (n, tot, m) => "⚠️ " + n + " de " + tot + " posiciones de tu nodo venían con precisión reducida (~" + m + ", seguramente de ratos en que la posición se compartía por el canal público). Se han descartado, y los paquetes recibidos en esos ratos no salen en el mapa.",
     sfAskTxt: "no trae los ajustes LoRa. ¿Con qué SF se grabó?",
     dropHere: "📂 Suelta aquí los archivos", lowPrec: m => "⚠️ Las posiciones de tu nodo vienen con precisión reducida (~" + m + "), así que no se usan para el recorrido ni para las celdas. En la app, activa la posición con precisión completa solo en un canal propio con clave (primario o secundario), y desactívala en el público.", errGpx: "el archivo no es un GPX válido",
@@ -1787,9 +1789,18 @@ function debugTxtToRows(text) {
   const ownLow = lowBits.length, ownTotal = own.length;
   if (ownLow) for (let i = own.length - 1; i >= 0; i--) if (own[i].pb > 0 && own[i].pb < 17) own.splice(i, 1);
   for (const t of senderTrack.values()) t.sort((a, b) => a.ms - b.ms);
-  // Solo cuenta como «nodo que se mueve» el emisor cuyas posiciones se separan más de 100 m
+  // Solo cuenta como «nodo que se mueve» el emisor con 5 posiciones o más que de verdad recorre algo:
+  // la mitad de sus posiciones a más de 60 m de su punto central y alguna a más de 300 m. Un nodo fijo
+  // con GPS bailotea unas decenas de metros con algún salto suelto, y no debe tomarse por un recorrido
+  // (ni un nodo ajeno que se oyó un par de veces)
   const moving = new Set();
-  for (const [n, t] of senderTrack) if (t.length >= 3 && t.some(q => RT.haversineM(t[0].lat, t[0].lon, q.lat, q.lon) > 100)) moving.add(n);
+  const med = a => { const b = a.slice().sort((x, y) => x - y); return b[b.length >> 1]; };
+  for (const [n, t] of senderTrack) {
+    if (t.length < 5) continue;
+    const c = { lat: med(t.map(q => q.lat)), lon: med(t.map(q => q.lon)) };
+    const ds = t.map(q => RT.haversineM(c.lat, c.lon, q.lat, q.lon));
+    if (med(ds) > 60 && Math.max(...ds) > 300) moving.add(n);
+  }
   // Posición en una lista a una hora dada: interpola entre dos puntos cercanos o usa el más próximo (< 2 min)
   const posAt = (list, ms) => {
     if (!list || !list.length) return null;
@@ -1844,7 +1855,7 @@ function debugTxtToRows(text) {
   const tracks = [];
   if (own.length) tracks.push(own);
   else for (const n of moving) tracks.push(senderTrack.get(n));
-  return { rows, tx, own, tracks, myNum, myName: names.get(myNum) || "", roles, hasCfg: loras.length > 0, ownBits, ownLow, ownTotal, lowBits: ownLow ? lowBits[ownLow >> 1] : null };
+  return { rows, tx, own, tracks, myNum, myName: names.get(myNum) || "", roles, hasCfg: loras.length > 0, noOwn: ownTotal === 0 && !moving.size, ownBits, ownLow, ownTotal, lowBits: ownLow ? lowBits[ownLow >> 1] : null };
 }
 async function openDebugTxt(file) {
   try {
@@ -1866,7 +1877,9 @@ async function openDebugTxt(file) {
     const conPos = r.rows.filter(x => x.rxLat !== null).length;
     // aviso: posiciones propias recortadas (menos de 17 bits ≈ 180 m no sirven para celdas de 250 m)
     // posiciones propias imprecisas: todas (aviso de configurar el canal) o solo algunas (ratos con otra configuración)
-    if (r.ownLow) {
+    // ninguna posición propia: casi siempre el GPS del nodo de ruta sin señal
+    if (r.noOwn) say(t("noOwnPos"), 25000);
+    else if (r.ownLow) {
       const m = fmtM(Math.round(23300 / Math.pow(2, r.lowBits - 10) / 10) * 10);
       say(r.ownLow === r.ownTotal ? t("lowPrec", m) : t("lowPrecSome", r.ownLow, r.ownTotal, m), 20000);
     }
