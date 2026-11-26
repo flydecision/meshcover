@@ -642,7 +642,7 @@ const I18N = {
     layer_topo: "ESRI topographic", layer_sat: "ESRI satellite imagery", layer_otm: "OpenTopoMap topographic",
     layer_osm: "OpenStreetMap classic", layer_relief: "High-resolution hillshade",
     lgRelayGrid: "Received with hops", lgRelayDots: "relayed by another node (hops ≥ 1, no useful SNR)",
-    cellOf: s => s + " cell", rxTitle: "Reception", ofExpected: "of expected", pktsRx: "Packets received", byOther: n => n + " via another node", reception: "reception",
+    cellOf: s => s + " cell", rxTitle: "Reception", inComm: "Community map", ofExpected: "of expected", pktsRx: "Packets received", byOther: n => n + " via another node", reception: "reception",
     onlyRelay: v => "Only relayed packets: last-hop SNR " + v + " dB <i>(not the origin node's)</i>",
     medSnr: (m, w, b) => "Median SNR " + m + " dB (worst " + w + ", best " + b + ")",
     medRssi: m => "Median RSSI " + m + " dBm", directOnly: "direct only", timeInCell: "Time in cell",
@@ -717,7 +717,7 @@ const I18N = {
     layer_topo: "Topográfico ESRI", layer_sat: "Imágenes satélite ESRI", layer_otm: "Topográfico OpenTopoMap",
     layer_osm: "OpenStreetMap clásico", layer_relief: "Relieve sombreado de alta resolución",
     lgRelayGrid: "Recibido con saltos", lgRelayDots: "llegó por otro nodo (saltos ≥ 1, sin SNR útil)",
-    cellOf: s => "Celda de " + s, rxTitle: "Recepción", ofExpected: "de lo esperado", pktsRx: "Paquetes recibidos", byOther: n => n + " por otro nodo", reception: "recepción",
+    cellOf: s => "Celda de " + s, rxTitle: "Recepción", inComm: "Mapa comunitario", ofExpected: "de lo esperado", pktsRx: "Paquetes recibidos", byOther: n => n + " por otro nodo", reception: "recepción",
     onlyRelay: v => "Solo llegaron repetidos: SNR del último salto " + v + " dB <i>(no es el del nodo de origen)</i>",
     medSnr: (m, w, b) => "SNR mediano " + m + " dB (peor " + w + ", mejor " + b + ")",
     medRssi: m => "RSSI mediano " + m + " dBm", directOnly: "solo directos", timeInCell: "Tiempo en la celda",
@@ -1385,9 +1385,13 @@ function cellHead(c) {
 function popSec(icon, title, lines) {
   return '<div class="psec"><div class="ptitle">' + icon + " " + title + "</div>" + lines.filter(Boolean).map(l => "<div>" + l + "</div>").join("") + "</div>";
 }
+// En el mapa comunitario la recepción y la transmisión llegan solo como franja (siempre / a veces / nunca):
+// se muestran dentro de su propia sección, y la sección 🌍 queda solo para pasadas, fiabilidad y fecha
+function commBand(b) { return b == null ? "" : "🌍 " + t("inComm") + ": <b>" + t(["rxNever", "rxSome", "rxAll"][b]) + "</b>"; }
 function txInfo(c) {
   const n = c.txOk + c.txFail;
-  return n ? popSec("📤", t("txTitle"), ['<i class="pdot" style="background:' + TX_COLORS[c.txOk === n ? 2 : c.txOk ? 1 : 0] + '"></i>' + t("txCell", c.txOk, n)]) : "";
+  if (!n && c.txb == null) return "";
+  return popSec("📤", t("txTitle"), [n ? '<i class="pdot" style="background:' + TX_COLORS[c.txOk === n ? 2 : c.txOk ? 1 : 0] + '"></i>' + t("txCell", c.txOk, n) : "", commBand(c.txb)]);
 }
 // estado de transmisión de una celda: 2 siempre llegó, 1 a veces, 0 nunca, null sin mensajes
 function txState(c) {
@@ -1398,14 +1402,11 @@ function txState(c) {
 const TX_COLORS = ["#d93025", "#e6b31e", "#1fa64a"];
 function commInfo(c) {
   if (!c.comm) return "";
-  const band = b => t(["rxNever", "rxSome", "rxAll"][b]);
-  const txl = c.txb != null ? "📤 " + t("txTitle") + ": " + band(c.txb) : "";
   // con pocas subidas en total el servidor no publica pasadas ni recepción (privacidad)
-  if (!c.cf) return popSec("🌍", t("commName"), [t("commFew"), txl]);
+  if (!c.cf) return popSec("🌍", t("commName"), [t("commFew")]);
   const lvl = c.cf >= 5 ? "relHigh" : c.cf >= 2 ? "relMid" : "relLow";
   return popSec("🌍", t("commName"), [
     t(c.cf >= 5 ? "commPass5" : c.cf >= 2 ? "commPass2" : "commPass1") + " · " + t("reliability").toLowerCase() + " <b>" + t(lvl) + "</b>",
-    c.cfr != null ? "📥 " + t("rxTitle") + ": " + band(c.cfr) : "", txl,
     c.clast ? t("lastData") + ": " + c.clast : ""]);
 }
 
@@ -1583,7 +1584,7 @@ function drawMap(fit, fromZoom) {
              : [best && bestNode !== null ? t("bestNode", esc(bestNames.get(bestNode) || hexId(bestNode))) + (c.by.size > 1 ? " · " + t("nNodes", c.by.size) : "") : "",
                 '<i class="pdot" style="background:' + sigColor(med) + '"></i>' + t(useMargin ? "medMargin" : "medSnr", fmtN(med, 1), fmtN(sorted[0], 1), fmtN(sorted[sorted.length - 1], 1)),
                 c.rssi.length ? t("medRssi", fmtN(median(c.rssi))) + (c.nRelay ? " <i>(" + t("directOnly") + ")</i>" : "") : ""])];
-      rect.bindPopup(cellHead(c) + popSec("📥", t("rxTitle"), rxLines) + txInfo(c) + commInfo(c));
+      rect.bindPopup(cellHead(c) + popSec("📥", t("rxTitle"), rxLines.concat(commBand(c.cfr))) + txInfo(c) + commInfo(c));
       rect.addTo(mapLayer);
       // el gris solo dentro del borde: así el borde se ve sobre el mapa con el mismo tono que las celdas en directo
       if (onlyRelay) L.rectangle(insetBounds(c.bounds, RELAY_BORDER), { stroke: false, fillColor: "#2b2f36", fillOpacity: .6, interactive: false }).addTo(mapLayer);
