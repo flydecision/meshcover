@@ -18,6 +18,9 @@
   button:disabled { opacity:.45; }
   .btns button { box-sizing:border-box; height:29px; padding:0 11px; font-size:16px; display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
   .btns button[hidden] { display:none; }
+  .sfask { display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:6px 0; padding:6px 10px; border:1px solid #2a3340; border-radius:10px; background:#1a2029; font-size:16px; color:#9aa4b2; }
+  .sfask b { color:#e6e9ee; overflow-wrap:anywhere; }
+  .sfask select { height:29px; padding:0 6px; font-size:16px; }
   #toast { position:fixed; left:50%; bottom:18px; transform:translateX(-50%); z-index:2000; max-width:min(92vw,560px);
     background:#5e2620; color:#fff; border-radius:10px; padding:10px 14px; font-size:16px; box-shadow:0 4px 18px #0008; white-space:pre-wrap; }
   #toast[hidden] { display:none; }
@@ -215,6 +218,7 @@
   <input type="file" id="fileAny" accept=".csv,.gpx,.txt,.json,text/csv,text/plain,application/gpx+xml,application/xml,text/xml,application/json" multiple hidden>
 </div>
 <div id="toast" hidden role="alert"></div>
+<div id="sfAsk"></div>
 
 <div id="mapBox">
   <div class="mapopts">
@@ -334,7 +338,7 @@
       <h3>⚖️ Comparar SF (¿cuánto ganamos subiendo a SF10?)</h3>
       <ol>
         <li>Con el nodo fijo y el de ruta en <b>SF7</b>, haz una ruta. Cambia <b>los dos</b> a <b>SF10</b> (mismo BW, CR y frecuencia) y repite <b>la misma ruta</b>, mejor el mismo día y despacio (andando o en bici).</li>
-        <li>Exporta el registro (o los dos) y añádelos aquí. No hay que apuntar nada: la página sabe con qué SF iba cada paquete y cada tramo del recorrido.</li>
+        <li>Exporta el registro (o los dos) y añádelos aquí. Normalmente no hay que apuntar nada: la página sabe con qué SF iba cada paquete y cada tramo del recorrido. Si el registro no trae los ajustes LoRa (por ejemplo, exportado solo con «Packets» o vaciado después de conectar), la página te pregunta el SF de ese archivo.</li>
         <li>En <b>Nodo</b>, elige el nodo fijo y pulsa <b>⚖️ Comparar</b> (solo sale si hay dos SF o más).</li>
         <li>Cada celda sale verde si recibieron <b>los dos</b>, azul si <b>solo el SF alto</b>, naranja si <b>solo el bajo</b> y gris si <b>ninguno</b>. Debajo, una tabla con el % de celdas con recepción, la distancia máxima y el margen mediano de cada SF.</li>
         <li>Solo cuentan las celdas por las que pasaste con los dos SF. Con más de dos SF, elige cuáles comparar.</li>
@@ -459,7 +463,7 @@
       <h3>⚖️ Compare SF (how much do we gain going up to SF10?)</h3>
       <ol>
         <li>With the fixed and the route node on <b>SF7</b>, do a route. Switch <b>both</b> to <b>SF10</b> (same BW, CR and frequency) and repeat <b>the same route</b>, ideally the same day and slowly (walking or cycling).</li>
-        <li>Export the log (or both) and add them here. No need to note anything: the page knows which SF each packet and each part of the track used.</li>
+        <li>Export the log (or both) and add them here. Usually no need to note anything: the page knows which SF each packet and each part of the track used. If the log has no LoRa settings (for example, exported with only «Packets», or cleared after connecting), the page asks you for that file's SF.</li>
         <li>In <b>Node</b>, choose the fixed node and press <b>⚖️ Compare</b> (it only appears with two or more SF).</li>
         <li>Each cell is green if <b>both</b> received, blue if <b>only the higher SF</b>, orange if <b>only the lower</b> and grey if <b>neither</b>. Below, a table with the % of cells with reception, the maximum distance and the median margin of each SF.</li>
         <li>Only cells you passed with both SF count. With more than two SF, choose which ones to compare.</li>
@@ -616,6 +620,7 @@ const I18N = {
     errEmpty: "the file is empty", errCsv: "it does not look like a CSV from this page",
     errNoPkts: "there are no packets received over the radio in the file",
     lowPrecSome: (n, tot, m) => "⚠️ " + n + " of " + tot + " positions of your node came with reduced precision (~" + m + ", probably while position was shared on the public channel). They have been discarded, and the packets received at those times are left off the map.",
+    sfAskTxt: "has no LoRa settings. Which SF was it recorded with?",
     dropHere: "📂 Drop the files here", lowPrec: m => "⚠️ Your node's positions come with reduced precision (~" + m + "), so they are not used for the route or the cells. In the app, turn on position with full precision only on a channel of your own with a key (primary or secondary), and turn it off on the public channel.", errGpx: "the file is not a valid GPX",
     errNoTrack: "it has no track points", errOpen: (f, m) => "Could not open " + f + ": " + m,
     nodeSearch: "Search node", noMatch: "No node matches",
@@ -679,6 +684,7 @@ const I18N = {
     errEmpty: "el archivo está vacío", errCsv: "no parece un CSV de esta página",
     errNoPkts: "no hay paquetes recibidos por radio en el archivo",
     lowPrecSome: (n, tot, m) => "⚠️ " + n + " de " + tot + " posiciones de tu nodo venían con precisión reducida (~" + m + ", seguramente de ratos en que la posición se compartía por el canal público). Se han descartado, y los paquetes recibidos en esos ratos no salen en el mapa.",
+    sfAskTxt: "no trae los ajustes LoRa. ¿Con qué SF se grabó?",
     dropHere: "📂 Suelta aquí los archivos", lowPrec: m => "⚠️ Las posiciones de tu nodo vienen con precisión reducida (~" + m + "), así que no se usan para el recorrido ni para las celdas. En la app, activa la posición con precisión completa solo en un canal propio con clave (primario o secundario), y desactívala en el público.", errGpx: "el archivo no es un GPX válido",
     errNoTrack: "no tiene puntos de recorrido", errOpen: (f, m) => "No se pudo abrir " + f + ": " + m,
     nodeSearch: "Buscar nodo", noMatch: "Ningún nodo coincide",
@@ -960,11 +966,27 @@ function placeFromGpx() {
   }
   return n;
 }
+// Registro sin bloque de configuración LoRa (p. ej. exportado solo con «Packets», o vaciado después de
+// conectar): no se sabe su SF. Se pregunta, para que el color por margen y «⚖️ Comparar SF» funcionen.
+function askSf(name) {
+  const d = document.createElement("div");
+  d.className = "sfask";
+  d.innerHTML = "📻 <b>" + esc(name) + "</b> <span>" + esc(t("sfAskTxt")) + "</span> <label>SF <select>" +
+    '<option value="">?</option>' + [7, 8, 9, 10, 11, 12].map(v => '<option value="' + v + '">' + v + "</option>").join("") + "</select></label>";
+  d.querySelector("select").addEventListener("change", e => {
+    const v = Number(e.target.value) || null;
+    for (const r of fileRows || []) if (r.file === name) r.sf = v;
+    for (const tr of fileTracks) if (tr.name === name) for (const sg of tr.segs) for (const q of sg) q.sf = v;
+    mapDirty = true; dirtyRender = true; render(); if (map) drawMap(false);
+  });
+  $("sfAsk").appendChild(d);
+}
 // «🗑 Limpiar»: quita del mapa todo lo abierto
 function clearAll() {
   if (!fileRows && !fileTracks.length && !fileVisited.length) return;
   fileRows = null; fileNames = []; fileTracks = []; fileVisited = [];
   nodeRoles = new Map();
+  $("sfAsk").innerHTML = "";
   $("ageWrap").hidden = true;
   closeExport();
   mapFitted = false; mapDirty = true; dirtyRender = true;
@@ -1711,14 +1733,16 @@ function debugTxtToRows(text) {
   const tracks = [];
   if (own.length) tracks.push(own);
   else for (const n of moving) tracks.push(senderTrack.get(n));
-  return { rows, own, tracks, myNum, myName: names.get(myNum) || "", roles, ownBits, ownLow, ownTotal, lowBits: ownLow ? lowBits[ownLow >> 1] : null };
+  return { rows, own, tracks, myNum, myName: names.get(myNum) || "", roles, hasCfg: loras.length > 0, ownBits, ownLow, ownTotal, lowBits: ownLow ? lowBits[ownLow >> 1] : null };
 }
 async function openDebugTxt(file) {
   try {
     const r = debugTxtToRows(await file.text());
     const first = !(fileRows && fileRows.length) && !fileVisited.length;
+    for (const x of r.rows) x.file = file.name;
     fileRows = (fileRows || []).concat(r.rows); fileNames.push(file.name);
     for (const [n, role] of r.roles) nodeRoles.set(n, role);
+    if (!r.hasCfg) askSf(file.name);
     for (const t of r.tracks) {
       const segs = trackSegments(t).map(seg => seg.map(p => ({ lat: p.lat, lon: p.lon, ms: p.ms, sf: p.sf || null })));
       fileTracks.push({ name: file.name, segs });
