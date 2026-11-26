@@ -1,4 +1,6 @@
-# Analizador Cobertura Meshtastic
+# MeshCover
+
+Analizador de cobertura para redes Meshtastic.
 
 > 🧪 **Repositorio de pruebas.** Esto es un experimento personal para medir la cobertura real de una red Meshtastic. La idea es que, si funciona bien, se ofrezca a la comunidad de Meshtastic para que lo integre, lo modifique o lo rechace, como mejor le parezca. Las ideas, los fallos y las propuestas son bienvenidos.
 
@@ -33,6 +35,10 @@ src/index.html   la web completa (HTML, CSS y JavaScript en un solo archivo)
 Usa [Leaflet](https://leafletjs.com) desde CDN. Para probar cambios basta con abrir `src/index.html` en el navegador.
 
 Las versiones anteriores, que grababan en vivo por Web Bluetooth, siguen en el historial de Git.
+
+## Aviso
+
+MeshCover es un proyecto independiente, sin relación con el proyecto Meshtastic®. Meshtastic es una marca registrada de Meshtastic LLC.
 
 ## Licencia
 
