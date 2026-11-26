@@ -197,6 +197,8 @@
   .leaflet-control-max a { display:flex !important; align-items:center; justify-content:center; color:#222 !important; }
   #map.leaflet-container, #map .leaflet-control-scale-line, #map .leaflet-control-attribution { font-size:16px; }
   .leaflet-popup-content { font-size:16px; line-height:1.45; color:#111; }
+.txm{width:18px;height:18px;border-radius:50%;border:2px solid #fff;color:#fff;font:700 12px/1 system-ui,sans-serif;display:flex;align-items:center;justify-content:center;box-shadow:0 0 3px rgba(0,0,0,.7);box-sizing:border-box}
+.txm.ok{background:#1fa64a}.txm.ko{background:#d93025}
 </style>
 </head>
 <body>
@@ -253,6 +255,7 @@
     <span><i style="background:#2f7df6;border-radius:2px;height:4px;width:16px;vertical-align:3px;border:0"></i><span data-i18n="track">Track</span></span>
     <span id="lgNone" hidden><i style="background:rgba(26,29,34,.6);border-radius:1px;border:1px solid #555"></i><span data-i18n="noRx">No reception</span></span>
     <span id="lgRelay" hidden></span>
+    <span id="lgTx" hidden><span class="txm ok" style="display:inline-flex;vertical-align:-3px">✓</span><span class="txm ko" style="display:inline-flex;vertical-align:-3px;margin-left:2px">✗</span> <span data-i18n="lgTx">Message sent: network heard it / nobody</span></span>
     <span>📡 <span data-i18n="nodeIcon">Node</span></span>
   </div>
   <div id="cmpBox" hidden></div>
@@ -335,6 +338,13 @@
         <li>Al abrir el registro se elige sola <b>📶 Oído directamente → Mejor señal de cualquier nodo</b> en <b>🔳 Cuadrícula</b>. Cada celda sale del color del nodo que mejor se oye allí; al pinchar, dice cuál es. Para la cobertura de un repetidor concreto, elígelo en ese mismo grupo.</li>
         <li>Deja los saltos en 0–7. Suma registros de varios días o personas para completar la zona.</li>
       </ol>
+      <h3>📤 Transmisión (¿la red me oye a mí?)</h3>
+      <div>Lo anterior mide lo que <b>tu nodo oye</b>. Para saber si <b>la red te oye a ti</b>, durante la ruta manda de vez en cuando un mensaje corto a un canal (cada pocos minutos o en los puntos que te interesen; el texto da igual). Tu nodo escucha si algún nodo lo retransmite y la app lo apunta en el registro.</div>
+      <ul>
+        <li>En el mapa sale <b>✓ verde</b> donde la red lo oyó y <b>✗ roja</b> donde nadie lo retransmitió tras 3 intentos. Al pinchar una celda: «3 de 4 mensajes llegaron a la red».</li>
+        <li>Para no llenar el canal público de pruebas, mándalos a tu canal propio con PSK: los repetidores con la retransmisión por defecto también reenvían lo que no pueden leer.</li>
+        <li>La hora es la del resultado: el ✓ llega en segundos, pero la ✗ puede llegar hasta un minuto después de enviarlo. Si vas en coche, la ✗ puede salir algo más adelante de donde la mandaste.</li>
+      </ul>
       <h3>⚖️ Comparar SF (¿cuánto ganamos subiendo a SF10?)</h3>
       <ol>
         <li>Con el nodo fijo y el de ruta en <b>SF7</b>, haz una ruta. Cambia <b>los dos</b> a <b>SF10</b> (mismo BW, CR y frecuencia) y repite <b>la misma ruta</b>, mejor el mismo día y despacio (andando o en bici).</li>
@@ -460,6 +470,13 @@
         <li>Opening the log picks <b>📶 Heard directly → Best signal of any node</b> in <b>🔳 Grid</b> for you. Each cell takes the colour of the node heard best there; tap it to see which one. For the coverage of a specific repeater, pick it in that same group.</li>
         <li>Leave hops at 0–7. Add logs from several days or people to complete the area.</li>
       </ol>
+      <h3>📤 Transmission (does the mesh hear me?)</h3>
+      <div>The above measures what <b>your node hears</b>. To know whether <b>the mesh hears you</b>, send a short message to a channel now and then during the route (every few minutes or at the places you care about; the text does not matter). Your node listens for another node relaying it and the app writes it in the log.</div>
+      <ul>
+        <li>The map shows a <b>green ✓</b> where the mesh heard it and a <b>red ✗</b> where nobody relayed it after 3 tries. Tap a cell: «3 of 4 messages reached the mesh».</li>
+        <li>To avoid filling the public channel with tests, send them to your own channel with a PSK: repeaters with the default rebroadcast mode also forward what they cannot read.</li>
+        <li>The time is that of the result: the ✓ comes within seconds, but the ✗ can come up to a minute after sending. In a car, the ✗ may appear a bit further on than where you sent it.</li>
+      </ul>
       <h3>⚖️ Compare SF (how much do we gain going up to SF10?)</h3>
       <ol>
         <li>With the fixed and the route node on <b>SF7</b>, do a route. Switch <b>both</b> to <b>SF10</b> (same BW, CR and frequency) and repeat <b>the same route</b>, ideally the same day and slowly (walking or cycling).</li>
@@ -619,6 +636,8 @@ const I18N = {
     medSnr: (m, w, b) => "Median SNR " + m + " dB (worst " + w + ", best " + b + ")",
     medRssi: m => "Median RSSI " + m + " dBm", directOnly: "direct only", timeInCell: "Time in cell",
     noRxText: "You passed here and no packet arrived.", noRxComm: "Routes passed here and nothing was heard directly from a relaying node.",
+    txTitle: "Transmission", txCell: (a, n) => a + " of " + n + " messages reached the mesh", txMsg: "Message sent",
+    txOk: "✓ The mesh heard it: a node relayed or acknowledged it.", txKo: "✗ Nobody relayed it after 3 tries.", lgTx: "Message sent: mesh heard it / nobody",
     commPasses: n => n === 1 ? "1 pass" : n + " passes", commRx: (a, b) => "reception in " + a + " of " + b, reliability: "Reliability",
     relLow: "low (a single pass, just a hint)", relMid: "medium (few passes)", relHigh: "good (5 or more passes)", lastData: "Newest data", expected: n => "About " + n + " packets were expected",
     gpsPos: "GPS position", lastHop: "from the last hop, not the origin node", distance: "distance",
@@ -689,6 +708,8 @@ const I18N = {
     medSnr: (m, w, b) => "SNR mediano " + m + " dB (peor " + w + ", mejor " + b + ")",
     medRssi: m => "RSSI mediano " + m + " dBm", directOnly: "solo directos", timeInCell: "Tiempo en la celda",
     noRxText: "Pasaste por aquí y no llegó ningún paquete.", noRxComm: "Han pasado recorridos por aquí y no se oyó directamente a ningún nodo que repita.",
+    txTitle: "Transmisión", txCell: (a, n) => a + " de " + n + " mensajes llegaron a la red", txMsg: "Mensaje enviado",
+    txOk: "✓ La red lo oyó: un nodo lo retransmitió o lo confirmó.", txKo: "✗ Nadie lo retransmitió tras 3 intentos.", lgTx: "Mensaje enviado: la red lo oyó / nadie",
     commPasses: n => n === 1 ? "1 pasada" : n + " pasadas", commRx: (a, b) => "recepción en " + a + " de " + b, reliability: "Fiabilidad",
     relLow: "baja (una sola pasada, solo orientativo)", relMid: "media (pocas pasadas)", relHigh: "buena (5 pasadas o más)", lastData: "Dato más reciente", expected: n => "Se esperaban ≈ " + n + " paquetes",
     gpsPos: "Posición GPS", lastHop: "del último salto, no del nodo de origen", distance: "distancia",
@@ -996,7 +1017,7 @@ function askSf(name) {
 // «🗑 Limpiar»: quita del mapa todo lo abierto
 function clearAll() {
   if (!fileRows && !fileTracks.length && !fileVisited.length) return;
-  fileRows = null; fileNames = []; fileTracks = []; fileVisited = [];
+  fileRows = null; fileNames = []; fileTracks = []; fileVisited = []; fileTx = [];
   nodeRoles = new Map();
   $("sfAsk").innerHTML = "";
   $("ageWrap").hidden = true;
@@ -1012,6 +1033,7 @@ const LEAFLET_SRC = [
 ];
 let map = null, mapLayer = null, mapOn = false, mapDirty = true, mapFitted = false;
 let fileRows = null, fileNames = [], fileTracks = [];
+let fileTx = [];        // mensajes enviados con su resultado (transmisión: ¿te oyó la red?)
 let fileVisited = [];   // centros de celdas sin recepción de archivos de cobertura importados
 let mapView = "dots";
 const cellSize = 250;   // tamaño fijo de celda: el mismo que el de la exportación y el mapa comunitario
@@ -1243,6 +1265,7 @@ function nodePopup(r, rows) {
 }
 function relayIcon() { return RELAY_ICON || (RELAY_ICON = L.divIcon({ className: "relay-sq", iconSize: [12, 12], iconAnchor: [6, 6], popupAnchor: [0, -6] })); }
 // los cuadrados van debajo de los círculos de recepción directa, para no taparlos
+function txPane() { if (!map.getPane("tx")) map.createPane("tx").style.zIndex = 620; return "tx"; }
 function relayPane() { if (!map.getPane("relay")) map.createPane("relay").style.zIndex = 390; return "relay"; }
 function median(a) { if (!a.length) return null; const b = a.slice().sort((x, y) => x - y), m = b.length >> 1; return b.length % 2 ? b[m] : (b[m - 1] + b[m]) / 2; }
 function fmtDur(ms) { const s = Math.round(ms / 1000); return s >= 60 ? Math.floor(s / 60) + " min " + (s % 60) + " s" : s + " s"; }
@@ -1268,7 +1291,7 @@ function buildGrid(rows, tracks, size) {
   const mLat = 111320, mLon = 111320 * Math.cos(latRef * Math.PI / 180);
   const key = (lat, lon) => Math.floor(lat * mLat / size) + ":" + Math.floor(lon * mLon / size);
   const cells = new Map();
-  const cell = k => { if (!cells.has(k)) cells.set(k, { k, snr: [], rssi: [], snrRelay: [], by: new Map(), n: 0, nRelay: 0, ms: 0, visited: false, own: false }); return cells.get(k); };
+  const cell = k => { if (!cells.has(k)) cells.set(k, { k, snr: [], rssi: [], snrRelay: [], by: new Map(), n: 0, nRelay: 0, ms: 0, visited: false, own: false, txOk: 0, txFail: 0 }); return cells.get(k); };
   const heard = heardMode();
   for (const r of rows) {
     if (r.rxLat == null || r.rxLon == null || isNaN(r.rxLat)) continue;
@@ -1285,6 +1308,7 @@ function buildGrid(rows, tracks, size) {
     }
     if (r.rssi != null && !isNaN(r.rssi)) c.rssi.push(r.rssi);
   }
+  for (const x of txVisible()) { const c = cell(key(x.lat, x.lon)); c.visited = true; c.own = true; if (x.ok) c.txOk++; else c.txFail++; }
   for (const v of fileVisited) { const c = cell(key(v.lat, v.lon)); c.visited = true; if (!v.community) c.own = true; else commCell(c, v); }
   for (const t of tracks) {
     const p = t.pts;
@@ -1326,6 +1350,12 @@ function commCell(c, r) {
   c.cf = Math.max(c.cf || 0, r.cf || 1);
   if (r.cfr != null) c.cfr = Math.max(c.cfr || 0, r.cfr);
   if (r.clast && (!c.clast || r.clast > c.clast)) c.clast = r.clast;
+}
+// mensajes enviados que se ven: con posición y fuera de la vista previa de exportación (no se exportan)
+function txVisible() { return exportPreviewOn() ? [] : fileTx.filter(x => x.lat != null && !isNaN(x.lat)); }
+function txInfo(c) {
+  const n = c.txOk + c.txFail;
+  return n ? "<hr style='border:0;border-top:1px solid #8884;margin:6px 0'>📤 <b>" + t("txTitle") + "</b>: " + t("txCell", c.txOk, n) : "";
 }
 function commInfo(c) {
   if (!c.cf) return "";
@@ -1496,7 +1526,7 @@ function drawMap(fit, fromZoom) {
                 t(useMargin ? "medMargin" : "medSnr", fmtN(med, 1), fmtN(sorted[0], 1), fmtN(sorted[sorted.length - 1], 1)) + "<br>" +
                 t("medRssi", fmtN(median(c.rssi))) + (c.nRelay ? " <i>(" + t("directOnly") + ")</i>" : "")) + (c.ms ? "<br>" + t("timeInCell") + ": " + fmtDur(c.ms) : "")
           : "<b>" + t("noRx") + "</b><br>" + t(c.own ? "noRxText" : "noRxComm") + (c.ms ? "<br>" + t("timeInCell") + ": " + fmtDur(c.ms) : "") +
-            (expected && expected >= 1 ? "<br>" + t("expected", Math.round(expected)) : "")) + commInfo(c));
+            (expected && expected >= 1 ? "<br>" + t("expected", Math.round(expected)) : "")) + txInfo(c) + commInfo(c));
       rect.addTo(mapLayer);
       // el gris solo dentro del borde: así el borde se ve sobre el mapa con el mismo tono que las celdas en directo
       if (onlyRelay) L.rectangle(insetBounds(c.bounds, RELAY_BORDER), { stroke: false, fillColor: "#2b2f36", fillOpacity: .6, interactive: false }).addTo(mapLayer);
@@ -1518,6 +1548,16 @@ function drawMap(fit, fromZoom) {
         .bindPopup(t("gpsPos") + (p.ms ? " · " + RT.fmtDate(p.ms) + " " + RT.fmtTime(p.ms) : "")).addTo(mapLayer);
     for (const p of tr.pts) pts.push([p.lat, p.lon]);
   }
+
+  // mensajes enviados: ✓ la red lo oyó, ✗ nadie lo retransmitió
+  if (!cmp) for (const x of txVisible()) {
+    L.marker([x.lat, x.lon], { icon: L.divIcon({ className: "", iconSize: [18, 18], iconAnchor: [9, 9], popupAnchor: [0, -9],
+      html: '<div class="txm ' + (x.ok ? "ok" : "ko") + '">' + (x.ok ? "✓" : "✗") + "</div>" }), pane: txPane() })
+      .bindPopup("<b>📤 " + t("txMsg") + " · " + RT.fmtDate(x.ms) + " " + RT.fmtTime(x.ms) + "</b><br>" + t(x.ok ? "txOk" : "txKo") +
+        (x.sf ? "<br>SF" + x.sf : "")).addTo(mapLayer);
+    pts.push([x.lat, x.lon]);
+  }
+  $("lgTx").hidden = cmp || !txVisible().length;
 
   // emisores
   // emisores; en «oído directamente», los nodos oídos (aunque solo repitan)
@@ -1658,11 +1698,23 @@ function debugTxtToRows(text) {
     if (sf >= 5 && sf <= 12) loras.push({ at: m.index, sf, bw });
   }
   let offset = 0;
+  // Transmisión: mensajes de texto que enviaste (con want_ack) y su resultado (ROUTING con request_id = id del mensaje).
+  // error_reason=NONE: algún nodo lo retransmitió o confirmó (la red te oyó); MAX_RETRANSMIT: nadie, tras 3 intentos.
+  const sentMsg = new Map(), routed = [];
   for (const b of parts) {
     const at = offset; offset += b.length;
     const h = b.match(/MeshPacket\{from=-?\d+ \(!([0-9a-f]{8})\)([^\n]*)/);
     if (!h) continue;
     const from = hexNum(h[1]), s = h[2];
+    const port0 = kv("portnum", b);
+    if (port0 === "TEXT_MESSAGE_APP" && kv("want_ack", s) === "true" && (myNum === null || from === myNum) && !kv("rx_time", s)) {
+      sentMsg.set(kv("id", s), { at, to: hexNum((s.match(/\bto=-?\d+ \(!([0-9a-f]{8})\)/) || [, "ffffffff"])[1]) });
+      continue;
+    }
+    if (port0 === "ROUTING_APP") {
+      const rq = kv("request_id", b), er = kv("error_reason", b), rt = Number(kv("rx_time", s));
+      if (rq && rq !== "0" && er && rt) routed.push({ id: rq, err: er, ms: rt * 1000 });
+    }
     const t = Number(kv("rx_time", s)); if (!t) continue;
     const ms = t * 1000, tr = kv("transport_mechanism", s);
     const pm = b.match(/latitude_i=(-?\d+), longitude_i=(-?\d+)/);
@@ -1765,11 +1817,27 @@ function debugTxtToRows(text) {
       hopLimit: p.hopLimit, hops: p.hops, port: null, kind: fixKind(kind), payload: "",
       heard: p.heard, heardName: p.heard != null ? (names.get(p.heard) || "") : "", sf: p.sf, bw: p.bw });
   }
+  // Mensajes enviados con su resultado, en tu posición. La hora es la del resultado: el acuse llega en
+  // segundos; el fallo, tras los reintentos (hasta ~1 min después del envío)
+  const TX_FAIL = new Set(["MAX_RETRANSMIT", "TIMEOUT", "NO_RESPONSE"]), res = new Map();
+  for (const r of routed) {
+    if (!sentMsg.has(r.id)) continue;
+    const ok = r.err === "NONE";
+    if (!ok && !TX_FAIL.has(r.err)) continue;
+    const o = res.get(r.id);
+    if (!o) res.set(r.id, { ok, ms: r.ms }); else if (ok && !o.ok) { o.ok = true; o.ms = r.ms; } else if (ok) o.ms = Math.min(o.ms, r.ms);
+  }
+  const tx = [];
+  for (const [id, r] of res) {
+    const p = posAt(own, r.ms), c = cfgAt(sentMsg.get(id).at);
+    tx.push({ ms: r.ms, ok: r.ok, lat: p ? p.lat : null, lon: p ? p.lon : null, sf: c ? c.sf : null, direct: sentMsg.get(id).to !== 0xffffffff });
+  }
+  tx.sort((a, b) => a.ms - b.ms);
   // Recorrido: el del nodo propio; si no lo hay, el de los emisores que se han movido
   const tracks = [];
   if (own.length) tracks.push(own);
   else for (const n of moving) tracks.push(senderTrack.get(n));
-  return { rows, own, tracks, myNum, myName: names.get(myNum) || "", roles, hasCfg: loras.length > 0, ownBits, ownLow, ownTotal, lowBits: ownLow ? lowBits[ownLow >> 1] : null };
+  return { rows, tx, own, tracks, myNum, myName: names.get(myNum) || "", roles, hasCfg: loras.length > 0, ownBits, ownLow, ownTotal, lowBits: ownLow ? lowBits[ownLow >> 1] : null };
 }
 async function openDebugTxt(file) {
   try {
@@ -1777,6 +1845,7 @@ async function openDebugTxt(file) {
     const first = !(fileRows && fileRows.length) && !fileVisited.length;
     for (const x of r.rows) x.file = file.name;
     fileRows = (fileRows || []).concat(r.rows); fileNames.push(file.name);
+    for (const x of r.tx) fileTx.push(Object.assign(x, { file: file.name }));
     for (const [n, role] of r.roles) nodeRoles.set(n, role);
     if (!r.hasCfg) askSf(file.name);
     for (const t of r.tracks) {
