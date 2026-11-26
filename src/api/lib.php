@@ -2,7 +2,7 @@
 // Mapa comunitario de cobertura: utilidades comunes a upload.php y community.php.
 // Los datos se guardan en ../data (fuera del alcance de la web gracias a su .htaccess).
 
-const BUILD = 4;                  // versión de community.json: al cambiarla se rehace
+const BUILD = 5;                  // versión de community.json: al cambiarla se rehace
 const CELL_SIZE = 250;            // tamaño fijo de celda de los archivos exportados por la página
 const MAX_BYTES = 524288;         // 512 KB por subida
 const MAX_CELLS = 20000;
@@ -35,9 +35,9 @@ function num($v, float $min, float $max): ?float {
   return ($f >= $min && $f <= $max && is_finite($f)) ? $f : null;
 }
 
-// Comprueba un archivo «meshtastic-coverage» y devuelve una copia limpia (solo los campos conocidos)
+// Comprueba un archivo «meshcover-coverage» (o el nombre antiguo «meshtastic-coverage») y devuelve una copia limpia (solo los campos conocidos)
 function clean_coverage($data): array {
-  if (!is_array($data) || ($data['format'] ?? null) !== 'meshtastic-coverage') throw new Exception('format');
+  if (!is_array($data) || !in_array($data['format'] ?? null, ['meshcover-coverage', 'meshtastic-coverage'], true)) throw new Exception('format');
   if (($data['version'] ?? null) !== 1) throw new Exception('version');
   if (($data['cellSize'] ?? null) !== CELL_SIZE) throw new Exception('cellSize');
   $cells = $data['cells'] ?? null;
@@ -68,7 +68,7 @@ function clean_coverage($data): array {
     $out[] = ['lat' => round($lat, 6), 'lon' => round($lon, 6), 'n' => (int)$n, 'nodes' => $cn];
   }
   $date = (is_string($data['date'] ?? null) && preg_match('/^\d{4}-\d{2}$/', $data['date'])) ? $data['date'] : gmdate('Y-m');
-  return ['format' => 'meshtastic-coverage', 'version' => 1, 'cellSize' => CELL_SIZE, 'date' => $date, 'cells' => $out];
+  return ['format' => 'meshcover-coverage', 'version' => 1, 'cellSize' => CELL_SIZE, 'date' => $date, 'cells' => $out];
 }
 
 // Antigüedades que se pueden pedir (meses; 0 = todo)
@@ -118,7 +118,7 @@ function build_community(string $dir, int $months = 0): array {
     }
     $out[] = ['lat' => $c['lat'], 'lon' => $c['lon'], 'n' => $c['n'], 'f' => $c['f'], 'fr' => $c['fr'], 'last' => $c['last'], 'nodes' => $nodes];
   }
-  return ['format' => 'meshtastic-coverage', 'version' => 1, 'build' => BUILD, 'cellSize' => CELL_SIZE, 'date' => gmdate('Y-m'),
+  return ['format' => 'meshcover-coverage', 'version' => 1, 'build' => BUILD, 'cellSize' => CELL_SIZE, 'date' => gmdate('Y-m'),
           'months' => $months, 'files' => $files, 'cells' => $out];
 }
 

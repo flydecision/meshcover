@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Meshtastic Coverage Analyzer</title>
+<title>MeshCover</title>
 <link rel="icon" type="image/png" href="logo.png">
 <style>
   :root { color-scheme: dark; }
@@ -202,7 +202,7 @@
 <body>
 <div id="dropZone" hidden data-i18n="dropHere">Drop the files here</div>
 <div class="hdr">
-  <h1><img class="logo" src="logo.png" width="44" height="44" alt=""><span data-i18n="appTitle">Meshtastic Coverage Analyzer</span></h1>
+  <h1><img class="logo" src="logo.png" width="44" height="44" alt=""><span data-i18n="appTitle">MeshCover</span></h1>
   <div class="tools">
     <select id="selLang" aria-label="Language / Idioma"><option value="en">English</option><option value="es">Español</option></select>
     <button id="btnHelp" class="sec" data-i18n-title="help" data-i18n-aria="help" aria-expanded="false">?</button>
@@ -297,6 +297,7 @@
       <h3>🎯 Para qué sirve</h3>
       <div>Para dibujar un <b>mapa de cobertura</b> Meshtastic a partir del registro que exporta la <b>app oficial de Android</b>: saber <b>hasta dónde llega la señal de un nodo concreto</b> o ver la cobertura general de la red con todos los nodos que oíste.</div>
       <div style="margin-top:6px">La app graba en segundo plano, con la pantalla apagada. Esta página solo analiza ese registro después, así que funciona en <b>cualquier navegador</b>, en el móvil o en el PC.</div>
+      <div style="margin-top:6px;opacity:.75;font-size:.9em">MeshCover es un proyecto independiente, sin relación con el proyecto Meshtastic®. Meshtastic es una marca registrada de Meshtastic LLC.</div>
       <h3>⚙️ Cómo funciona</h3>
       <ol>
         <li>Un <b>nodo fijo</b> envía su posición cada minuto.</li>
@@ -415,13 +416,14 @@
       <ul>
         <li>Se suma al <b>mapa comunitario</b>, que es <b>público</b>: cualquiera puede verlo y descargarlo.</li>
         <li>Cada subida se guarda como un archivo aparte. Para evitar abusos, el servidor guarda durante una hora una huella (hash) de la IP (no la IP), solo para limitar a 6 subidas por hora. El alojamiento web, como cualquier web, puede guardar registros técnicos de acceso.</li>
-        <li>No hay cuentas, así que la página no puede saber qué subida es tuya. Si quieres que se retire algo, abre una incidencia en <a href="https://github.com/flydecision/meshtastic/issues" target="_blank" rel="noopener">GitHub</a> indicando la zona y la fecha aproximada.</li>
+        <li>No hay cuentas, así que la página no puede saber qué subida es tuya. Si quieres que se retire algo, abre una incidencia en <a href="https://github.com/flydecision/meshcover/issues" target="_blank" rel="noopener">GitHub</a> indicando la zona y la fecha aproximada.</li>
       </ul>
     </div>
     <div class="page" data-p="0" data-lang="en" hidden>
       <h3>🎯 What it is for</h3>
       <div>It draws a Meshtastic <b>coverage map</b> from the log exported by the <b>official Android app</b>: how far <b>the signal of a specific node</b> reaches, or the general coverage of the mesh with every node you heard.</div>
       <div style="margin-top:6px">The app records in the background with the screen off. This page only analyses that log afterwards, so it works in <b>any browser</b>, on a phone or a PC.</div>
+      <div style="margin-top:6px;opacity:.75;font-size:.9em">MeshCover is an independent project, not affiliated with the Meshtastic® project. Meshtastic is a registered trademark of Meshtastic LLC.</div>
       <h3>⚙️ How it works</h3>
       <ol>
         <li>A <b>fixed node</b> broadcasts its position every minute.</li>
@@ -539,7 +541,7 @@
       <ul>
         <li>They are added to the <b>community map</b>, which is <b>public</b>: anyone can view and download it.</li>
         <li>Each upload is stored as a separate file. To prevent abuse, the server keeps a fingerprint (hash) of the IP (not the IP) for one hour, only to limit uploads to 6 per hour. The web host, like any website, may keep technical access logs.</li>
-        <li>There are no accounts, so the page cannot tell which upload is yours. If you want something removed, open an issue on <a href="https://github.com/flydecision/meshtastic/issues" target="_blank" rel="noopener">GitHub</a> with the area and approximate date.</li>
+        <li>There are no accounts, so the page cannot tell which upload is yours. If you want something removed, open an issue on <a href="https://github.com/flydecision/meshcover/issues" target="_blank" rel="noopener">GitHub</a> with the area and approximate date.</li>
       </ul>
     </div>
     </div>
@@ -553,7 +555,7 @@
 
 <script>
 /* Utilidades: nombre de nodo, distancia y formato de fecha/hora */
-window.MeshtasticRT = (function () {
+window.MeshCoverRT = (function () {
   // Nombre de nodo para mostrar: «corto - largo» (o el que haya)
   function nodeLabel(shortName, longName) {
     if (shortName && longName && shortName !== longName) return shortName + " - " + longName;
@@ -576,13 +578,13 @@ window.MeshtasticRT = (function () {
 
 <script>
 "use strict";
-const RT = window.MeshtasticRT;
+const RT = window.MeshCoverRT;
 
 const $ = id => document.getElementById(id);
 /* ---------- idioma (inglés por defecto, español opcional) ---------- */
 const I18N = {
   en: {
-    appTitle: "Meshtastic Coverage Analyzer", help: "Help", close: "Close", open: "Add Logs", clear: "Clear",
+    appTitle: "MeshCover", help: "Help", close: "Close", open: "Add Logs", clear: "Clear",
     openTitle: "Add the packet log exported from the Meshtastic app (.txt), or CSV and GPX files. Each file adds to what is already on the map",
     clearTitle: "Remove everything opened from the map",
     node: "Node", allNodes: "All nodes", view: "View",
@@ -632,7 +634,7 @@ const I18N = {
     nodeSearch: "Search node", noMatch: "No node matches",
     ageTitle: "Age of the community map data", ageAll: "All data", age12: "Last 12 months", age6: "Last 6 months", age3: "Last 3 months",
     communityBtn: "Community map", communityTitle: "Add the shared coverage map uploaded by everyone",
-    expUp: "Upload to community", expPrivLink: "What exactly is saved or uploaded?", upConfirm: n => "Upload these " + n + " cells to the public community map? They are added for everyone.\n\nPrivacy: the uploaded file contains no personal data, but you can check it first by downloading it with the «Download file» button and opening it with any text editor, or by reviewing the open source code, yourself or with an AI, at https://github.com/flydecision/meshtastic",
+    expUp: "Upload to community", expPrivLink: "What exactly is saved or uploaded?", upConfirm: n => "Upload these " + n + " cells to the public community map? They are added for everyone.\n\nPrivacy: the uploaded file contains no personal data, but you can check it first by downloading it with the «Download file» button and opening it with any text editor, or by reviewing the open source code, yourself or with an AI, at https://github.com/flydecision/meshcover",
     upOk: n => "✅ Uploaded: " + n + " cells added to the community map. Thanks!", upBusy: "Uploading…",
     upErr: m => "Could not upload (" + m + ").", upRate: "too many uploads from your connection, try again in an hour", upDup: "this file is already on the community map",
     commEmpty: "The community map is still empty.", commErr: m => "Could not load the community map (" + m + ").", commName: "Community map",
@@ -652,7 +654,7 @@ const I18N = {
     directPl: "direct", lastPos: "Last position", lastHeard: "Last heard", relayedWord: "relayed", maxDist: "Max distance"
   },
   es: {
-    appTitle: "Analizador Cobertura Meshtastic", help: "Ayuda", close: "Cerrar", open: "Añadir registros", clear: "Limpiar",
+    appTitle: "MeshCover", help: "Ayuda", close: "Cerrar", open: "Añadir registros", clear: "Limpiar",
     openTitle: "Añadir el registro de paquetes exportado de la app Meshtastic (.txt), o CSV y GPX. Cada archivo se suma a lo que ya hay en el mapa",
     clearTitle: "Quitar del mapa todo lo abierto",
     node: "Nodo", allNodes: "Todos los nodos", view: "Vista",
@@ -702,7 +704,7 @@ const I18N = {
     nodeSearch: "Buscar nodo", noMatch: "Ningún nodo coincide",
     ageTitle: "Antigüedad de los datos del mapa comunitario", ageAll: "Todos los datos", age12: "Últimos 12 meses", age6: "Últimos 6 meses", age3: "Últimos 3 meses",
     communityBtn: "Mapa comunitario", communityTitle: "Añadir el mapa de cobertura compartido que ha subido todo el mundo",
-    expUp: "Subir a la comunidad", expPrivLink: "¿Qué se guarda o sube exactamente?", upConfirm: n => "¿Subir estas " + n + " celdas al mapa comunitario público? Se suman para todo el mundo.\n\nPrivacidad: el archivo que se sube no lleva ningún dato personal, pero puedes revisarlo antes descargándolo con el botón «Descargar archivo» y abriéndolo con cualquier editor de texto, o consultando el código abierto, por tu cuenta o con una IA, en https://github.com/flydecision/meshtastic",
+    expUp: "Subir a la comunidad", expPrivLink: "¿Qué se guarda o sube exactamente?", upConfirm: n => "¿Subir estas " + n + " celdas al mapa comunitario público? Se suman para todo el mundo.\n\nPrivacidad: el archivo que se sube no lleva ningún dato personal, pero puedes revisarlo antes descargándolo con el botón «Descargar archivo» y abriéndolo con cualquier editor de texto, o consultando el código abierto, por tu cuenta o con una IA, en https://github.com/flydecision/meshcover",
     upOk: n => "✅ Subido: " + n + " celdas añadidas al mapa comunitario. ¡Gracias!", upBusy: "Subiendo…",
     upErr: m => "No se pudo subir (" + m + ").", upRate: "demasiadas subidas desde tu conexión, prueba dentro de una hora", upDup: "este archivo ya está en el mapa comunitario",
     commEmpty: "El mapa comunitario aún está vacío.", commErr: m => "No se pudo cargar el mapa comunitario (" + m + ").", commName: "Mapa comunitario",
@@ -1815,7 +1817,9 @@ function autoView(rows) {
 }
 
 /* ---------- exportar / importar cobertura anónima ---------- */
-// Formato «meshtastic-coverage» v1: solo celdas (centro, nº de paquetes y, por nodo oído directamente,
+// Formato «meshcover-coverage» v1 (antes «meshtastic-coverage», que se sigue aceptando)
+const COVERAGE_FORMATS = ["meshcover-coverage", "meshtastic-coverage"];
+//: solo celdas (centro, nº de paquetes y, por nodo oído directamente,
 // nº de paquetes, SNR y RSSI medianos y SF). Sin recorrido, sin horas y sin celdas cerca del inicio/fin.
 let expLayer = null;
 const EXPORT_CELL = 250;   // tamaño fijo de las celdas exportadas: así los archivos de todos encajan
@@ -1961,7 +1965,7 @@ function coverageData() {
   for (const r of fileRows || []) if (r.ms && !r.community && r.ms > last) last = r.ms;
   for (const tr of fileTracks) for (const sg of tr.segs) for (const q of sg) if (q.ms && q.ms > last) last = q.ms;
   const d = new Date(last || Date.now()), p = n => String(n).padStart(2, "0");
-  return { format: "meshtastic-coverage", version: 1, cellSize: EXPORT_CELL, date: d.getFullYear() + "-" + p(d.getMonth() + 1), cells: res.cells };
+  return { format: "meshcover-coverage", version: 1, cellSize: EXPORT_CELL, date: d.getFullYear() + "-" + p(d.getMonth() + 1), cells: res.cells };
 }
 // Sube el archivo anónimo al servidor (api/upload.php), que lo valida y lo suma al mapa comunitario
 async function uploadCoverage() {
@@ -2004,7 +2008,7 @@ function downloadCoverage() {
   const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "meshtastic_coverage_" + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + ".json";
+  a.download = "meshcover_coverage_" + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "_" + p(d.getHours()) + p(d.getMinutes()) + ".json";
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 10000);
 }
@@ -2016,7 +2020,7 @@ async function importCoverage(file) {
   } catch (e) { say(t("errOpen", file.name, e.message)); }
 }
 async function addCoverage(data, name, community) {
-    if (!data || data.format !== "meshtastic-coverage" || !Array.isArray(data.cells)) throw new Error(t("errJson"));
+    if (!data || !COVERAGE_FORMATS.includes(data.format) || !Array.isArray(data.cells)) throw new Error(t("errJson"));
     const rows = [];
     for (const c of data.cells) {
       const lat = Number(c.lat), lon = Number(c.lon);
