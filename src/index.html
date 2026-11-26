@@ -64,7 +64,7 @@
   #dropZone { position:fixed; inset:0; z-index:3000; display:flex; align-items:center; justify-content:center; background:rgba(15,20,27,.82); border:4px dashed #2f7df6; color:#e8edf3; font-size:24px; font-weight:600; text-align:center; padding:16px; pointer-events:none; }
   #dropZone[hidden] { display:none; }
   #map { height:62vh; min-height:320px; border:1px solid #2a3340; border-radius:10px; background:#1a2029; }
-  #vCmp[hidden], #cmpWrap[hidden], #ageWrap[hidden], #lgConf[hidden] { display:none; }
+  #vCmp[hidden], #cmpWrap[hidden], #ageWrap[hidden] { display:none; }
   .filt.cmpf, .filt.agef { margin:0; gap:6px; }
   .filt.cmpf select, .filt.agef select { height:29px; padding:0 6px; font-size:16px; }
   #cmpBox { margin:8px 0; font-size:16px; color:#c9d1db; }
@@ -255,7 +255,6 @@
     <span><i style="background:#2f7df6;border-radius:2px;height:4px;width:16px;vertical-align:3px;border:0"></i><span data-i18n="track">Track</span></span>
     <span id="lgNone" hidden><i style="background:rgba(26,29,34,.6);border-radius:1px;border:1px solid #555"></i><span data-i18n="noRx">No reception</span></span>
     <span id="lgRelay" hidden></span>
-    <span id="lgConf" hidden><i style="background:rgba(31,166,74,.28);border-radius:1px;border:1px solid #555"></i><span data-i18n="lgConf">Faint: little data (community)</span></span>
     <span>📡 <span data-i18n="nodeIcon">Node</span></span>
   </div>
   <div id="cmpBox" hidden></div>
@@ -384,7 +383,7 @@
       <div>Un mapa común de la <b>cobertura real de la red</b>, hecho entre todas/os: cada persona que hace un recorrido con su nodo suma sus celdas, y el mapa se va completando zona a zona.</div>
       <h3>👀 Verlo</h3>
       <div>Pulsa <b>🌍 Mapa comunitario</b>. Se carga en <b>cuadrícula de 250 m</b>: cada celda sale del color del nodo que mejor se oye allí. Las celdas grises son sitios por los que alguien pasó <b>sin recibir nada</b>. Puedes sumarle tus propios registros con <b>📂 Añadir registros</b> sin subirlos.</div>
-      <div>Las celdas <b>más transparentes</b> tienen pocos datos: solo una persona ha pasado por ahí y con pocos paquetes, así que tómalas con cautela. Con dos aportaciones o más salen normales. Con el selector <b>🌍 Todos los datos / Últimos 12, 6 o 3 meses</b> se quitan los datos antiguos, por si la red ha cambiado (cuenta el mes en que se grabó el registro).</div>
+      <div>Cada nuevo recorrido que pasa por una celda se suma a su media, así que su color se va afinando con cada pase. Con el selector <b>🌍 Todos los datos / Últimos 12, 6 o 3 meses</b> se quitan los datos antiguos, por si la red ha cambiado (cuenta el mes en que se grabó el registro).</div>
       <h3>🚶 Aportar tu recorrido</h3>
       <ol>
         <li>Prepara el nodo de ruta como en «Cómo usar → Cobertura general de la red»: <b>mismos ajustes de radio que la red</b>, CLIENT_MUTE, GPS activado con actualización cada 20–30 s y «posición inteligente» desactivada. El intervalo de difusión puede quedar en «unset» o largo: así tampoco emites tu recorrido en directo.</li>
@@ -511,7 +510,7 @@
       <div>A shared map of the <b>real coverage of the network</b>, built by everyone: each person who does a route with their node adds their cells, and the map fills in area by area.</div>
       <h3>👀 Viewing it</h3>
       <div>Press <b>🌍 Community map</b>. It loads as a <b>250 m grid</b>: each cell takes the colour of the node heard best there. Grey cells are places someone passed <b>without receiving anything</b>. You can add your own logs on top with <b>📂 Add Logs</b> without uploading them.</div>
-      <div><b>Fainter cells</b> have little data: only one person has passed there, with few packets, so take them with care. With two contributions or more they look normal. The <b>🌍 All data / Last 12, 6 or 3 months</b> selector removes old data, in case the mesh has changed (it uses the month the log was recorded).</div>
+      <div>Each new route through a cell adds to its average, so its colour gets more accurate with every pass. The <b>🌍 All data / Last 12, 6 or 3 months</b> selector removes old data, in case the mesh has changed (it uses the month the log was recorded).</div>
       <h3>🚶 Contributing your route</h3>
       <ol>
         <li>Set up the route node as in «How to use → General coverage of the mesh»: <b>same radio settings as the network</b>, CLIENT_MUTE, GPS on with updates every 20–30 s and «smart position» off. The broadcast interval can stay «unset» or long: that way you do not broadcast your route live either.</li>
@@ -638,7 +637,6 @@ const I18N = {
     errNoTrack: "it has no track points", errOpen: (f, m) => "Could not open " + f + ": " + m,
     nodeSearch: "Search node", noMatch: "No node matches",
     ageTitle: "Age of the community map data", ageAll: "All data", age12: "Last 12 months", age6: "Last 6 months", age3: "Last 3 months",
-    lgConf: "Faint: little data (community)",
     communityBtn: "Community map", communityTitle: "Add the shared coverage map uploaded by everyone",
     expUp: "Upload to community", expPrivLink: "What exactly is saved or uploaded?", upConfirm: n => "Upload these " + n + " cells to the public community map? They are added for everyone.\n\nPrivacy: the uploaded file contains no personal data, but you can check it first by downloading it with the «Download file» button and opening it with any text editor, or by reviewing the open source code, yourself or with an AI, at https://github.com/flydecision/meshtastic",
     upOk: n => "✅ Uploaded: " + n + " cells added to the community map. Thanks!", upBusy: "Uploading…",
@@ -702,7 +700,6 @@ const I18N = {
     errNoTrack: "no tiene puntos de recorrido", errOpen: (f, m) => "No se pudo abrir " + f + ": " + m,
     nodeSearch: "Buscar nodo", noMatch: "Ningún nodo coincide",
     ageTitle: "Antigüedad de los datos del mapa comunitario", ageAll: "Todos los datos", age12: "Últimos 12 meses", age6: "Últimos 6 meses", age3: "Últimos 3 meses",
-    lgConf: "Más transparente: pocos datos (comunitario)",
     communityBtn: "Mapa comunitario", communityTitle: "Añadir el mapa de cobertura compartido que ha subido todo el mundo",
     expUp: "Subir a la comunidad", expPrivLink: "¿Qué se guarda o sube exactamente?", upConfirm: n => "¿Subir estas " + n + " celdas al mapa comunitario público? Se suman para todo el mundo.\n\nPrivacidad: el archivo que se sube no lleva ningún dato personal, pero puedes revisarlo antes descargándolo con el botón «Descargar archivo» y abriéndolo con cualquier editor de texto, o consultando el código abierto, por tu cuenta o con una IA, en https://github.com/flydecision/meshtastic",
     upOk: n => "✅ Subido: " + n + " celdas añadidas al mapa comunitario. ¡Gracias!", upBusy: "Subiendo…",
@@ -1253,14 +1250,6 @@ function insetBounds(b, px) {
   dLat = Math.min(dLat, (b[1][0] - b[0][0]) / 4); dLon = Math.min(dLon, (b[1][1] - b[0][1]) / 4);
   return [[b[0][0] + dLat, b[0][1] + dLon], [b[1][0] - dLat, b[1][1] - dLon]];
 }
-// Fiabilidad de una celda del mapa comunitario: 1 = normal; menos = más transparente.
-// Dos subidas o más, o bastantes paquetes, ya se consideran fiables.
-function cellConf(c) {
-  const sz = (cellSize / EXPORT_CELL) ** 2;   // celdas más grandes juntan más celdas de 250 m
-  if (c.cf >= 3 || c.n >= 30 * sz) return 1;
-  if (c.cf >= 2 || c.n >= 10 * sz) return .7;
-  return .45;
-}
 function buildGrid(rows, tracks, size) {
   const all = [];
   for (const r of rows) if (r.rxLat != null && !isNaN(r.rxLat)) all.push(r.rxLat);
@@ -1271,14 +1260,13 @@ function buildGrid(rows, tracks, size) {
   const mLat = 111320, mLon = 111320 * Math.cos(latRef * Math.PI / 180);
   const key = (lat, lon) => Math.floor(lat * mLat / size) + ":" + Math.floor(lon * mLon / size);
   const cells = new Map();
-  const cell = k => { if (!cells.has(k)) cells.set(k, { k, snr: [], rssi: [], snrRelay: [], by: new Map(), n: 0, nRelay: 0, ms: 0, visited: false, own: false, cf: 0 }); return cells.get(k); };
+  const cell = k => { if (!cells.has(k)) cells.set(k, { k, snr: [], rssi: [], snrRelay: [], by: new Map(), n: 0, nRelay: 0, ms: 0, visited: false, own: false }); return cells.get(k); };
   const heard = heardMode();
   for (const r of rows) {
     if (r.rxLat == null || r.rxLon == null || isNaN(r.rxLat)) continue;
     const c = cell(key(r.rxLat, r.rxLon));
     c.n += r.w || 1; c.visited = true;
     if (!r.community) c.own = true;   // celdas solo del mapa comunitario: sin ventana de datos
-    else c.cf = Math.max(c.cf, r.cf || 1);   // nº de subidas que tocan la celda (para la transparencia)
     // repetido por otro nodo: cuenta como recibido, pero su SNR/RSSI es del último salto y no entra en la mediana
     // (en «oído directamente» sí vale: es la señal del nodo que se oyó)
     const v = sigOf(r);
@@ -1289,7 +1277,7 @@ function buildGrid(rows, tracks, size) {
     }
     if (r.rssi != null && !isNaN(r.rssi)) c.rssi.push(r.rssi);
   }
-  for (const v of fileVisited) { const c = cell(key(v.lat, v.lon)); c.visited = true; if (!v.community) c.own = true; else c.cf = Math.max(c.cf, v.cf || 1); }
+  for (const v of fileVisited) { const c = cell(key(v.lat, v.lon)); c.visited = true; if (!v.community) c.own = true; }
   for (const t of tracks) {
     const p = t.pts;
     for (let i = 0; i < p.length; i++) {
@@ -1445,7 +1433,7 @@ function drawMap(fit, fromZoom) {
     : '<i style="background:#000;border:1.5px solid #fff;border-radius:1px"></i>' + esc(t("lgRelayDots"));
 
   // cuadrícula (debajo de todo)
-  let nCells = 0, nEmpty = 0, nFaint = 0;
+  let nCells = 0, nEmpty = 0;
   if (grid) {
     const iv = heard ? null : typicalInterval(rows);
     for (const c of buildGrid(rows, tracks, cellSize)) {
@@ -1462,14 +1450,11 @@ function drawMap(fit, fromZoom) {
       // solo repetidos: gris con borde grueso del color de su señal (la del último salto)
       // sin nada recibido: gris oscuro translúcido, sin borde (se ve el mapa debajo)
       // el borde de color va por dentro de la celda: se dibuja en un rectángulo reducido medio grosor
-      // celdas solo comunitarias con pocos datos (una subida y pocos paquetes): más transparentes
-      const conf = c.own ? 1 : cellConf(c);
-      if (!c.own && conf < 1) nFaint++;
       const rect = L.rectangle(c.bounds, Object.assign(onlyRelay
         ? { stroke: false, fillOpacity: 0 }
         : has
-        ? { color: "#0b0d10", weight: .5, opacity: conf, fillColor: sigColor(med), fillOpacity: .65 * conf }
-        : { stroke: false, fillColor: "#1a1d22", fillOpacity: .45 * conf }, c.own ? {} : { interactive: false }));
+        ? { color: "#0b0d10", weight: .5, fillColor: sigColor(med), fillOpacity: .65 }
+        : { stroke: false, fillColor: "#1a1d22", fillOpacity: .45 }, c.own ? {} : { interactive: false }));
       if (c.own) rect.bindPopup(has
           ? "<b>" + t("cellOf", cellSize >= 1000 ? cellSize / 1000 + " km" : cellSize + " m") + "</b><br>" +
             t("pktsRx") + ": " + c.n + (c.nRelay ? " (" + t("byOther", c.nRelay) + ")" : "") + (pct !== null ? " · " + t("reception") + " ≈ " + pct + " %" : "") + "<br>" +
@@ -1488,7 +1473,6 @@ function drawMap(fit, fromZoom) {
     }
   }
 
-  $("lgConf").hidden = !(grid && nFaint);
 
   // recorridos (azul)
   for (const tr of tracks) {
