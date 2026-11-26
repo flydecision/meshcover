@@ -165,7 +165,7 @@
     pointer-events:none; -webkit-appearance:none; appearance:none; }
   .filt .dual input[type=range]::-webkit-slider-runnable-track { background:none; }
   .filt .dual input[type=range]::-moz-range-track { background:none; }
-  /* botones del deslizador: misma altura que «Puntos» / «Cuadrícula» (29 px) */
+  /* botones del deslizador: misma altura que «Rx» / «Tx» (29 px) */
   /* botones al estilo noUiSlider: rectángulo claro con dos rayitas verticales en el centro */
   .filt .dual input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; pointer-events:auto; width:24px; height:29px;
     border-radius:4px; border:1px solid #c4c9d0; box-sizing:border-box; cursor:grab; margin-top:0;
@@ -226,10 +226,10 @@
   <div class="mapopts">
     <span class="filt nodesel">📡 <span class="colon" data-i18n="node">Node</span> <span class="combo"><input id="nodeSearch" type="text" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="false" aria-controls="nodeList" data-i18n-aria="nodeSearch"><span class="caret">▼</span><div id="nodeList" class="combo-list" role="listbox" hidden></div></span><select id="selFrom" hidden><option value="" data-i18n="allNodes">All nodes</option></select></span>
     <span class="seg" role="group" data-i18n-aria="view">
-      <button id="vDots" data-i18n-title="dotsTitle">🔵 <span data-i18n="dots">Dots</span></button>
-      <button id="vGrid" data-i18n-title="gridTitle">🔳 <span data-i18n="grid">Grid</span></button>
+      <button id="vGrid" data-i18n-title="gridTitle">📥 <span data-i18n="grid">Rx</span></button>
       <button id="vTx" data-i18n-title="txViewTitle">📤 <span data-i18n="txView">Tx</span></button>
       <button id="vCmp" data-i18n-title="cmpTitle" hidden>⚖️ <span data-i18n="cmp">Compare</span></button>
+      <button id="vDots" data-i18n-title="dotsTitle" data-i18n-aria="dotsTitle">🔵</button>
     </span>
     <span id="cmpWrap" class="filt cmpf" hidden>SF <select id="cmpA" data-i18n-aria="cmpA"></select> <span data-i18n="vs">vs</span> SF <select id="cmpB" data-i18n-aria="cmpB"></select></span>
     <span id="ageWrap" class="filt agef" hidden data-i18n-title="ageTitle">🌍 <select id="selAge" data-i18n-aria="ageTitle"><option value="0" data-i18n="ageAll">All data</option><option value="12" data-i18n="age12">Last 12 months</option><option value="6" data-i18n="age6">Last 6 months</option><option value="3" data-i18n="age3">Last 3 months</option></select></span>
@@ -311,8 +311,8 @@
       </ol>
       <h3>📊 Qué obtienes</h3>
       <ul>
-        <li>Un punto por paquete recibido, de color según la señal: <b>verde</b> buena, <b>amarillo</b> justa, <b>rojo</b> al límite. Si el registro trae el SF (lo vuelca la app al conectar), el color es el <b>margen</b>: cuántos dB sobran sobre el límite de ese SF (−7,5 dB a SF7 … −20 dB a SF12), así se pueden comparar pruebas con distinto SF.</li>
-        <li>La vista <b>🔳 Cuadrícula</b>: la zona en celdas con la señal de cada una, y en <b>gris oscuro translúcido</b> las celdas por las que pasaste sin recibir nada. El color usa solo lo recibido en directo; una celda <b>gris con borde de color</b> es que allí solo llegó lo repetido por otro nodo (el borde es la señal del último salto).</li>
+        <li>Con <b>🔵</b> (detalle), un punto por paquete recibido, de color según la señal: <b>verde</b> buena, <b>amarillo</b> justa, <b>rojo</b> al límite. Si el registro trae el SF (lo vuelca la app al conectar), el color es el <b>margen</b>: cuántos dB sobran sobre el límite de ese SF (−7,5 dB a SF7 … −20 dB a SF12), así se pueden comparar pruebas con distinto SF.</li>
+        <li>La vista <b>📥 Rx</b> (recepción): la zona en celdas con la señal de cada una, y en <b>gris oscuro translúcido</b> las celdas por las que pasaste sin recibir nada. El color usa solo lo recibido en directo; una celda <b>gris con borde de color</b> es que allí solo llegó lo repetido por otro nodo (el borde es la señal del último salto).</li>
         <li>Puedes abrir varios registros a la vez (de varios días o de otras personas): se suman en el mapa.</li>
       </ul>
     </div>
@@ -331,13 +331,13 @@
       <ol>
         <li>En la app: Ajustes → panel de depuración → <b>exportar</b>. Mejor sin filtros.</li>
         <li>Aquí, <b>📂 Añadir registros</b> y elige el <code>.txt</code> (en el ordenador también puedes arrastrarlo a la página). Cada archivo se suma a lo que ya hay en el mapa. También abre CSV y GPX de versiones anteriores de esta página.</li>
-        <li>Al abrir el primer registro, si casi todo lo recibido viene de un nodo, se elige ese nodo y la <b>🔳 Cuadrícula</b> sin hacer nada. Si no, elige el nodo fijo en <b>Nodo</b>.</li>
+        <li>Al abrir el primer registro, si casi todo lo recibido viene de un nodo, se elige ese nodo y la <b>📥 Rx</b> sin hacer nada. Si no, elige el nodo fijo en <b>Nodo</b>.</li>
       </ol>
       <h3>Cobertura general de la red</h3>
       <ol>
         <li>No hace falta nodo fijo. El nodo de ruta, con los <b>mismos ajustes de radio que la red</b>, con GPS activado y actualización del GPS cada 20–30 s (el intervalo de difusión da igual).</li>
         <li>Sal y exporta el registro igual que antes, y añádelo aquí.</li>
-        <li>Al abrir el registro se elige sola <b>📶 Oído directamente → Mejor señal de cualquier nodo</b> en <b>🔳 Cuadrícula</b>. Cada celda sale del color del nodo que mejor se oye allí; al pinchar, dice cuál es. Para la cobertura de un repetidor concreto, elígelo en ese mismo grupo.</li>
+        <li>Al abrir el registro se elige sola <b>📶 Oído directamente → Mejor señal de cualquier nodo</b> en <b>📥 Rx</b>. Cada celda sale del color del nodo que mejor se oye allí; al pinchar, dice cuál es. Para la cobertura de un repetidor concreto, elígelo en ese mismo grupo.</li>
         <li>Deja los saltos en 0–7. Suma registros de varios días o personas para completar la zona.</li>
       </ol>
       <h3>📤 Transmisión (¿la red me oye a mí?)</h3>
@@ -446,8 +446,8 @@
       </ol>
       <h3>📊 What you get</h3>
       <ul>
-        <li>One dot per received packet, coloured by signal: <b>green</b> good, <b>yellow</b> fair, <b>red</b> at the limit. If the log includes the SF (the app writes it when it connects), the colour is the <b>margin</b>: how many dB are left above that SF's limit (−7.5 dB at SF7 … −20 dB at SF12), so tests with different SF can be compared.</li>
-        <li>The <b>🔳 Grid</b> view: the area split into cells with the signal of each one, and in <b>translucent dark grey</b> the cells you passed through without receiving anything. The colour only uses packets received directly; a <b>grey cell with a coloured border</b> means only packets relayed by another node arrived there (the border is the signal of the last hop).</li>
+        <li>With <b>🔵</b> (detail), one dot per received packet, coloured by signal: <b>green</b> good, <b>yellow</b> fair, <b>red</b> at the limit. If the log includes the SF (the app writes it when it connects), the colour is the <b>margin</b>: how many dB are left above that SF's limit (−7.5 dB at SF7 … −20 dB at SF12), so tests with different SF can be compared.</li>
+        <li>The <b>📥 Rx</b> view (reception): the area split into cells with the signal of each one, and in <b>translucent dark grey</b> the cells you passed through without receiving anything. The colour only uses packets received directly; a <b>grey cell with a coloured border</b> means only packets relayed by another node arrived there (the border is the signal of the last hop).</li>
         <li>You can open several logs at once (from different days or people): they add up on the map.</li>
       </ul>
     </div>
@@ -466,13 +466,13 @@
       <ol>
         <li>In the app: Settings → debug panel → <b>export</b>. Better without filters.</li>
         <li>Here, <b>📂 Add Logs</b> and pick the <code>.txt</code> (on a computer you can also drag it onto the page). Each file adds to what is already on the map. It also opens CSV and GPX files from older versions of this page.</li>
-        <li>When you open the first log, if almost everything received comes from one node, that node and <b>🔳 Grid</b> are picked for you. If not, pick the fixed node in <b>Node</b>.</li>
+        <li>When you open the first log, if almost everything received comes from one node, that node and <b>📥 Rx</b> are picked for you. If not, pick the fixed node in <b>Node</b>.</li>
       </ol>
       <h3>General coverage of the mesh</h3>
       <ol>
         <li>No fixed node needed. The route node, with the <b>same radio settings as the mesh</b>, with GPS on and a GPS update every 20–30 s (the broadcast interval does not matter).</li>
         <li>Go out and export the log as before, and add it here.</li>
-        <li>Opening the log picks <b>📶 Heard directly → Best signal of any node</b> in <b>🔳 Grid</b> for you. Each cell takes the colour of the node heard best there; tap it to see which one. For the coverage of a specific repeater, pick it in that same group.</li>
+        <li>Opening the log picks <b>📶 Heard directly → Best signal of any node</b> in <b>📥 Rx</b> for you. Each cell takes the colour of the node heard best there; tap it to see which one. For the coverage of a specific repeater, pick it in that same group.</li>
         <li>Leave hops at 0–7. Add logs from several days or people to complete the area.</li>
       </ol>
       <h3>📤 Transmission (does the mesh hear me?)</h3>
@@ -610,7 +610,7 @@ const I18N = {
     openTitle: "Add the packet log exported from the Meshtastic app (.txt), or CSV and GPX files. Each file adds to what is already on the map",
     clearTitle: "Remove everything opened from the map",
     node: "Node", allNodes: "All nodes", view: "View",
-    dots: "Dots", grid: "Grid", cmp: "Compare", cmpTitle: "Compare two spreading factors (SF) cell by cell", vs: "vs", cmpA: "First SF", cmpB: "Second SF",
+    grid: "Rx", cmp: "Compare", cmpTitle: "Compare two spreading factors (SF) cell by cell", vs: "vs", cmpA: "First SF", cmpB: "Second SF",
     cmpBoth: "Both", cmpOnly: sf => "Only SF" + sf, cmpNone: "Neither",
     cmpHead: (a, b) => "SF" + a + " vs SF" + b + " on the same route",
     cmpHeadAll: l => l.map(sf => "SF" + sf).join(" · ") + " on the same route",
@@ -621,7 +621,7 @@ const I18N = {
     cmpNote: n => "Only the " + n + " cells travelled with both SF count, so the comparison is fair. Distance: to the sending node. Margin: SNR above the decoding limit of each SF.",
     cmpGain: (b, d, a) => d > 0 ? "SF" + b + " receives in " + d + (d === 1 ? " more cell" : " more cells") + " than SF" + a + "." : d < 0 ? "SF" + b + " receives in " + (-d) + (d === -1 ? " fewer cell" : " fewer cells") + " than SF" + a + "." : "Both receive in the same number of cells.",
     cmpNoCommon: "No cell was travelled with both SF: do the same route with each one.",
-    cmpCell: (sf, n, m) => "SF" + sf + ": " + (n ? n + (n === 1 ? " packet" : " packets") + (m !== null ? " · margin " + m + " dB" : "") : "nothing received"), dotsTitle: "Show each reception as a dot", gridTitle: "Show coverage by cells",
+    cmpCell: (sf, n, m) => "SF" + sf + ": " + (n ? n + (n === 1 ? " packet" : " packets") + (m !== null ? " · margin " + m + " dB" : "") : "nothing received"), dotsTitle: "Detail: each received packet as a dot (time, SNR, hops, node)", gridTitle: "Reception (Rx): what your node heard from the mesh, in 250 m cells",
     hops: "Hops", hopsMin: "Minimum hops", hopsMax: "Maximum hops",
     hopsTitle: "Hops. 0 = received directly; 1, 2… = relayed by other nodes. Drag both ends to pick a minimum and a maximum",
     to: "to", track: "Track", noRx: "No reception", nodeIcon: "Node",
@@ -685,7 +685,7 @@ const I18N = {
     openTitle: "Añadir el registro de paquetes exportado de la app Meshtastic (.txt), o CSV y GPX. Cada archivo se suma a lo que ya hay en el mapa",
     clearTitle: "Quitar del mapa todo lo abierto",
     node: "Nodo", allNodes: "Todos los nodos", view: "Vista",
-    dots: "Puntos", grid: "Cuadrícula", cmp: "Comparar", cmpTitle: "Comparar dos factores de dispersión (SF) celda a celda", vs: "frente a", cmpA: "Primer SF", cmpB: "Segundo SF",
+    grid: "Rx", cmp: "Comparar", cmpTitle: "Comparar dos factores de dispersión (SF) celda a celda", vs: "frente a", cmpA: "Primer SF", cmpB: "Segundo SF",
     cmpBoth: "Los dos", cmpOnly: sf => "Solo SF" + sf, cmpNone: "Ninguno",
     cmpHead: (a, b) => "SF" + a + " frente a SF" + b + " en la misma ruta",
     cmpHeadAll: l => l.map(sf => "SF" + sf).join(" · ") + " en la misma ruta",
@@ -696,7 +696,7 @@ const I18N = {
     cmpNote: n => "Solo cuentan las " + n + " celdas recorridas con los dos SF, para que la comparación sea justa. Distancia: al nodo emisor. Margen: SNR por encima del límite de descodificación de cada SF.",
     cmpGain: (b, d, a) => d > 0 ? "SF" + b + " recibe en " + d + (d === 1 ? " celda" : " celdas") + " más que SF" + a + "." : d < 0 ? "SF" + b + " recibe en " + (-d) + (d === -1 ? " celda" : " celdas") + " menos que SF" + a + "." : "Los dos reciben en el mismo número de celdas.",
     cmpNoCommon: "Ninguna celda se recorrió con los dos SF: haz la misma ruta con cada uno.",
-    cmpCell: (sf, n, m) => "SF" + sf + ": " + (n ? n + (n === 1 ? " paquete" : " paquetes") + (m !== null ? " · margen " + m + " dB" : "") : "nada recibido"), dotsTitle: "Ver cada recepción como un punto", gridTitle: "Ver la cobertura por celdas",
+    cmpCell: (sf, n, m) => "SF" + sf + ": " + (n ? n + (n === 1 ? " paquete" : " paquetes") + (m !== null ? " · margen " + m + " dB" : "") : "nada recibido"), dotsTitle: "Detalle: cada paquete recibido como un punto (hora, SNR, saltos, nodo)", gridTitle: "Recepción (Rx): lo que tu nodo oyó de la red, en celdas de 250 m",
     hops: "Saltos", hopsMin: "Saltos mínimos", hopsMax: "Saltos máximos",
     hopsTitle: "Saltos. 0 = recibido en directo; 1, 2… = llegó repetido por otros nodos. Mueve los dos extremos para elegir un mínimo y un máximo",
     to: "a", track: "Recorrido", noRx: "Sin recepción", nodeIcon: "Nodo",
@@ -1049,7 +1049,7 @@ let fileRows = null, fileNames = [], fileTracks = [];
 let fileTxCells = [];   // transmisión por celda de archivos de cobertura (.json propio: {ok, n}; mapa comunitario: franja b)
 let fileTx = [];        // mensajes enviados con su resultado (transmisión: ¿te oyó la red?)
 let fileVisited = [];   // centros de celdas sin recepción de archivos de cobertura importados
-let mapView = "dots";
+let mapView = "grid";
 const cellSize = 250;   // tamaño fijo de celda: el mismo que el de la exportación y el mapa comunitario
 function saveMapPrefs() { try { localStorage.setItem("rangetest_mapprefs_v1", JSON.stringify({ mapView })); } catch (e) {} }
 function loadMapPrefs() {
