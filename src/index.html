@@ -633,7 +633,8 @@ const I18N = {
     direct: "direct", nHops: n => n + (n === 1 ? " hop" : " hops"), routePos: "position of the route node",
     errEmpty: "the file is empty", errCsv: "it does not look like a CSV from this page",
     errNoPkts: "there are no packets received over the radio in the file",
-    dropHere: "📂 Drop the files here", lowPrec: m => "⚠️ Your node's positions come with reduced precision (~" + m + "), so the route and the cells come out wrong. In the app, make the primary channel one of your own with a key and full position precision, and keep the public channel as secondary.", errGpx: "the file is not a valid GPX",
+    lowPrecSome: (n, tot, m) => "⚠️ " + n + " of " + tot + " positions of your node came with reduced precision (~" + m + ", probably while the primary channel was the public one). They have been discarded, and the packets received at those times are left off the map.",
+    dropHere: "📂 Drop the files here", lowPrec: m => "⚠️ Your node's positions come with reduced precision (~" + m + "), so they are not used for the route or the cells. In the app, make the primary channel one of your own with a key and full position precision, and keep the public channel as secondary.", errGpx: "the file is not a valid GPX",
     errNoTrack: "it has no track points", errOpen: (f, m) => "Could not open " + f + ": " + m,
     nodeSearch: "Search node", noMatch: "No node matches",
     ageTitle: "Age of the community map data", ageAll: "All data", age12: "Last 12 months", age6: "Last 6 months", age3: "Last 3 months",
@@ -696,7 +697,8 @@ const I18N = {
     direct: "directo", nHops: n => n + (n === 1 ? " salto" : " saltos"), routePos: "posición del nodo de ruta",
     errEmpty: "el archivo está vacío", errCsv: "no parece un CSV de esta página",
     errNoPkts: "no hay paquetes recibidos por radio en el archivo",
-    dropHere: "📂 Suelta aquí los archivos", lowPrec: m => "⚠️ Las posiciones de tu nodo vienen con precisión reducida (~" + m + "), así que el recorrido y las celdas salen mal. En la app, pon como canal primario uno propio con clave y precisión de posición completa, y deja el público como secundario.", errGpx: "el archivo no es un GPX válido",
+    lowPrecSome: (n, tot, m) => "⚠️ " + n + " de " + tot + " posiciones de tu nodo venían con precisión reducida (~" + m + ", seguramente de ratos con el canal público como primario). Se han descartado, y los paquetes recibidos en esos ratos no salen en el mapa.",
+    dropHere: "📂 Suelta aquí los archivos", lowPrec: m => "⚠️ Las posiciones de tu nodo vienen con precisión reducida (~" + m + "), así que no se usan para el recorrido ni para las celdas. En la app, pon como canal primario uno propio con clave y precisión de posición completa, y deja el público como secundario.", errGpx: "el archivo no es un GPX válido",
     errNoTrack: "no tiene puntos de recorrido", errOpen: (f, m) => "No se pudo abrir " + f + ": " + m,
     nodeSearch: "Buscar nodo", noMatch: "Ningún nodo coincide",
     ageTitle: "Antigüedad de los datos del mapa comunitario", ageAll: "Todos los datos", age12: "Últimos 12 meses", age6: "Últimos 6 meses", age3: "Últimos 3 meses",
@@ -1697,6 +1699,15 @@ function debugTxtToRows(text) {
     else p.heard = p.hops === null ? p.from : null;
   }
   own.sort((a, b) => a.ms - b.ms); pkts.sort((a, b) => a.ms - b.ms);
+  // Precisión de las posiciones propias: el nodo las pasa al móvil con la del canal primario
+  // (un canal público la limita; con 13 bits todas caen en el mismo punto, a ~3 km). Las de menos
+  // de 17 bits (> ~180 m) se descartan una a una: en un registro largo pueden venir de ratos con
+  // otra configuración y colocarían mal los paquetes. Esos paquetes se quedan sin posición.
+  const pbs = own.map(q => q.pb).filter(v => v > 0).sort((a, b) => a - b);
+  const ownBits = pbs.length ? pbs[pbs.length >> 1] : null;
+  const lowBits = own.filter(q => q.pb > 0 && q.pb < 17).map(q => q.pb).sort((a, b) => a - b);
+  const ownLow = lowBits.length, ownTotal = own.length;
+  if (ownLow) for (let i = own.length - 1; i >= 0; i--) if (own[i].pb > 0 && own[i].pb < 17) own.splice(i, 1);
   for (const t of senderTrack.values()) t.sort((a, b) => a.ms - b.ms);
   // Solo cuenta como «nodo que se mueve» el emisor cuyas posiciones se separan más de 100 m
   const moving = new Set();
@@ -1739,11 +1750,7 @@ function debugTxtToRows(text) {
   const tracks = [];
   if (own.length) tracks.push(own);
   else for (const n of moving) tracks.push(senderTrack.get(n));
-  // Precisión de las posiciones propias: el nodo las pasa al móvil con la del canal primario
-  // (un canal público la limita; con 13 bits todas caen en el mismo punto, a ~3 km)
-  const pbs = own.map(q => q.pb).filter(v => v > 0).sort((a, b) => a - b);
-  const ownBits = pbs.length ? pbs[pbs.length >> 1] : null;
-  return { rows, own, tracks, myNum, myName: names.get(myNum) || "", ownBits };
+  return { rows, own, tracks, myNum, myName: names.get(myNum) || "", ownBits, ownLow, ownTotal, lowBits: ownLow ? lowBits[ownLow >> 1] : null };
 }
 async function openDebugTxt(file) {
   try {
@@ -1760,7 +1767,11 @@ async function openDebugTxt(file) {
     mapDirty = true; drawMap(true); dirtyRender = true;
     const conPos = r.rows.filter(x => x.rxLat !== null).length;
     // aviso: posiciones propias recortadas (menos de 17 bits ≈ 180 m no sirven para celdas de 250 m)
-    if (r.ownBits && r.ownBits < 17) say(t("lowPrec", fmtM(Math.round(23300 / Math.pow(2, r.ownBits - 10) / 10) * 10)), 20000);
+    // posiciones propias imprecisas: todas (aviso de configurar el canal) o solo algunas (ratos con otra configuración)
+    if (r.ownLow) {
+      const m = fmtM(Math.round(23300 / Math.pow(2, r.lowBits - 10) / 10) * 10);
+      say(r.ownLow === r.ownTotal ? t("lowPrec", m) : t("lowPrecSome", r.ownLow, r.ownTotal, m), 20000);
+    }
   } catch (e) { say(t("errOpen", file.name, e.message)); }
 }
 
