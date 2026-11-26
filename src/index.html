@@ -339,7 +339,7 @@
       <ol>
         <li>Con el nodo fijo y el de ruta en <b>SF7</b>, haz una ruta. Cambia <b>los dos</b> a <b>SF10</b> (mismo BW, CR y frecuencia) y repite <b>la misma ruta</b>, mejor el mismo día y despacio (andando o en bici).</li>
         <li>Exporta el registro (o los dos) y añádelos aquí. Normalmente no hay que apuntar nada: la página sabe con qué SF iba cada paquete y cada tramo del recorrido. Si el registro no trae los ajustes LoRa (por ejemplo, exportado solo con «Packets» o vaciado después de conectar), la página te pregunta el SF de ese archivo.</li>
-        <li>En <b>Nodo</b>, elige el nodo fijo y pulsa <b>⚖️ Comparar</b> (solo sale si hay dos SF o más).</li>
+        <li>En <b>Nodo</b>, elige el nodo fijo y pulsa <b>⚖️ Comparar</b> (solo sale si hay dos SF o más). Con tres SF o más, la tabla los compara todos a la vez; el mapa compara los dos que elijas en los selectores <b>SF … frente a SF …</b>.</li>
         <li>Cada celda sale verde si recibieron <b>los dos</b>, azul si <b>solo el SF alto</b>, naranja si <b>solo el bajo</b> y gris si <b>ninguno</b>. Debajo, una tabla con el % de celdas con recepción, la distancia máxima y el margen mediano de cada SF.</li>
         <li>Solo cuentan las celdas por las que pasaste con los dos SF. Con más de dos SF, elige cuáles comparar.</li>
       </ol>
@@ -464,7 +464,7 @@
       <ol>
         <li>With the fixed and the route node on <b>SF7</b>, do a route. Switch <b>both</b> to <b>SF10</b> (same BW, CR and frequency) and repeat <b>the same route</b>, ideally the same day and slowly (walking or cycling).</li>
         <li>Export the log (or both) and add them here. Usually no need to note anything: the page knows which SF each packet and each part of the track used. If the log has no LoRa settings (for example, exported with only «Packets», or cleared after connecting), the page asks you for that file's SF.</li>
-        <li>In <b>Node</b>, choose the fixed node and press <b>⚖️ Compare</b> (it only appears with two or more SF).</li>
+        <li>In <b>Node</b>, choose the fixed node and press <b>⚖️ Compare</b> (it only appears with two or more SF). With three SF or more, the table compares them all at once; the map compares the two you pick in the <b>SF … vs SF …</b> selectors.</li>
         <li>Each cell is green if <b>both</b> received, blue if <b>only the higher SF</b>, orange if <b>only the lower</b> and grey if <b>neither</b>. Below, a table with the % of cells with reception, the maximum distance and the median margin of each SF.</li>
         <li>Only cells you passed with both SF count. With more than two SF, choose which ones to compare.</li>
       </ol>
@@ -589,6 +589,10 @@ const I18N = {
     dots: "Dots", grid: "Grid", cmp: "Compare", cmpTitle: "Compare two spreading factors (SF) cell by cell", vs: "vs", cmpA: "First SF", cmpB: "Second SF",
     cmpBoth: "Both", cmpOnly: sf => "Only SF" + sf, cmpNone: "Neither",
     cmpHead: (a, b) => "SF" + a + " vs SF" + b + " on the same route",
+    cmpHeadAll: l => l.map(sf => "SF" + sf).join(" · ") + " on the same route",
+    cmpNoteAll: n => "Only the " + n + " cells travelled with every SF count, so the comparison is fair. Distance: to the sending node. Margin: SNR above the decoding limit of each SF.",
+    cmpNoCommonAll: "No cell was travelled with every SF: compare them two by two with the selectors above.",
+    cmpMapPair: (a, b) => "The map compares SF" + a + " with SF" + b + " (change them above).",
     cmpThSf: "SF", cmpThCells: "Cells with reception", cmpThDist: "Max. distance", cmpThMargin: "Median margin", cmpThPkts: "Packets",
     cmpNote: n => "Only the " + n + " cells travelled with both SF count, so the comparison is fair. Distance: to the sending node. Margin: SNR above the decoding limit of each SF.",
     cmpGain: (b, d, a) => d > 0 ? "SF" + b + " receives in " + d + (d === 1 ? " more cell" : " more cells") + " than SF" + a + "." : d < 0 ? "SF" + b + " receives in " + (-d) + (d === -1 ? " fewer cell" : " fewer cells") + " than SF" + a + "." : "Both receive in the same number of cells.",
@@ -653,6 +657,10 @@ const I18N = {
     dots: "Puntos", grid: "Cuadrícula", cmp: "Comparar", cmpTitle: "Comparar dos factores de dispersión (SF) celda a celda", vs: "frente a", cmpA: "Primer SF", cmpB: "Segundo SF",
     cmpBoth: "Los dos", cmpOnly: sf => "Solo SF" + sf, cmpNone: "Ninguno",
     cmpHead: (a, b) => "SF" + a + " frente a SF" + b + " en la misma ruta",
+    cmpHeadAll: l => l.map(sf => "SF" + sf).join(" · ") + " en la misma ruta",
+    cmpNoteAll: n => "Solo cuentan las " + n + " celdas recorridas con todos los SF, para que la comparación sea justa. Distancia: al nodo emisor. Margen: SNR por encima del límite de descodificación de cada SF.",
+    cmpNoCommonAll: "Ninguna celda se recorrió con todos los SF: compáralos de dos en dos con los selectores de arriba.",
+    cmpMapPair: (a, b) => "El mapa compara SF" + a + " con SF" + b + " (cámbialos arriba).",
     cmpThSf: "SF", cmpThCells: "Celdas con recepción", cmpThDist: "Distancia máx.", cmpThMargin: "Margen mediano", cmpThPkts: "Paquetes",
     cmpNote: n => "Solo cuentan las " + n + " celdas recorridas con los dos SF, para que la comparación sea justa. Distancia: al nodo emisor. Margen: SNR por encima del límite de descodificación de cada SF.",
     cmpGain: (b, d, a) => d > 0 ? "SF" + b + " recibe en " + d + (d === 1 ? " celda" : " celdas") + " más que SF" + a + "." : d < 0 ? "SF" + b + " recibe en " + (-d) + (d === -1 ? " celda" : " celdas") + " menos que SF" + a + "." : "Los dos reciben en el mismo número de celdas.",
@@ -1319,19 +1327,22 @@ function cmpSfList(rows, tracks) {
   for (const t of tracks) for (const p of t.pts) if (p.sf) set.add(p.sf);
   return [...set].sort((a, b) => a - b);
 }
-function compareSf(rows, tracks, size, a, b) {
+// list: SF a comparar (dos para el mapa; todos los que haya para la tabla). Solo cuentan las celdas
+// recorridas con todos ellos. Con dos, cada celda lleva su categoría (los dos / solo b / solo a / ninguno)
+function compareSf(rows, tracks, size, list) {
+  const [a, b] = list, has = sf => list.includes(sf), obj = f => Object.fromEntries(list.map(sf => [sf, f()]));
   const lats = rows.filter(r => r.rxLat != null && !isNaN(r.rxLat)).map(r => r.rxLat).concat(...tracks.map(t => t.pts.map(p => p.lat)));
   if (!lats.length) return null;
   const latRef = Math.round(lats.reduce((x, y) => x + y, 0) / lats.length);
   const mLat = 111320, mLon = 111320 * Math.cos(latRef * Math.PI / 180);
   const key = (lat, lon) => Math.floor(lat * mLat / size) + ":" + Math.floor(lon * mLon / size);
   const cells = new Map();
-  const cell = k => { if (!cells.has(k)) cells.set(k, { k, v: { [a]: false, [b]: false }, n: { [a]: 0, [b]: 0 }, m: { [a]: [], [b]: [] } }); return cells.get(k); };
+  const cell = k => { if (!cells.has(k)) cells.set(k, { k, v: obj(() => false), n: obj(() => 0), m: obj(() => []) }); return cells.get(k); };
   const heard = heardMode();
   const st = {};
-  for (const sf of [a, b]) st[sf] = { n: 0, dist: null, margins: [], ms: 0 };
+  for (const sf of list) st[sf] = { n: 0, dist: null, margins: [], ms: 0 };
   for (const r of rows) {
-    if (r.sf !== a && r.sf !== b) continue;
+    if (!has(r.sf)) continue;
     const s = st[r.sf], w = r.w || 1;
     s.n += w;
     const d = distFor(r); if (d != null && !isNaN(d) && (s.dist === null || d > s.dist)) s.dist = d;
@@ -1345,7 +1356,7 @@ function compareSf(rows, tracks, size, a, b) {
     const p = t.pts;
     for (let i = 0; i < p.length; i++) {
       const sf = p[i].sf;
-      if (sf !== a && sf !== b) continue;
+      if (!has(sf)) continue;
       cell(key(p[i].lat, p[i].lon)).v[sf] = true;
       const q = p[i + 1];
       if (!q || q.sf !== sf) continue;
@@ -1356,11 +1367,11 @@ function compareSf(rows, tracks, size, a, b) {
     }
   }
   const out = [];
-  let common = 0; const rx = { [a]: 0, [b]: 0 };
+  let common = 0; const rx = obj(() => 0);
   for (const c of cells.values()) {
-    if (!c.v[a] || !c.v[b]) continue;   // solo las celdas recorridas con los dos SF
+    if (!list.every(sf => c.v[sf])) continue;   // solo las celdas recorridas con todos los SF
     common++;
-    if (c.n[a]) rx[a]++; if (c.n[b]) rx[b]++;
+    for (const sf of list) if (c.n[sf]) rx[sf]++;
     const [iy, ix] = c.k.split(":").map(Number);
     c.bounds = [[iy * size / mLat, ix * size / mLon], [(iy + 1) * size / mLat, (ix + 1) * size / mLon]];
     c.cat = c.n[a] && c.n[b] ? "both" : c.n[b] ? "b" : c.n[a] ? "a" : "none";
@@ -1375,7 +1386,9 @@ function drawCompare(rows, tracks, sfList) {
   if (a === b) b = sfList.find(x => x !== a);
   const opts = v => sfList.map(sf => '<option value="' + sf + '"' + (sf === v ? " selected" : "") + ">" + sf + "</option>").join("");
   $("cmpA").innerHTML = opts(a); $("cmpB").innerHTML = opts(b);
-  const res = compareSf(rows, tracks, cellSize, a, b), pts = [];
+  const res = compareSf(rows, tracks, cellSize, [a, b]), pts = [];
+  // con tres SF o más, la tabla los compara todos a la vez (en las celdas recorridas con todos)
+  const all = sfList.length > 2 ? compareSf(rows, tracks, cellSize, sfList) : null;
   const sw = (c, txt) => '<span><i style="background:' + c + ';border-radius:1px"></i>' + esc(txt) + "</span>";
   $("lgScale").innerHTML = sw(CMP_COLORS.both, t("cmpBoth")) + sw(CMP_COLORS.b, t("cmpOnly", b)) + sw(CMP_COLORS.a, t("cmpOnly", a)) + sw("rgba(26,29,34,.6)", t("cmpNone"));
   if (!res) { $("cmpBox").innerHTML = ""; return pts; }
@@ -1389,14 +1402,19 @@ function drawCompare(rows, tracks, sfList) {
     pts.push(c.bounds[0], c.bounds[1]);
   }
   // tabla por SF
-  const row = sf => { const s = res.st[sf], pct = res.common ? Math.round(100 * res.rx[sf] / res.common) : 0;
-    return "<tr><td><b>SF" + sf + "</b></td><td>" + res.rx[sf] + " / " + res.common + " (" + pct + " %)</td><td>" + fmtDist(s.dist) + "</td><td>" +
+  const row = (R, sf) => { const s = R.st[sf], pct = R.common ? Math.round(100 * R.rx[sf] / R.common) : 0;
+    return "<tr><td><b>SF" + sf + "</b></td><td>" + R.rx[sf] + " / " + R.common + " (" + pct + " %)</td><td>" + fmtDist(s.dist) + "</td><td>" +
       sign(med(s.margins)) + "</td><td>" + s.n + "</td></tr>"; };
-  $("cmpBox").innerHTML = '<div class="cmphead">⚖️ ' + esc(t("cmpHead", a, b)) + "</div>" +
-    (res.common ? '<div class="cmpscroll"><table><thead><tr><th>' + esc(t("cmpThSf")) + "</th><th>" + esc(t("cmpThCells")) + "</th><th>" + esc(t("cmpThDist")) +
-      "</th><th>" + esc(t("cmpThMargin")) + "</th><th>" + esc(t("cmpThPkts")) + "</th></tr></thead><tbody>" + row(a) + row(b) + "</tbody></table></div>" +
-      '<div class="cmpnote"><b>' + esc(t("cmpGain", b, res.rx[b] - res.rx[a], a)) + "</b> " + esc(t("cmpNote", res.common)) + "</div>"
-      : '<div class="cmpnote">' + esc(t("cmpNoCommon")) + "</div>");
+  const table = (R, list) => '<div class="cmpscroll"><table><thead><tr><th>' + esc(t("cmpThSf")) + "</th><th>" + esc(t("cmpThCells")) + "</th><th>" + esc(t("cmpThDist")) +
+      "</th><th>" + esc(t("cmpThMargin")) + "</th><th>" + esc(t("cmpThPkts")) + "</th></tr></thead><tbody>" + list.map(sf => row(R, sf)).join("") + "</tbody></table></div>";
+  $("cmpBox").innerHTML = all
+    ? '<div class="cmphead">⚖️ ' + esc(t("cmpHeadAll", sfList)) + "</div>" +
+      (all.common ? table(all, sfList) + '<div class="cmpnote">' + esc(t("cmpNoteAll", all.common)) + "</div>" : '<div class="cmpnote">' + esc(t("cmpNoCommonAll")) + "</div>") +
+      '<div class="cmpnote"><b>' + esc(t("cmpMapPair", a, b)) + "</b>" + (res.common ? " " + esc(t("cmpGain", b, res.rx[b] - res.rx[a], a)) : "") + "</div>"
+    : '<div class="cmphead">⚖️ ' + esc(t("cmpHead", a, b)) + "</div>" +
+      (res.common ? table(res, [a, b]) +
+        '<div class="cmpnote"><b>' + esc(t("cmpGain", b, res.rx[b] - res.rx[a], a)) + "</b> " + esc(t("cmpNote", res.common)) + "</div>"
+        : '<div class="cmpnote">' + esc(t("cmpNoCommon")) + "</div>");
   return pts;
 }
 
