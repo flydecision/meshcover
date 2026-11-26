@@ -387,7 +387,7 @@
       <h3>🚶 Aportar tu recorrido</h3>
       <ol>
         <li>Prepara el nodo de ruta como en «Cómo usar → Cobertura general de la red»: <b>mismos ajustes de radio que la red</b>, CLIENT_MUTE, GPS activado con actualización cada 20–30 s y «posición inteligente» desactivada. El intervalo de difusión puede quedar en «unset» o largo: así tampoco emites tu recorrido en directo.</li>
-        <li><b>Canal primario propio</b>: crea un canal tuyo con clave (PSK) y ponlo como <b>primario</b> (canal 0), con precisión de posición completa; deja el canal público de la red como <b>secundario</b>. Así tu recorrido se registra con precisión completa (en un canal público el firmware la limita a unos 730 m), solo lo ve quien tenga tu clave, y sigues oyendo a toda la red por el secundario.</li>
+        <li><b>Canal propio para la posición</b>: crea un canal tuyo con clave (PSK), como primario o secundario, y actívale la posición con precisión completa. En los demás canales (por ejemplo el público) deja la posición <b>desactivada</b>. Así tu recorrido se registra con precisión completa (en un canal público el firmware la limita a unos 730 m), solo lo ve quien tenga tu clave, y sigues oyendo a toda la red.</li>
         <li><b>Si tu nodo no tiene GPS</b>: en la app, activa <b>Ajustes › «Proporcionar la ubicación del teléfono a la malla»</b>: el nodo usa la posición del móvil. Si aun así el registro no trae tu recorrido, graba la ruta con cualquier app de rutas del móvil, expórtala en <b>GPX</b> y abre el <code>.gpx</code> junto con el <code>.txt</code> (en cualquier orden): los paquetes sin posición se colocan según la hora del GPX.</li>
         <li>En la app, vacía el registro (Ajustes → panel de depuración → borrar), haz el recorrido con la pantalla apagada y al volver <b>exporta</b> el registro.</li>
         <li>Aquí, <b>📂 Añadir registros</b> con ese <code>.txt</code>.</li>
@@ -514,7 +514,7 @@
       <h3>🚶 Contributing your route</h3>
       <ol>
         <li>Set up the route node as in «How to use → General coverage of the mesh»: <b>same radio settings as the network</b>, CLIENT_MUTE, GPS on with updates every 20–30 s and «smart position» off. The broadcast interval can stay «unset» or long: that way you do not broadcast your route live either.</li>
-        <li><b>Your own primary channel</b>: create a channel of your own with a key (PSK) and make it the <b>primary</b> (channel 0), with full position precision; keep the network's public channel as <b>secondary</b>. That way your track is logged with full precision (on a public channel the firmware limits it to about 730 m), only people with your key see it, and you still hear the whole network on the secondary.</li>
+        <li><b>Your own channel for position</b>: create a channel of your own with a key (PSK), as primary or secondary, and turn on position for it with full precision. On the other channels (for example the public one) leave position <b>off</b>. That way your track is logged with full precision (on a public channel the firmware limits it to about 730 m), only people with your key see it, and you still hear the whole network.</li>
         <li><b>If your node has no GPS</b>: in the app, turn on <b>Settings › «Provide location to mesh»</b>: the node uses the phone's position. If the log still has no track, record the route with any route app on your phone, export it as <b>GPX</b> and open the <code>.gpx</code> together with the <code>.txt</code> (in any order): packets without a position are placed by the time in the GPX.</li>
         <li>In the app, clear the log (Settings → debug panel → clear), do the route with the screen off and, back home, <b>export</b> the log.</li>
         <li>Here, <b>📂 Add Logs</b> with that <code>.txt</code>.</li>
@@ -632,8 +632,8 @@ const I18N = {
     direct: "direct", nHops: n => n + (n === 1 ? " hop" : " hops"), routePos: "position of the route node",
     errEmpty: "the file is empty", errCsv: "it does not look like a CSV from this page",
     errNoPkts: "there are no packets received over the radio in the file",
-    lowPrecSome: (n, tot, m) => "⚠️ " + n + " of " + tot + " positions of your node came with reduced precision (~" + m + ", probably while the primary channel was the public one). They have been discarded, and the packets received at those times are left off the map.",
-    dropHere: "📂 Drop the files here", lowPrec: m => "⚠️ Your node's positions come with reduced precision (~" + m + "), so they are not used for the route or the cells. In the app, make the primary channel one of your own with a key and full position precision, and keep the public channel as secondary.", errGpx: "the file is not a valid GPX",
+    lowPrecSome: (n, tot, m) => "⚠️ " + n + " of " + tot + " positions of your node came with reduced precision (~" + m + ", probably while position was shared on the public channel). They have been discarded, and the packets received at those times are left off the map.",
+    dropHere: "📂 Drop the files here", lowPrec: m => "⚠️ Your node's positions come with reduced precision (~" + m + "), so they are not used for the route or the cells. In the app, turn on position with full precision only on a channel of your own with a key (primary or secondary), and turn it off on the public channel.", errGpx: "the file is not a valid GPX",
     errNoTrack: "it has no track points", errOpen: (f, m) => "Could not open " + f + ": " + m,
     nodeSearch: "Search node", noMatch: "No node matches",
     ageTitle: "Age of the community map data", ageAll: "All data", age12: "Last 12 months", age6: "Last 6 months", age3: "Last 3 months",
@@ -695,8 +695,8 @@ const I18N = {
     direct: "directo", nHops: n => n + (n === 1 ? " salto" : " saltos"), routePos: "posición del nodo de ruta",
     errEmpty: "el archivo está vacío", errCsv: "no parece un CSV de esta página",
     errNoPkts: "no hay paquetes recibidos por radio en el archivo",
-    lowPrecSome: (n, tot, m) => "⚠️ " + n + " de " + tot + " posiciones de tu nodo venían con precisión reducida (~" + m + ", seguramente de ratos con el canal público como primario). Se han descartado, y los paquetes recibidos en esos ratos no salen en el mapa.",
-    dropHere: "📂 Suelta aquí los archivos", lowPrec: m => "⚠️ Las posiciones de tu nodo vienen con precisión reducida (~" + m + "), así que no se usan para el recorrido ni para las celdas. En la app, pon como canal primario uno propio con clave y precisión de posición completa, y deja el público como secundario.", errGpx: "el archivo no es un GPX válido",
+    lowPrecSome: (n, tot, m) => "⚠️ " + n + " de " + tot + " posiciones de tu nodo venían con precisión reducida (~" + m + ", seguramente de ratos en que la posición se compartía por el canal público). Se han descartado, y los paquetes recibidos en esos ratos no salen en el mapa.",
+    dropHere: "📂 Suelta aquí los archivos", lowPrec: m => "⚠️ Las posiciones de tu nodo vienen con precisión reducida (~" + m + "), así que no se usan para el recorrido ni para las celdas. En la app, activa la posición con precisión completa solo en un canal propio con clave (primario o secundario), y desactívala en el público.", errGpx: "el archivo no es un GPX válido",
     errNoTrack: "no tiene puntos de recorrido", errOpen: (f, m) => "No se pudo abrir " + f + ": " + m,
     nodeSearch: "Buscar nodo", noMatch: "Ningún nodo coincide",
     ageTitle: "Antigüedad de los datos del mapa comunitario", ageAll: "Todos los datos", age12: "Últimos 12 meses", age6: "Últimos 6 meses", age3: "Últimos 3 meses",
@@ -1683,7 +1683,7 @@ function debugTxtToRows(text) {
     else p.heard = p.hops === null ? p.from : null;
   }
   own.sort((a, b) => a.ms - b.ms); pkts.sort((a, b) => a.ms - b.ms);
-  // Precisión de las posiciones propias: el nodo las pasa al móvil con la del canal primario
+  // Precisión de las posiciones propias: el nodo las pasa al móvil con la del canal que tiene la posición activada
   // (un canal público la limita; con 13 bits todas caen en el mismo punto, a ~3 km). Las de menos
   // de 17 bits (> ~180 m) se descartan una a una: en un registro largo pueden venir de ratos con
   // otra configuración y colocarían mal los paquetes. Esos paquetes se quedan sin posición.
