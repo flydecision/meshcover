@@ -2,7 +2,7 @@
 // Mapa comunitario de cobertura: utilidades comunes a upload.php y community.php.
 // Los datos se guardan en ../data (fuera del alcance de la web gracias a su .htaccess).
 
-const BUILD = 7;
+const BUILD = 8;
 const MIN_FILES_INFO = 5;        // con menos subidas en total, no se publican pasadas ni recepción por celda (privacidad)                  // versión de community.json: al cambiarla se rehace
 const CELL_SIZE = 250;            // tamaño fijo de celda de los archivos exportados por la página
 const MAX_BYTES = 524288;         // 512 KB por subida
@@ -66,7 +66,14 @@ function clean_coverage($data): array {
       if (array_key_exists('bw', $o)) { $v = num($o['bw'], 7.8, 1625); if ($v === null) throw new Exception('bw'); $node['bw'] = $v; }
       $cn[] = $node;
     }
-    $out[] = ['lat' => round($lat, 6), 'lon' => round($lon, 6), 'n' => (int)$n, 'nodes' => $cn];
+    $cell = ['lat' => round($lat, 6), 'lon' => round($lon, 6), 'n' => (int)$n, 'nodes' => $cn];
+    // transmisión (opcional): mensajes enviados en la celda y cuántos llegaron a la red
+    if (array_key_exists('tx', $c)) {
+      $t = $c['tx']; $tn = is_array($t) ? num($t['n'] ?? null, 1, 100000) : null; $to = is_array($t) ? num($t['ok'] ?? null, 0, 100000) : null;
+      if ($tn === null || $to === null || floor($tn) != $tn || floor($to) != $to || $to > $tn) throw new Exception('tx');
+      $cell['tx'] = ['ok' => (int)$to, 'n' => (int)$tn];
+    }
+    $out[] = $cell;
   }
   $date = (is_string($data['date'] ?? null) && preg_match('/^\d{4}-\d{2}$/', $data['date'])) ? $data['date'] : gmdate('Y-m');
   return ['format' => 'meshcover-coverage', 'version' => 1, 'cellSize' => CELL_SIZE, 'date' => $date, 'cells' => $out];
@@ -92,10 +99,11 @@ function build_community(string $dir, int $months = 0): array {
     $files++;
     foreach ($d['cells'] as $c) {
       $k = sprintf('%.6f,%.6f', $c['lat'], $c['lon']);
-      if (!isset($cells[$k])) $cells[$k] = ['lat' => $c['lat'], 'lon' => $c['lon'], 'n' => 0, 'f' => 0, 'fr' => 0, 'last' => '', 'nodes' => []];
+      if (!isset($cells[$k])) $cells[$k] = ['lat' => $c['lat'], 'lon' => $c['lon'], 'n' => 0, 'f' => 0, 'fr' => 0, 'txo' => 0, 'txn' => 0, 'last' => '', 'nodes' => []];
       $cells[$k]['n'] += $c['n'];
       $cells[$k]['f']++;
       if ($c['n'] > 0) $cells[$k]['fr']++;
+      if (isset($c['tx'])) { $cells[$k]['txo'] += $c['tx']['ok']; $cells[$k]['txn'] += $c['tx']['n']; }
       if (strcmp($date, $cells[$k]['last']) > 0) $cells[$k]['last'] = $date;
       foreach ($c['nodes'] as $o) {
         $id = $o['id'];
@@ -121,6 +129,8 @@ function build_community(string $dir, int $months = 0): array {
     }
     $o = ['lat' => $c['lat'], 'lon' => $c['lon'], 'n' => $c['n']];
     if ($info) { $o['f'] = $c['f'] >= 5 ? 5 : ($c['f'] >= 2 ? 2 : 1); $o['rx'] = $c['fr'] == 0 ? 0 : ($c['fr'] >= $c['f'] ? 2 : 1); }
+    // transmisión: solo la franja (0 nunca llegó a la red, 1 a veces, 2 siempre), nunca los números
+    if ($c['txn'] > 0) $o['tx'] = $c['txo'] == 0 ? 0 : ($c['txo'] >= $c['txn'] ? 2 : 1);
     $o['last'] = $c['last']; $o['nodes'] = $nodes;
     $out[] = $o;
   }

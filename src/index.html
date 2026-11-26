@@ -228,6 +228,7 @@
     <span class="seg" role="group" data-i18n-aria="view">
       <button id="vDots" data-i18n-title="dotsTitle">🔵 <span data-i18n="dots">Dots</span></button>
       <button id="vGrid" data-i18n-title="gridTitle">🔳 <span data-i18n="grid">Grid</span></button>
+      <button id="vTx" data-i18n-title="txViewTitle">📤 <span data-i18n="txView">Tx</span></button>
       <button id="vCmp" data-i18n-title="cmpTitle" hidden>⚖️ <span data-i18n="cmp">Compare</span></button>
     </span>
     <span id="cmpWrap" class="filt cmpf" hidden>SF <select id="cmpA" data-i18n-aria="cmpA"></select> <span data-i18n="vs">vs</span> SF <select id="cmpB" data-i18n-aria="cmpB"></select></span>
@@ -343,6 +344,7 @@
       <div>Lo anterior mide lo que <b>tu nodo oye</b>. Para saber si <b>la red te oye a ti</b>, durante la ruta manda de vez en cuando un mensaje corto a un canal (cada pocos minutos o en los puntos que te interesen; el texto da igual). Tu nodo escucha si algún nodo lo retransmite y la app lo apunta en el registro.</div>
       <ul>
         <li>En el mapa sale <b>✓ verde</b> donde la red lo oyó y <b>✗ roja</b> donde nadie lo retransmitió tras 3 intentos. Al pinchar una celda: «3 de 4 mensajes llegaron a la red».</li>
+        <li>El botón <b>📤 Tx</b> pinta la cuadrícula según la transmisión: verde si los mensajes <b>siempre</b> llegaron a la red, amarillo si <b>a veces</b> y rojo si <b>nunca</b>. Se exporta y se sube al mapa comunitario junto con la recepción (allí solo como siempre / a veces / nunca).</li>
         <li>Para no llenar el canal público de pruebas, mándalos a tu canal propio con PSK: los repetidores con la retransmisión por defecto también reenvían lo que no pueden leer.</li>
         <li>La hora es la del resultado: el ✓ llega en segundos, pero la ✗ puede llegar hasta un minuto después de enviarlo. Si vas en coche, la ✗ puede salir algo más adelante de donde la mandaste.</li>
       </ul>
@@ -477,6 +479,7 @@
       <div>The above measures what <b>your node hears</b>. To know whether <b>the mesh hears you</b>, send a short message to a channel now and then during the route (every few minutes or at the places you care about; the text does not matter). Your node listens for another node relaying it and the app writes it in the log.</div>
       <ul>
         <li>The map shows a <b>green ✓</b> where the mesh heard it and a <b>red ✗</b> where nobody relayed it after 3 tries. Tap a cell: «3 of 4 messages reached the mesh».</li>
+        <li>The <b>📤 Tx</b> button colours the grid by transmission: green if the messages <b>always</b> reached the mesh, yellow if <b>sometimes</b> and red if <b>never</b>. It is exported and uploaded to the community map along with reception (there only as always / sometimes / never).</li>
         <li>To avoid filling the public channel with tests, send them to your own channel with a PSK: repeaters with the default rebroadcast mode also forward what they cannot read.</li>
         <li>The time is that of the result: the ✓ comes within seconds, but the ✗ can come up to a minute after sending. In a car, the ✗ may appear a bit further on than where you sent it.</li>
       </ul>
@@ -640,6 +643,8 @@ const I18N = {
     medSnr: (m, w, b) => "Median SNR " + m + " dB (worst " + w + ", best " + b + ")",
     medRssi: m => "Median RSSI " + m + " dBm", directOnly: "direct only", timeInCell: "Time in cell",
     noRxText: "You passed here and no packet arrived.", noRxComm: "Routes passed here and nothing was heard directly from a relaying node.",
+    txView: "Tx", txViewTitle: "Transmission: did the mesh hear the messages you sent? (cells by messages sent)",
+    txLgAll: "Tx: always reached the mesh", txLgSome: "sometimes", txLgNever: "never",
     txTitle: "Transmission", txCell: (a, n) => a + " of " + n + " messages reached the mesh", txMsg: "Message sent",
     txOk: "✓ The mesh heard it: a node relayed or acknowledged it.", txKo: "✗ Nobody relayed it after 3 tries.", lgTx: "Message sent: mesh heard it / nobody",
     commFew: "There are still few uploads: passes and reliability will show when there are more.", commPass1: "1 pass", commPass2: "2–4 passes", commPass5: "5 or more passes", commRx: "reception", rxNever: "never", rxSome: "sometimes", rxAll: "always", reliability: "Reliability",
@@ -713,6 +718,8 @@ const I18N = {
     medSnr: (m, w, b) => "SNR mediano " + m + " dB (peor " + w + ", mejor " + b + ")",
     medRssi: m => "RSSI mediano " + m + " dBm", directOnly: "solo directos", timeInCell: "Tiempo en la celda",
     noRxText: "Pasaste por aquí y no llegó ningún paquete.", noRxComm: "Han pasado recorridos por aquí y no se oyó directamente a ningún nodo que repita.",
+    txView: "Tx", txViewTitle: "Transmisión: ¿la red oyó los mensajes que enviaste? (celdas según los mensajes enviados)",
+    txLgAll: "Tx: siempre llegó a la red", txLgSome: "a veces", txLgNever: "nunca",
     txTitle: "Transmisión", txCell: (a, n) => a + " de " + n + " mensajes llegaron a la red", txMsg: "Mensaje enviado",
     txOk: "✓ La red lo oyó: un nodo lo retransmitió o lo confirmó.", txKo: "✗ Nadie lo retransmitió tras 3 intentos.", lgTx: "Mensaje enviado: la red lo oyó / nadie",
     commFew: "Aún hay pocas subidas: las pasadas y la fiabilidad se mostrarán cuando haya más.", commPass1: "1 pasada", commPass2: "2–4 pasadas", commPass5: "5 pasadas o más", commRx: "recepción", rxNever: "nunca", rxSome: "a veces", rxAll: "siempre", reliability: "Fiabilidad",
@@ -1023,7 +1030,7 @@ function askSf(name) {
 // «🗑 Limpiar»: quita del mapa todo lo abierto
 function clearAll() {
   if (!fileRows && !fileTracks.length && !fileVisited.length) return;
-  fileRows = null; fileNames = []; fileTracks = []; fileVisited = []; fileTx = [];
+  fileRows = null; fileNames = []; fileTracks = []; fileVisited = []; fileTx = []; fileTxCells = [];
   nodeRoles = new Map();
   $("sfAsk").innerHTML = "";
   $("ageWrap").hidden = true;
@@ -1039,6 +1046,7 @@ const LEAFLET_SRC = [
 ];
 let map = null, mapLayer = null, mapOn = false, mapDirty = true, mapFitted = false;
 let fileRows = null, fileNames = [], fileTracks = [];
+let fileTxCells = [];   // transmisión por celda de archivos de cobertura (.json propio: {ok, n}; mapa comunitario: franja b)
 let fileTx = [];        // mensajes enviados con su resultado (transmisión: ¿te oyó la red?)
 let fileVisited = [];   // centros de celdas sin recepción de archivos de cobertura importados
 let mapView = "dots";
@@ -1047,7 +1055,7 @@ function saveMapPrefs() { try { localStorage.setItem("rangetest_mapprefs_v1", JS
 function loadMapPrefs() {
   try {
     const p = JSON.parse(localStorage.getItem("rangetest_mapprefs_v1") || "{}");
-    if (["grid", "dots", "cmp"].includes(p.mapView)) mapView = p.mapView;
+    if (["grid", "dots", "cmp", "tx"].includes(p.mapView)) mapView = p.mapView;
   } catch (e) {}
   showView();
   $("rngHops").value = String(maxHops); $("rngHopsMin").value = String(minHops); showHops();
@@ -1056,6 +1064,7 @@ function showView() {
   $("vDots").classList.toggle("on", mapView === "dots");
   $("vGrid").classList.toggle("on", mapView === "grid");
   $("vCmp").classList.toggle("on", mapView === "cmp");
+  $("vTx").classList.toggle("on", mapView === "tx");
   $("cmpWrap").hidden = mapView !== "cmp" || $("vCmp").hidden;
 }
 function setView(v) { mapView = v; showView(); saveMapPrefs(); mapDirty = true; dirtyRender = true; }
@@ -1315,6 +1324,11 @@ function buildGrid(rows, tracks, size) {
     if (r.rssi != null && !isNaN(r.rssi)) c.rssi.push(r.rssi);
   }
   for (const x of txVisible()) { const c = cell(key(x.lat, x.lon)); c.visited = true; c.own = true; if (x.ok) c.txOk++; else c.txFail++; }
+  if (!exportPreviewOn()) for (const x of fileTxCells) {
+    const c = cell(key(x.lat, x.lon)); c.visited = true;
+    if (x.b != null) { c.comm = true; c.txb = c.txb == null ? x.b : (c.txb === x.b ? x.b : 1); }
+    else { c.own = true; c.txOk += x.ok; c.txFail += x.n - x.ok; }
+  }
   for (const v of fileVisited) { const c = cell(key(v.lat, v.lon)); c.visited = true; if (!v.community) c.own = true; else commCell(c, v); }
   for (const t of tracks) {
     const p = t.pts;
@@ -1364,14 +1378,22 @@ function txInfo(c) {
   const n = c.txOk + c.txFail;
   return n ? "<hr style='border:0;border-top:1px solid #8884;margin:6px 0'>📤 <b>" + t("txTitle") + "</b>: " + t("txCell", c.txOk, n) : "";
 }
+// estado de transmisión de una celda: 2 siempre llegó, 1 a veces, 0 nunca, null sin mensajes
+function txState(c) {
+  const n = c.txOk + c.txFail, own = n ? (c.txOk === n ? 2 : c.txOk === 0 ? 0 : 1) : null;
+  if (own == null) return c.txb == null ? null : c.txb;
+  return c.txb == null || c.txb === own ? own : 1;
+}
+const TX_COLORS = ["#d93025", "#e6b31e", "#1fa64a"];
 function commInfo(c) {
   if (!c.comm) return "";
+  const txl = c.txb != null ? "<br>📤 " + t("txTitle") + ": " + t(["rxNever", "rxSome", "rxAll"][c.txb]) : "";
   // con pocas subidas en total el servidor no publica pasadas ni recepción (privacidad)
-  if (!c.cf) return "<hr style='border:0;border-top:1px solid #8884;margin:6px 0'>🌍 <b>" + t("commName") + "</b><br>" + t("commFew");
+  if (!c.cf) return "<hr style='border:0;border-top:1px solid #8884;margin:6px 0'>🌍 <b>" + t("commName") + "</b><br>" + t("commFew") + txl;
   const lvl = c.cf >= 5 ? "relHigh" : c.cf >= 2 ? "relMid" : "relLow";
   return "<hr style='border:0;border-top:1px solid #8884;margin:6px 0'>🌍 <b>" + t("commName") + "</b><br>" +
     t(c.cf >= 5 ? "commPass5" : c.cf >= 2 ? "commPass2" : "commPass1") + (c.cfr != null ? " · " + t("commRx") + ": " + t(["rxNever", "rxSome", "rxAll"][c.cfr]) : "") + "<br>" +
-    t("reliability") + ": <b>" + t(lvl) + "</b>" + (c.clast ? "<br>" + t("lastData") + ": " + c.clast : "");
+    t("reliability") + ": <b>" + t(lvl) + "</b>" + txl + (c.clast ? "<br>" + t("lastData") + ": " + c.clast : "");
 }
 
 /* ---------- comparar dos SF ---------- */
@@ -1490,13 +1512,15 @@ function drawMap(fit, fromZoom) {
   // «Comparar» solo si lo visible tiene al menos dos SF; si no, se ve como cuadrícula
   const sfList = cmpSfList(rows, tracks);
   $("vCmp").hidden = sfList.length < 2;
-  const cmp = mapView === "cmp" && sfList.length >= 2, grid = mapView === "grid" || (mapView === "cmp" && !cmp);
+  const cmp = mapView === "cmp" && sfList.length >= 2, txv = mapView === "tx", grid = txv || mapView === "grid" || (mapView === "cmp" && !cmp);
   const withSnr = rows.filter(r => r.snr != null && !isNaN(r.snr));
   useMargin = withSnr.length > 0 && withSnr.every(r => r.sf);
   drawLegendScale(useMargin ? [...new Set(withSnr.map(r => r.sf))].sort((a, b) => a - b) : null);
+  // vista «Tx»: la leyenda es la de la transmisión
+  if (txv) $("lgScale").innerHTML = [2, 1, 0].map(i => '<span><i style="background:' + TX_COLORS[i] + ';border-radius:1px"></i>' + esc(t(["txLgNever", "txLgSome", "txLgAll"][i])) + "</span>").join("");
   showView();
   if (mapView === "cmp" && !cmp) $("vGrid").classList.add("on");
-  $("lgNone").hidden = !grid;
+  $("lgNone").hidden = !grid || txv;
   $("cmpBox").hidden = !cmp;
   if (cmp) pts.push(...drawCompare(rows, tracks, sfList));
   $("lgRelay").innerHTML = grid || cmp
@@ -1509,6 +1533,17 @@ function drawMap(fit, fromZoom) {
     const iv = heard ? null : typicalInterval(rows);
     for (const c of buildGrid(rows, tracks, cellSize)) {
       if (!c.visited) continue;
+      // vista «Tx»: solo celdas con mensajes enviados, del color de cómo llegaron a la red
+      if (txv) {
+        const st = txState(c);
+        if (st == null) continue;
+        nCells++;
+        L.rectangle(c.bounds, { color: "#0b0d10", weight: .5, fillColor: TX_COLORS[st], fillOpacity: .65 })
+          .bindPopup("<b>" + t("cellOf", cellSize + " m") + "</b>" + (c.txOk + c.txFail ? "<br>📤 " + t("txCell", c.txOk, c.txOk + c.txFail) : "") + commInfo(c))
+          .addTo(mapLayer);
+        pts.push(c.bounds[0], c.bounds[1]);
+        continue;
+      }
       nCells++;
       // «mejor señal de cualquier nodo»: la mediana del nodo que mejor se oye en la celda
       let vals = c.snr, bestNode = null;
@@ -1955,7 +1990,10 @@ function coverageCells(size, radius) {
   const mLat = 111320, mLon = 111320 * Math.cos(latRef * Math.PI / 180);
   const key = (lat, lon) => Math.floor(lat * mLat / size) + ":" + Math.floor(lon * mLon / size);
   const cells = new Map();
-  const cell = k => { if (!cells.has(k)) cells.set(k, { k, n: 0, by: new Map() }); return cells.get(k); };
+  const cell = k => { if (!cells.has(k)) cells.set(k, { k, n: 0, by: new Map(), txOk: 0, txN: 0 }); return cells.get(k); };
+  // mensajes enviados (transmisión): cuántos y cuántos llegaron a la red, por celda
+  for (const x of fileTx) if (x.lat != null && !isNaN(x.lat)) { const c = cell(key(x.lat, x.lon)); c.txN++; if (x.ok) c.txOk++; }
+  for (const x of fileTxCells) if (x.b == null && !x.community) { const c = cell(key(x.lat, x.lon)); c.txN += x.n; c.txOk += x.ok; }
   for (const r of rows) {
     const c = cell(key(r.rxLat, r.rxLon)), w = r.w || 1;
     // oído solo a un nodo que no repite: se pasó por ahí, pero no es cobertura de la red
@@ -1990,7 +2028,7 @@ function coverageCells(size, radius) {
     // fuera toda celda que toque el círculo de privacidad
     if (radius > 0 && priv.some(q => RT.haversineM(q.lat, q.lon, lat, lon) < q.r + half)) { removed++; continue; }
     const r1 = v => Math.round(v * 10) / 10;
-    out.push({ lat: Math.round(lat * 1e6) / 1e6, lon: Math.round(lon * 1e6) / 1e6, n: c.n,
+    out.push({ lat: Math.round(lat * 1e6) / 1e6, lon: Math.round(lon * 1e6) / 1e6, n: c.n, ...(c.txN ? { tx: { ok: c.txOk, n: c.txN } } : {}),
       nodes: [...c.by].map(([id, b]) => {
         const sf = b.sf.size ? [...b.sf].sort((x, y) => y[1] - x[1])[0][0] : null;
         const o = { id: hexId(id), n: b.n };   // sin nombre: el id basta
@@ -2101,6 +2139,7 @@ async function loadCommunity() {
 function dropCommunity() {
   if (fileRows) { fileRows = fileRows.filter(r => !r.community); if (!fileRows.length) fileRows = null; }
   fileVisited = fileVisited.filter(v => !v.community);
+  fileTxCells = fileTxCells.filter(v => !v.community);
   fileNames = fileNames.filter(n => n !== t("commName"));
 }
 function hasCommunity() { return (fileRows || []).some(r => r.community) || fileVisited.some(v => v.community); }
@@ -2130,6 +2169,10 @@ async function addCoverage(data, name, community) {
       if (!isFinite(lat) || !isFinite(lon)) continue;
       const n = Math.max(0, Number(c.n) || 0), cf = c.f != null && Number(c.f) >= 1 ? Number(c.f) : null,
         cfr = [0, 1, 2].includes(c.rx) ? c.rx : null, clast = /^\d{4}-\d{2}$/.test(String(c.last || "")) ? String(c.last) : "";
+      // transmisión: {ok, n} en un .json propio; franja 0/1/2 en el mapa comunitario
+      const tx = c.tx;
+      if (tx && typeof tx === "object" && Number.isInteger(tx.n) && Number.isInteger(tx.ok) && tx.n > 0 && tx.ok >= 0 && tx.ok <= tx.n) fileTxCells.push({ lat, lon, community: !!community, ok: tx.ok, n: tx.n });
+      else if ([0, 1, 2].includes(tx)) fileTxCells.push({ lat, lon, community: !!community, b: tx });
       if (!n) { fileVisited.push({ lat, lon, community: !!community, cf, cfr, clast }); continue; }
       let known = 0;
       for (const o of c.nodes || []) {
@@ -2323,6 +2366,7 @@ $("fileAny").addEventListener("change", async e => { const fs = [...(e.target.fi
 $("vDots").addEventListener("click", () => setView("dots"));
 $("vGrid").addEventListener("click", () => setView("grid"));
 $("vCmp").addEventListener("click", () => setView("cmp"));
+$("vTx").addEventListener("click", () => setView("tx"));
 for (const id of ["cmpA", "cmpB"]) $(id).addEventListener("change", e => { cmpPick[id] = Number(e.target.value); mapDirty = true; dirtyRender = true; if (map) drawMap(false); });
 function showHops() {
   $("hopsVal").textContent = minHops === maxHops ? String(maxHops) : minHops + "–" + maxHops;
