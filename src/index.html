@@ -199,6 +199,10 @@
   .leaflet-popup-content { font-size:16px; line-height:1.45; color:#111; }
 .txm{width:18px;height:18px;border-radius:50%;border:2px solid #fff;color:#fff;font:700 12px/1 system-ui,sans-serif;display:flex;align-items:center;justify-content:center;box-shadow:0 0 3px rgba(0,0,0,.7);box-sizing:border-box}
 .txm.ok{background:#1fa64a}.txm.ko{background:#d93025}
+.leaflet-popup-content .phead{margin-bottom:2px}.leaflet-popup-content .pmuted{opacity:.7;font-weight:400}
+.leaflet-popup-content .psec{border-top:1px solid #8884;margin-top:6px;padding-top:5px}
+.leaflet-popup-content .ptitle{font-weight:700;margin-bottom:1px}
+.leaflet-popup-content .pdot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:0;border:1px solid #0006}
 </style>
 </head>
 <body>
@@ -638,8 +642,8 @@ const I18N = {
     layer_topo: "ESRI topographic", layer_sat: "ESRI satellite imagery", layer_otm: "OpenTopoMap topographic",
     layer_osm: "OpenStreetMap classic", layer_relief: "High-resolution hillshade",
     lgRelayGrid: "Received with hops", lgRelayDots: "relayed by another node (hops ≥ 1, no useful SNR)",
-    cellOf: s => s + " cell", pktsRx: "Packets received", byOther: n => n + " via another node", reception: "reception",
-    onlyRelay: v => "Only relayed packets arrived. Median SNR of the last hop: " + v + " dB <i>(not the origin node's)</i>",
+    cellOf: s => s + " cell", rxTitle: "Reception", ofExpected: "of expected", pktsRx: "Packets received", byOther: n => n + " via another node", reception: "reception",
+    onlyRelay: v => "Only relayed packets: last-hop SNR " + v + " dB <i>(not the origin node's)</i>",
     medSnr: (m, w, b) => "Median SNR " + m + " dB (worst " + w + ", best " + b + ")",
     medRssi: m => "Median RSSI " + m + " dBm", directOnly: "direct only", timeInCell: "Time in cell",
     noRxText: "You passed here and no packet arrived.", noRxComm: "Routes passed here and nothing was heard directly from a relaying node.",
@@ -648,7 +652,7 @@ const I18N = {
     txTitle: "Transmission", txCell: (a, n) => a + " of " + n + " messages reached the mesh", txMsg: "Message sent",
     txOk: "✓ The mesh heard it: a node relayed or acknowledged it.", txKo: "✗ Nobody relayed it after 3 tries.", lgTx: "Message sent: mesh heard it / nobody",
     commFew: "There are still few uploads: passes and reliability will show when there are more.", commPass1: "1 pass", commPass2: "2–4 passes", commPass5: "5 or more passes", commRx: "reception", rxNever: "never", rxSome: "sometimes", rxAll: "always", reliability: "Reliability",
-    relLow: "low (a single pass, just a hint)", relMid: "medium (few passes)", relHigh: "good (5 or more passes)", lastData: "Newest data", expected: n => "About " + n + " packets were expected",
+    relLow: "low, just a hint", relMid: "medium", relHigh: "good", lastData: "Newest data", expected: n => "About " + n + " packets were expected",
     gpsPos: "GPS position", lastHop: "from the last hop, not the origin node", distance: "distance",
     direct: "direct", nHops: n => n + (n === 1 ? " hop" : " hops"), routePos: "position of the route node",
     errEmpty: "the file is empty", errCsv: "it does not look like a CSV from this page",
@@ -713,8 +717,8 @@ const I18N = {
     layer_topo: "Topográfico ESRI", layer_sat: "Imágenes satélite ESRI", layer_otm: "Topográfico OpenTopoMap",
     layer_osm: "OpenStreetMap clásico", layer_relief: "Relieve sombreado de alta resolución",
     lgRelayGrid: "Recibido con saltos", lgRelayDots: "llegó por otro nodo (saltos ≥ 1, sin SNR útil)",
-    cellOf: s => "Celda de " + s, pktsRx: "Paquetes recibidos", byOther: n => n + " por otro nodo", reception: "recepción",
-    onlyRelay: v => "Solo llegaron repetidos por otro nodo. SNR mediano del último salto: " + v + " dB <i>(no es el del nodo de origen)</i>",
+    cellOf: s => "Celda de " + s, rxTitle: "Recepción", ofExpected: "de lo esperado", pktsRx: "Paquetes recibidos", byOther: n => n + " por otro nodo", reception: "recepción",
+    onlyRelay: v => "Solo llegaron repetidos: SNR del último salto " + v + " dB <i>(no es el del nodo de origen)</i>",
     medSnr: (m, w, b) => "SNR mediano " + m + " dB (peor " + w + ", mejor " + b + ")",
     medRssi: m => "RSSI mediano " + m + " dBm", directOnly: "solo directos", timeInCell: "Tiempo en la celda",
     noRxText: "Pasaste por aquí y no llegó ningún paquete.", noRxComm: "Han pasado recorridos por aquí y no se oyó directamente a ningún nodo que repita.",
@@ -723,7 +727,7 @@ const I18N = {
     txTitle: "Transmisión", txCell: (a, n) => a + " de " + n + " mensajes llegaron a la red", txMsg: "Mensaje enviado",
     txOk: "✓ La red lo oyó: un nodo lo retransmitió o lo confirmó.", txKo: "✗ Nadie lo retransmitió tras 3 intentos.", lgTx: "Mensaje enviado: la red lo oyó / nadie",
     commFew: "Aún hay pocas subidas: las pasadas y la fiabilidad se mostrarán cuando haya más.", commPass1: "1 pasada", commPass2: "2–4 pasadas", commPass5: "5 pasadas o más", commRx: "recepción", rxNever: "nunca", rxSome: "a veces", rxAll: "siempre", reliability: "Fiabilidad",
-    relLow: "baja (una sola pasada, solo orientativo)", relMid: "media (pocas pasadas)", relHigh: "buena (5 pasadas o más)", lastData: "Dato más reciente", expected: n => "Se esperaban ≈ " + n + " paquetes",
+    relLow: "baja, solo orientativo", relMid: "media", relHigh: "buena", lastData: "Dato más reciente", expected: n => "Se esperaban ≈ " + n + " paquetes",
     gpsPos: "Posición GPS", lastHop: "del último salto, no del nodo de origen", distance: "distancia",
     direct: "directo", nHops: n => n + (n === 1 ? " salto" : " saltos"), routePos: "posición del nodo de ruta",
     errEmpty: "el archivo está vacío", errCsv: "no parece un CSV de esta página",
@@ -1374,9 +1378,16 @@ function commCell(c, r) {
 }
 // mensajes enviados que se ven: con posición y fuera de la vista previa de exportación (no se exportan)
 function txVisible() { return exportPreviewOn() ? [] : fileTx.filter(x => x.lat != null && !isNaN(x.lat)); }
+// Popup de celda: cabecera y secciones con título e icono (las líneas vacías se omiten)
+function cellHead(c) {
+  return '<div class="phead"><b>' + t("cellOf", cellSize + " m") + "</b>" + (c.ms ? '<span class="pmuted"> · ⏱ ' + fmtDur(c.ms) + "</span>" : "") + "</div>";
+}
+function popSec(icon, title, lines) {
+  return '<div class="psec"><div class="ptitle">' + icon + " " + title + "</div>" + lines.filter(Boolean).map(l => "<div>" + l + "</div>").join("") + "</div>";
+}
 function txInfo(c) {
   const n = c.txOk + c.txFail;
-  return n ? "<hr style='border:0;border-top:1px solid #8884;margin:6px 0'>📤 <b>" + t("txTitle") + "</b>: " + t("txCell", c.txOk, n) : "";
+  return n ? popSec("📤", t("txTitle"), ['<i class="pdot" style="background:' + TX_COLORS[c.txOk === n ? 2 : c.txOk ? 1 : 0] + '"></i>' + t("txCell", c.txOk, n)]) : "";
 }
 // estado de transmisión de una celda: 2 siempre llegó, 1 a veces, 0 nunca, null sin mensajes
 function txState(c) {
@@ -1387,13 +1398,15 @@ function txState(c) {
 const TX_COLORS = ["#d93025", "#e6b31e", "#1fa64a"];
 function commInfo(c) {
   if (!c.comm) return "";
-  const txl = c.txb != null ? "<br>📤 " + t("txTitle") + ": " + t(["rxNever", "rxSome", "rxAll"][c.txb]) : "";
+  const band = b => t(["rxNever", "rxSome", "rxAll"][b]);
+  const txl = c.txb != null ? "📤 " + t("txTitle") + ": " + band(c.txb) : "";
   // con pocas subidas en total el servidor no publica pasadas ni recepción (privacidad)
-  if (!c.cf) return "<hr style='border:0;border-top:1px solid #8884;margin:6px 0'>🌍 <b>" + t("commName") + "</b><br>" + t("commFew") + txl;
+  if (!c.cf) return popSec("🌍", t("commName"), [t("commFew"), txl]);
   const lvl = c.cf >= 5 ? "relHigh" : c.cf >= 2 ? "relMid" : "relLow";
-  return "<hr style='border:0;border-top:1px solid #8884;margin:6px 0'>🌍 <b>" + t("commName") + "</b><br>" +
-    t(c.cf >= 5 ? "commPass5" : c.cf >= 2 ? "commPass2" : "commPass1") + (c.cfr != null ? " · " + t("commRx") + ": " + t(["rxNever", "rxSome", "rxAll"][c.cfr]) : "") + "<br>" +
-    t("reliability") + ": <b>" + t(lvl) + "</b>" + txl + (c.clast ? "<br>" + t("lastData") + ": " + c.clast : "");
+  return popSec("🌍", t("commName"), [
+    t(c.cf >= 5 ? "commPass5" : c.cf >= 2 ? "commPass2" : "commPass1") + " · " + t("reliability").toLowerCase() + " <b>" + t(lvl) + "</b>",
+    c.cfr != null ? "📥 " + t("rxTitle") + ": " + band(c.cfr) : "", txl,
+    c.clast ? t("lastData") + ": " + c.clast : ""]);
 }
 
 /* ---------- comparar dos SF ---------- */
@@ -1539,7 +1552,7 @@ function drawMap(fit, fromZoom) {
         if (st == null) continue;
         nCells++;
         L.rectangle(c.bounds, { color: "#0b0d10", weight: .5, fillColor: TX_COLORS[st], fillOpacity: .65 })
-          .bindPopup("<b>" + t("cellOf", cellSize + " m") + "</b>" + (c.txOk + c.txFail ? "<br>📤 " + t("txCell", c.txOk, c.txOk + c.txFail) : "") + commInfo(c))
+          .bindPopup(cellHead(c) + txInfo(c) + commInfo(c))
           .addTo(mapLayer);
         pts.push(c.bounds[0], c.bounds[1]);
         continue;
@@ -1561,16 +1574,16 @@ function drawMap(fit, fromZoom) {
         : has
         ? { color: "#0b0d10", weight: .5, fillColor: sigColor(med), fillOpacity: .65 }
         : { stroke: false, fillColor: "#1a1d22", fillOpacity: .45 }));
-      rect.bindPopup((has
-          ? "<b>" + t("cellOf", cellSize >= 1000 ? cellSize / 1000 + " km" : cellSize + " m") + "</b><br>" +
-            t("pktsRx") + ": " + c.n + (c.nRelay ? " (" + t("byOther", c.nRelay) + ")" : "") + (pct !== null ? " · " + t("reception") + " ≈ " + pct + " %" : "") + "<br>" +
-            (onlyRelay
-              ? t("onlyRelay", fmtN(median(c.snrRelay), 1))
-              : (best && bestNode !== null ? t("bestNode", esc(bestNames.get(bestNode) || hexId(bestNode))) + (c.by.size > 1 ? " · " + t("nNodes", c.by.size) : "") + "<br>" : "") +
-                t(useMargin ? "medMargin" : "medSnr", fmtN(med, 1), fmtN(sorted[0], 1), fmtN(sorted[sorted.length - 1], 1)) + "<br>" +
-                t("medRssi", fmtN(median(c.rssi))) + (c.nRelay ? " <i>(" + t("directOnly") + ")</i>" : "")) + (c.ms ? "<br>" + t("timeInCell") + ": " + fmtDur(c.ms) : "")
-          : "<b>" + t("noRx") + "</b><br>" + t(c.own ? "noRxText" : "noRxComm") + (c.ms ? "<br>" + t("timeInCell") + ": " + fmtDur(c.ms) : "") +
-            (expected && expected >= 1 ? "<br>" + t("expected", Math.round(expected)) : "")) + txInfo(c) + commInfo(c));
+      // popup en secciones: cabecera, 📥 recepción, 📤 transmisión y 🌍 mapa comunitario
+      const rxLines = !has
+        ? ["<b>" + t("noRx") + "</b>. " + t(c.own ? "noRxText" : "noRxComm"), expected && expected >= 1 ? t("expected", Math.round(expected)) : ""]
+        : [t("pktsRx") + ": <b>" + c.n + "</b>" + (c.nRelay ? " (" + t("byOther", c.nRelay) + ")" : "") + (pct !== null ? " · ≈ " + pct + " % " + t("ofExpected") : ""),
+           ...(onlyRelay
+             ? [t("onlyRelay", fmtN(median(c.snrRelay), 1))]
+             : [best && bestNode !== null ? t("bestNode", esc(bestNames.get(bestNode) || hexId(bestNode))) + (c.by.size > 1 ? " · " + t("nNodes", c.by.size) : "") : "",
+                '<i class="pdot" style="background:' + sigColor(med) + '"></i>' + t(useMargin ? "medMargin" : "medSnr", fmtN(med, 1), fmtN(sorted[0], 1), fmtN(sorted[sorted.length - 1], 1)),
+                c.rssi.length ? t("medRssi", fmtN(median(c.rssi))) + (c.nRelay ? " <i>(" + t("directOnly") + ")</i>" : "") : ""])];
+      rect.bindPopup(cellHead(c) + popSec("📥", t("rxTitle"), rxLines) + txInfo(c) + commInfo(c));
       rect.addTo(mapLayer);
       // el gris solo dentro del borde: así el borde se ve sobre el mapa con el mismo tono que las celdas en directo
       if (onlyRelay) L.rectangle(insetBounds(c.bounds, RELAY_BORDER), { stroke: false, fillColor: "#2b2f36", fillOpacity: .6, interactive: false }).addTo(mapLayer);
