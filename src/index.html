@@ -341,7 +341,7 @@
       </ol>
       <h3>Controles</h3>
       <ul>
-        <li><b>Nodo</b>: en <b>📡 Enviado por</b>, los paquetes que envió un nodo. En <b>📶 Oído directamente</b>, lo que oíste directamente de un nodo, aunque fuera repitiendo paquetes de otros: su SNR sí es de ese nodo, así que es su cobertura real. «Mejor señal de cualquier nodo» pinta en cada celda el nodo que mejor se oye: la cobertura de la red.</li>
+        <li><b>Nodo</b>: en <b>📡 Enviado por</b>, los paquetes que envió un nodo. En <b>📶 Oído directamente</b>, lo que oíste directamente de un nodo, aunque fuera repitiendo paquetes de otros: su SNR sí es de ese nodo, así que es su cobertura real. «Mejor señal de cualquier nodo» pinta en cada celda el nodo que mejor se oye: la cobertura de la red. Aquí no cuentan los nodos en <b>CLIENT_MUTE</b> (según su rol en el registro): solo emiten y no repiten, así que no dan acceso a la red. Salen en «Enviado por», pero no aquí ni en lo que se exporta.</li>
         <li><b>Saltos</b>: deslizador doble con mínimo y máximo. Al abrir la página empieza en 0–7 (todo). 0–0 = solo lo que llega <b>directo</b>, que es lo que mide la cobertura de cada nodo. Sube el máximo para ver también lo repetido por otros nodos, o el mínimo para ver <b>solo</b> lo repetido. Con <b>📡 Enviado por</b>, lo repetido sale como <b>cuadrado negro</b>: su SNR es el del último salto, no el del nodo de origen.</li>
         <li><b>🗑 Limpiar</b>: quita del mapa todo lo abierto.</li>
         <li><b>📤 Exportar cobertura</b> y <b>🌍 Mapa comunitario</b>: ver la pestaña «Mapa comunitario».</li>
@@ -466,7 +466,7 @@
       </ol>
       <h3>Controls</h3>
       <ul>
-        <li><b>Node</b>: under <b>📡 Sent by</b>, the packets a node sent. Under <b>📶 Heard directly</b>, what you heard directly from a node, even when it was relaying other nodes' packets: that SNR does belong to that node, so it is its real coverage. «Best signal of any node» paints each cell with the node heard best: the coverage of the mesh.</li>
+        <li><b>Node</b>: under <b>📡 Sent by</b>, the packets a node sent. Under <b>📶 Heard directly</b>, what you heard directly from a node, even when it was relaying other nodes' packets: that SNR does belong to that node, so it is its real coverage. «Best signal of any node» paints each cell with the node heard best: the coverage of the mesh. Nodes in <b>CLIENT_MUTE</b> (by their role in the log) do not count here: they only transmit and do not relay, so they give no access to the mesh. They show under «Sent by», but not here or in what is exported.</li>
         <li><b>Hops</b>: double slider with minimum and maximum. It starts at 0–7 (everything). 0–0 = only what arrives <b>directly</b>, which is what measures each node's coverage. Raise the maximum to also see packets relayed by other nodes, or the minimum to see <b>only</b> relayed ones. With <b>📡 Sent by</b>, relayed packets show as a <b>black square</b>: their SNR is the last hop's, not the origin node's.</li>
         <li><b>🗑 Clear</b>: removes everything opened from the map.</li>
         <li><b>📤 Export coverage</b> and <b>🌍 Community map</b>: see the «Community map» tab.</li>
@@ -632,7 +632,7 @@ const I18N = {
     expNoData: "Open a log first: there is nothing to export.", expEmpty: "No cells are left with that radius.",
     errJson: "it is not a coverage file from this page", impCov: n => "Imported coverage · " + n + (n === 1 ? " packet" : " packets"), impCells: n => n + " cells imported",
     heardNote: n => "📶 Packets heard directly from " + n + ": its own and the ones it relayed from other nodes. The Node column is the original sender.",
-    heardNoteAll: "📶 Packets with a known directly heard node. The Node column is the original sender.",
+    heardNoteAll: "📶 Packets heard directly from a node that relays (CLIENT_MUTE nodes, which do not relay, are left out). The Node column is the original sender.",
     grpHeard: "📶 Heard directly", grpSender: "📡 Sent by", bestAll: "Best signal of any node",
     heardFrom: "Heard directly from", marginTxt: m => "margin " + m + " dB", lgMargin: "Margin",
     medMargin: (m, w, b) => "Median margin " + m + " dB (worst " + w + ", best " + b + ")",
@@ -695,7 +695,7 @@ const I18N = {
     expNoData: "Abre primero un registro: no hay nada que exportar.", expEmpty: "Con ese radio no queda ninguna celda.",
     errJson: "no es un archivo de cobertura de esta página", impCov: n => "Cobertura importada · " + n + (n === 1 ? " packet" : " packets"), impCells: n => n + " celdas importadas",
     heardNote: n => "📶 Paquetes oídos directamente de " + n + ": los suyos y los que repitió de otros nodos. La columna Nodo es el emisor original.",
-    heardNoteAll: "📶 Paquetes en los que se sabe qué nodo se oyó directamente. La columna Nodo es el emisor original.",
+    heardNoteAll: "📶 Paquetes oídos directamente de un nodo que repite (se dejan fuera los CLIENT_MUTE, que no repiten). La columna Nodo es el emisor original.",
     grpHeard: "📶 Oído directamente", grpSender: "📡 Enviado por", bestAll: "Mejor señal de cualquier nodo",
     heardFrom: "Oído directamente de", marginTxt: m => "margen " + m + " dB", lgMargin: "Margen",
     medMargin: (m, w, b) => "Margen mediano " + m + " dB (peor " + w + ", mejor " + b + ")",
@@ -758,10 +758,17 @@ function fmtFecha(ms) { const d = new Date(ms), p = n => String(n).padStart(2, "
 function hexId(n) { return "!" + (n >>> 0).toString(16).padStart(8, "0"); }
 // Filtro del selector: "" todos · "N" enviados por el nodo N · "h*" oídos directamente (mejor nodo) · "hN" oídos directamente de N
 function heardMode() { return selFrom.startsWith("h"); }
+// ¿El nodo oído da cobertura, es decir, repite lo que oye? El único rol que nunca repite es CLIENT_MUTE
+// (lo dice su NodeInfo en el registro). No se usa «se le ha visto repetir»: el relay_node solo trae el
+// último byte del id y la app a veces lo asigna a otro nodo. Sin rol conocido se cuenta.
+const NO_RELAY_ROLES = new Set(["CLIENT_MUTE"]);
+let nodeRoles = new Map();
+function relays(n) { return n != null && !NO_RELAY_ROLES.has(nodeRoles.get(n)); }
+function covRow(r) { return r.community || relays(r.heard); }
 function rowsView() {
   const all = fileRows || [];
-  if (selFrom === "h*") return all.filter(r => r.heard != null && passHops(r));
-  if (heardMode()) { const h = Number(selFrom.slice(1)); return all.filter(r => r.heard === h && passHops(r)); }
+  if (selFrom === "h*") return all.filter(r => r.heard != null && covRow(r) && passHops(r));
+  if (heardMode()) { const h = Number(selFrom.slice(1)); return all.filter(r => r.heard === h && covRow(r) && passHops(r)); }
   const f = selFrom ? Number(selFrom) : null;
   return all.filter(r => (f === null || r.from === f) && passHops(r));
 }
@@ -811,7 +818,7 @@ function refreshFromSelect() {
     if (!seen.has(r.from) || (r.name && (!cur || (!cur.includes(" - ") && r.name.includes(" - "))))) seen.set(r.from, r.name || "");
     count.set(r.from, (count.get(r.from) || 0) + (r.w || 1));
     if (r.senderLat != null && !(r.senderLat === 0 && r.senderLon === 0)) nodePos.set(r.from, { lat: r.senderLat, lon: r.senderLon });
-    if (r.heard != null) heardCount.set(r.heard, (heardCount.get(r.heard) || 0) + (r.w || 1));
+    if (r.heard != null && covRow(r)) heardCount.set(r.heard, (heardCount.get(r.heard) || 0) + (r.w || 1));
   }
   for (const r of all) if (r.heard != null && !seen.has(r.heard)) seen.set(r.heard, r.heardName || "");
   bestNames = seen;
@@ -957,6 +964,7 @@ function placeFromGpx() {
 function clearAll() {
   if (!fileRows && !fileTracks.length && !fileVisited.length) return;
   fileRows = null; fileNames = []; fileTracks = []; fileVisited = [];
+  nodeRoles = new Map();
   $("ageWrap").hidden = true;
   closeExport();
   mapFitted = false; mapDirty = true; dirtyRender = true;
@@ -1564,6 +1572,9 @@ function debugTxtToRows(text) {
   const names = new Map(), senderPos = new Map(), senderTrack = new Map(), own = [], pkts = [], seen = new Set();
   let myNum = null;
   const mi = text.match(/my_node_num=(-?\d+)/); if (mi) myNum = Number(mi[1]) >>> 0;
+  // rol de cada nodo (NodeInfo): sirve para saber si repite lo que oye
+  const roles = new Map();
+  for (const m of text.matchAll(/User\{id=!([0-9a-f]{8}),[^}]*?\brole=([A-Z_]+)/g)) roles.set(hexNum(m[1]), m[2]);
   for (const m of text.matchAll(/User\{id=!([0-9a-f]{8}), long_name=([^,]*), short_name=([^,]*)/g)) {
     const n = hexNum(m[1]), label = RT.nodeLabel(m[3].trim(), m[2].trim()); if (label && !names.has(n)) names.set(n, label);
   }
@@ -1700,13 +1711,14 @@ function debugTxtToRows(text) {
   const tracks = [];
   if (own.length) tracks.push(own);
   else for (const n of moving) tracks.push(senderTrack.get(n));
-  return { rows, own, tracks, myNum, myName: names.get(myNum) || "", ownBits, ownLow, ownTotal, lowBits: ownLow ? lowBits[ownLow >> 1] : null };
+  return { rows, own, tracks, myNum, myName: names.get(myNum) || "", roles, ownBits, ownLow, ownTotal, lowBits: ownLow ? lowBits[ownLow >> 1] : null };
 }
 async function openDebugTxt(file) {
   try {
     const r = debugTxtToRows(await file.text());
     const first = !(fileRows && fileRows.length) && !fileVisited.length;
     fileRows = (fileRows || []).concat(r.rows); fileNames.push(file.name);
+    for (const [n, role] of r.roles) nodeRoles.set(n, role);
     for (const t of r.tracks) {
       const segs = trackSegments(t).map(seg => seg.map(p => ({ lat: p.lat, lon: p.lon, ms: p.ms, sf: p.sf || null })));
       fileTracks.push({ name: file.name, segs });
@@ -1795,6 +1807,8 @@ function coverageCells(size, radius) {
   const cell = k => { if (!cells.has(k)) cells.set(k, { k, n: 0, by: new Map() }); return cells.get(k); };
   for (const r of rows) {
     const c = cell(key(r.rxLat, r.rxLon)), w = r.w || 1;
+    // oído solo a un nodo que no repite: se pasó por ahí, pero no es cobertura de la red
+    if (r.heard != null && !covRow(r)) continue;
     c.n += w;
     if (r.heard == null) continue;
     if (!c.by.has(r.heard)) c.by.set(r.heard, { n: 0, snr: [], rssi: [], sf: new Map(), bw: null, name: bestNames.get(r.heard) || r.heardName || "" });
