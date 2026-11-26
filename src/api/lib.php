@@ -2,7 +2,7 @@
 // Mapa comunitario de cobertura: utilidades comunes a upload.php y community.php.
 // Los datos se guardan en ../data (fuera del alcance de la web gracias a su .htaccess).
 
-const BUILD = 3;                  // versión de community.json: al cambiarla se rehace
+const BUILD = 4;                  // versión de community.json: al cambiarla se rehace
 const CELL_SIZE = 250;            // tamaño fijo de celda de los archivos exportados por la página
 const MAX_BYTES = 524288;         // 512 KB por subida
 const MAX_CELLS = 20000;
@@ -76,7 +76,7 @@ const AGES = [0, 3, 6, 12];
 
 // Suma las subidas en un solo archivo: por celda se suman los paquetes y, por nodo,
 // SNR y RSSI se combinan con la media ponderada por nº de paquetes; el SF es el de más paquetes.
-// Cada celda lleva también cuántas subidas la tocan (f) y el mes más reciente (last).
+// Cada celda lleva también cuántas subidas la tocan (f), en cuántas se recibió algo (fr) y el mes más reciente (last).
 // Con $months > 0 solo cuentan las subidas de los últimos $months meses (por el mes de los datos).
 function build_community(string $dir, int $months = 0): array {
   $cells = []; $files = 0;
@@ -89,9 +89,10 @@ function build_community(string $dir, int $months = 0): array {
     $files++;
     foreach ($d['cells'] as $c) {
       $k = sprintf('%.6f,%.6f', $c['lat'], $c['lon']);
-      if (!isset($cells[$k])) $cells[$k] = ['lat' => $c['lat'], 'lon' => $c['lon'], 'n' => 0, 'f' => 0, 'last' => '', 'nodes' => []];
+      if (!isset($cells[$k])) $cells[$k] = ['lat' => $c['lat'], 'lon' => $c['lon'], 'n' => 0, 'f' => 0, 'fr' => 0, 'last' => '', 'nodes' => []];
       $cells[$k]['n'] += $c['n'];
       $cells[$k]['f']++;
+      if ($c['n'] > 0) $cells[$k]['fr']++;
       if (strcmp($date, $cells[$k]['last']) > 0) $cells[$k]['last'] = $date;
       foreach ($c['nodes'] as $o) {
         $id = $o['id'];
@@ -115,7 +116,7 @@ function build_community(string $dir, int $months = 0): array {
       if ($a['sf']) { arsort($a['sf']); [$sf, $bw] = explode('|', (string)array_key_first($a['sf'])); $o['sf'] = (int)$sf; if ($bw !== '') $o['bw'] = (float)$bw; }
       $nodes[] = $o;
     }
-    $out[] = ['lat' => $c['lat'], 'lon' => $c['lon'], 'n' => $c['n'], 'f' => $c['f'], 'last' => $c['last'], 'nodes' => $nodes];
+    $out[] = ['lat' => $c['lat'], 'lon' => $c['lon'], 'n' => $c['n'], 'f' => $c['f'], 'fr' => $c['fr'], 'last' => $c['last'], 'nodes' => $nodes];
   }
   return ['format' => 'meshtastic-coverage', 'version' => 1, 'build' => BUILD, 'cellSize' => CELL_SIZE, 'date' => gmdate('Y-m'),
           'months' => $months, 'files' => $files, 'cells' => $out];

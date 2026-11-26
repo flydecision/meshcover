@@ -373,7 +373,7 @@
       <div>Un mapa común de la <b>cobertura real de la red</b>, hecho entre todas/os: cada persona que hace un recorrido con su nodo suma sus celdas, y el mapa se va completando zona a zona.</div>
       <h3>👀 Verlo</h3>
       <div>Pulsa <b>🌍 Mapa comunitario</b>. Se carga en <b>cuadrícula de 250 m</b>: cada celda sale del color del nodo que mejor se oye allí. Las celdas grises son sitios por los que alguien pasó <b>sin recibir nada</b>. Puedes sumarle tus propios registros con <b>📂 Añadir registros</b> sin subirlos.</div>
-      <div>Cada nuevo recorrido que pasa por una celda se suma a su media, así que su color se va afinando con cada pase. Con el selector <b>🌍 Todos los datos / Últimos 12, 6 o 3 meses</b> se quitan los datos antiguos, por si la red ha cambiado (cuenta el mes en que se grabó el registro).</div>
+      <div>Cada nuevo recorrido que pasa por una celda se suma a su media, así que su color se va afinando con cada pase. Al <b>tocar una celda</b> se ven sus pasadas, en cuántas se recibió algo, la fiabilidad (baja con 1 pasada, media con 2–4, buena con 5 o más) y el mes del dato más reciente. Con el selector <b>🌍 Todos los datos / Últimos 12, 6 o 3 meses</b> se quitan los datos antiguos, por si la red ha cambiado (cuenta el mes en que se grabó el registro).</div>
       <h3>🚶 Aportar tu recorrido</h3>
       <ol>
         <li>Prepara el nodo de ruta como en «Cómo usar → Cobertura general de la red»: <b>mismos ajustes de radio que la red</b>, GPS activado con actualización cada 20–30 s y «posición inteligente» desactivada. El intervalo de difusión puede quedar en «unset» o largo: así tampoco emites tu recorrido en directo.</li>
@@ -497,7 +497,7 @@
       <div>A shared map of the <b>real coverage of the network</b>, built by everyone: each person who does a route with their node adds their cells, and the map fills in area by area.</div>
       <h3>👀 Viewing it</h3>
       <div>Press <b>🌍 Community map</b>. It loads as a <b>250 m grid</b>: each cell takes the colour of the node heard best there. Grey cells are places someone passed <b>without receiving anything</b>. You can add your own logs on top with <b>📂 Add Logs</b> without uploading them.</div>
-      <div>Each new route through a cell adds to its average, so its colour gets more accurate with every pass. The <b>🌍 All data / Last 12, 6 or 3 months</b> selector removes old data, in case the mesh has changed (it uses the month the log was recorded).</div>
+      <div>Each new route through a cell adds to its average, so its colour gets more accurate with every pass. <b>Tap a cell</b> to see its passes, in how many something was received, the reliability (low with 1 pass, medium with 2–4, good with 5 or more) and the month of the newest data. The <b>🌍 All data / Last 12, 6 or 3 months</b> selector removes old data, in case the mesh has changed (it uses the month the log was recorded).</div>
       <h3>🚶 Contributing your route</h3>
       <ol>
         <li>Set up the route node as in «How to use → General coverage of the mesh»: <b>same radio settings as the network</b>, GPS on with updates every 20–30 s and «smart position» off. The broadcast interval can stay «unset» or long: that way you do not broadcast your route live either.</li>
@@ -618,7 +618,9 @@ const I18N = {
     onlyRelay: v => "Only relayed packets arrived. Median SNR of the last hop: " + v + " dB <i>(not the origin node's)</i>",
     medSnr: (m, w, b) => "Median SNR " + m + " dB (worst " + w + ", best " + b + ")",
     medRssi: m => "Median RSSI " + m + " dBm", directOnly: "direct only", timeInCell: "Time in cell",
-    noRxText: "You passed here and no packet arrived.", expected: n => "About " + n + " packets were expected",
+    noRxText: "You passed here and no packet arrived.", noRxComm: "Routes passed here and nothing was heard directly from a relaying node.",
+    commPasses: n => n === 1 ? "1 pass" : n + " passes", commRx: (a, b) => "reception in " + a + " of " + b, reliability: "Reliability",
+    relLow: "low (a single pass, just a hint)", relMid: "medium (few passes)", relHigh: "good (5 or more passes)", lastData: "Newest data", expected: n => "About " + n + " packets were expected",
     gpsPos: "GPS position", lastHop: "from the last hop, not the origin node", distance: "distance",
     direct: "direct", nHops: n => n + (n === 1 ? " hop" : " hops"), routePos: "position of the route node",
     errEmpty: "the file is empty", errCsv: "it does not look like a CSV from this page",
@@ -686,7 +688,9 @@ const I18N = {
     onlyRelay: v => "Solo llegaron repetidos por otro nodo. SNR mediano del último salto: " + v + " dB <i>(no es el del nodo de origen)</i>",
     medSnr: (m, w, b) => "SNR mediano " + m + " dB (peor " + w + ", mejor " + b + ")",
     medRssi: m => "RSSI mediano " + m + " dBm", directOnly: "solo directos", timeInCell: "Tiempo en la celda",
-    noRxText: "Pasaste por aquí y no llegó ningún paquete.", expected: n => "Se esperaban ≈ " + n + " paquetes",
+    noRxText: "Pasaste por aquí y no llegó ningún paquete.", noRxComm: "Han pasado recorridos por aquí y no se oyó directamente a ningún nodo que repita.",
+    commPasses: n => n === 1 ? "1 pasada" : n + " pasadas", commRx: (a, b) => "recepción en " + a + " de " + b, reliability: "Fiabilidad",
+    relLow: "baja (una sola pasada, solo orientativo)", relMid: "media (pocas pasadas)", relHigh: "buena (5 pasadas o más)", lastData: "Dato más reciente", expected: n => "Se esperaban ≈ " + n + " paquetes",
     gpsPos: "Posición GPS", lastHop: "del último salto, no del nodo de origen", distance: "distancia",
     direct: "directo", nHops: n => n + (n === 1 ? " salto" : " saltos"), routePos: "posición del nodo de ruta",
     errEmpty: "el archivo está vacío", errCsv: "no parece un CSV de esta página",
@@ -1270,7 +1274,7 @@ function buildGrid(rows, tracks, size) {
     if (r.rxLat == null || r.rxLon == null || isNaN(r.rxLat)) continue;
     const c = cell(key(r.rxLat, r.rxLon));
     c.n += r.w || 1; c.visited = true;
-    if (!r.community) c.own = true;   // celdas solo del mapa comunitario: sin ventana de datos
+    if (!r.community) c.own = true; else commCell(c, r);
     // repetido por otro nodo: cuenta como recibido, pero su SNR/RSSI es del último salto y no entra en la mediana
     // (en «oído directamente» sí vale: es la señal del nodo que se oyó)
     const v = sigOf(r);
@@ -1281,7 +1285,7 @@ function buildGrid(rows, tracks, size) {
     }
     if (r.rssi != null && !isNaN(r.rssi)) c.rssi.push(r.rssi);
   }
-  for (const v of fileVisited) { const c = cell(key(v.lat, v.lon)); c.visited = true; if (!v.community) c.own = true; }
+  for (const v of fileVisited) { const c = cell(key(v.lat, v.lon)); c.visited = true; if (!v.community) c.own = true; else commCell(c, v); }
   for (const t of tracks) {
     const p = t.pts;
     for (let i = 0; i < p.length; i++) {
@@ -1315,6 +1319,20 @@ function buildGrid(rows, tracks, size) {
     out.push(c);
   }
   return out;
+}
+
+// datos del mapa comunitario en una celda: nº de subidas que pasan por ella (f), en cuántas se recibió algo (fr) y último mes
+function commCell(c, r) {
+  c.cf = Math.max(c.cf || 0, r.cf || 1);
+  if (r.cfr != null) c.cfr = Math.max(c.cfr || 0, r.cfr);
+  if (r.clast && (!c.clast || r.clast > c.clast)) c.clast = r.clast;
+}
+function commInfo(c) {
+  if (!c.cf) return "";
+  const lvl = c.cf >= 5 ? "relHigh" : c.cf >= 2 ? "relMid" : "relLow";
+  return "<hr style='border:0;border-top:1px solid #8884;margin:6px 0'>🌍 <b>" + t("commName") + "</b><br>" +
+    t("commPasses", c.cf) + (c.cfr != null ? " · " + t("commRx", c.cfr, c.cf) : "") + "<br>" +
+    t("reliability") + ": <b>" + t(lvl) + "</b>" + (c.clast ? "<br>" + t("lastData") + ": " + c.clast : "");
 }
 
 /* ---------- comparar dos SF ---------- */
@@ -1468,8 +1486,8 @@ function drawMap(fit, fromZoom) {
         ? { stroke: false, fillOpacity: 0 }
         : has
         ? { color: "#0b0d10", weight: .5, fillColor: sigColor(med), fillOpacity: .65 }
-        : { stroke: false, fillColor: "#1a1d22", fillOpacity: .45 }, c.own ? {} : { interactive: false }));
-      if (c.own) rect.bindPopup(has
+        : { stroke: false, fillColor: "#1a1d22", fillOpacity: .45 }));
+      rect.bindPopup((has
           ? "<b>" + t("cellOf", cellSize >= 1000 ? cellSize / 1000 + " km" : cellSize + " m") + "</b><br>" +
             t("pktsRx") + ": " + c.n + (c.nRelay ? " (" + t("byOther", c.nRelay) + ")" : "") + (pct !== null ? " · " + t("reception") + " ≈ " + pct + " %" : "") + "<br>" +
             (onlyRelay
@@ -1477,8 +1495,8 @@ function drawMap(fit, fromZoom) {
               : (best && bestNode !== null ? t("bestNode", esc(bestNames.get(bestNode) || hexId(bestNode))) + (c.by.size > 1 ? " · " + t("nNodes", c.by.size) : "") + "<br>" : "") +
                 t(useMargin ? "medMargin" : "medSnr", fmtN(med, 1), fmtN(sorted[0], 1), fmtN(sorted[sorted.length - 1], 1)) + "<br>" +
                 t("medRssi", fmtN(median(c.rssi))) + (c.nRelay ? " <i>(" + t("directOnly") + ")</i>" : "")) + (c.ms ? "<br>" + t("timeInCell") + ": " + fmtDur(c.ms) : "")
-          : "<b>" + t("noRx") + "</b><br>" + t("noRxText") + (c.ms ? "<br>" + t("timeInCell") + ": " + fmtDur(c.ms) : "") +
-            (expected && expected >= 1 ? "<br>" + t("expected", Math.round(expected)) : ""));
+          : "<b>" + t("noRx") + "</b><br>" + t(c.own ? "noRxText" : "noRxComm") + (c.ms ? "<br>" + t("timeInCell") + ": " + fmtDur(c.ms) : "") +
+            (expected && expected >= 1 ? "<br>" + t("expected", Math.round(expected)) : "")) + commInfo(c));
       rect.addTo(mapLayer);
       // el gris solo dentro del borde: así el borde se ve sobre el mapa con el mismo tono que las celdas en directo
       if (onlyRelay) L.rectangle(insetBounds(c.bounds, RELAY_BORDER), { stroke: false, fillColor: "#2b2f36", fillOpacity: .6, interactive: false }).addTo(mapLayer);
@@ -2003,20 +2021,21 @@ async function addCoverage(data, name, community) {
     for (const c of data.cells) {
       const lat = Number(c.lat), lon = Number(c.lon);
       if (!isFinite(lat) || !isFinite(lon)) continue;
-      const n = Math.max(0, Number(c.n) || 0), cf = Math.max(1, Number(c.f) || 1);
-      if (!n) { fileVisited.push({ lat, lon, community: !!community, cf }); continue; }
+      const n = Math.max(0, Number(c.n) || 0), cf = Math.max(1, Number(c.f) || 1),
+        cfr = c.fr != null && isFinite(Number(c.fr)) ? Number(c.fr) : null, clast = /^\d{4}-\d{2}$/.test(String(c.last || "")) ? String(c.last) : "";
+      if (!n) { fileVisited.push({ lat, lon, community: !!community, cf, cfr, clast }); continue; }
       let known = 0;
       for (const o of c.nodes || []) {
         const id = parseInt(String(o.id || "").replace("!", ""), 16);
         if (isNaN(id)) continue;
         const w = Math.max(1, Number(o.n) || 1); known += w;
-        rows.push({ ms: null, synthetic: true, community: !!community, cf, w, seq: null, from: id >>> 0, name: String(o.name || ""), heard: id >>> 0, heardName: String(o.name || ""),
+        rows.push({ ms: null, synthetic: true, community: !!community, cf, cfr, clast, w, seq: null, from: id >>> 0, name: String(o.name || ""), heard: id >>> 0, heardName: String(o.name || ""),
           senderLat: null, senderLon: null, rxLat: lat, rxLon: lon, rxAlt: null, rxAcc: null, rxSrc: "", dist: null,
           snr: o.snr != null ? Number(o.snr) : null, rssi: o.rssi != null ? Number(o.rssi) : null,
           sf: o.sf ? Number(o.sf) : null, bw: o.bw ? Number(o.bw) : null, hops: 0, hopLimit: null, port: null, kind: "coverage", payload: "" });
       }
       // paquetes de la celda sin nodo oído conocido: cuentan como recibidos
-      if (n > known) rows.push({ ms: null, synthetic: true, community: !!community, cf, w: n - known, seq: null, from: null, name: "", heard: null, heardName: "",
+      if (n > known) rows.push({ ms: null, synthetic: true, community: !!community, cf, cfr, clast, w: n - known, seq: null, from: null, name: "", heard: null, heardName: "",
         senderLat: null, senderLon: null, rxLat: lat, rxLon: lon, rxSrc: "", dist: null, snr: null, rssi: null, sf: null, bw: null,
         hops: 0, hopLimit: null, port: null, kind: "coverage", payload: "" });
     }
