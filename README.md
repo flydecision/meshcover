@@ -6,7 +6,7 @@ Analizador de cobertura para redes Meshtastic.
 
 Página web para analizar la cobertura real entre nodos [Meshtastic](https://meshtastic.org) a partir del registro que exporta la **app oficial de Android**. Un nodo se queda fijo enviando su posición y otro va contigo por la ruta, conectado a la app. La app graba en segundo plano, con la pantalla apagada; al volver, exportas el registro y esta página coloca cada paquete recibido donde estabas, con su SNR y RSSI, y lo dibuja en un mapa.
 
-👉 **Úsala aquí:** https://meshtastic.flydecision.com
+👉 **Úsala aquí:** https://meshcover.flydecision.com
 
 ## Qué hace
 
