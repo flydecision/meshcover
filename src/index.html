@@ -398,7 +398,7 @@
       </ol>
       <h3>💡 Consejos</h3>
       <ul>
-        <li>Mejor si no empiezas ni acabas en casa; si lo haces, el recorte por defecto (300 m) quita esa zona. Las paradas de más de 5 min también se recortan.</li>
+        <li>Mejor si no empiezas ni acabas en casa; si lo haces, el recorte por defecto (300 m) quita esa zona. Las paradas de más de 5 min también se recortan, aunque el nodo siga encendido (por eso no hace falta vaciar el registro de la app antes de salir).</li>
         <li>Varias pasadas por la misma zona se suman: cuanta más gente, más fiable el mapa. Un archivo idéntico a otro ya subido no se vuelve a sumar.</li>
         <li>Todo se guarda siempre en celdas de 250 m, para que los archivos de todo el mundo encajen.</li>
         <li>Para evitar abusos, como mucho 6 subidas por hora desde la misma conexión.</li>
@@ -525,7 +525,7 @@
       </ol>
       <h3>💡 Tips</h3>
       <ul>
-        <li>Better not to start or end at home; if you do, the default cut (300 m) removes that area. Stops longer than 5 min are cut too.</li>
+        <li>Better not to start or end at home; if you do, the default cut (300 m) removes that area. Stops longer than 5 min are cut too, even with the node still on (so you don't need to clear the app's log before going out).</li>
         <li>Several passes over the same area add up: the more people, the more reliable the map. A file identical to one already uploaded is not added again.</li>
         <li>Everything is always stored in 250 m cells, so everyone's files fit together.</li>
         <li>To prevent abuse, at most 6 uploads per hour from the same connection.</li>
@@ -1786,19 +1786,39 @@ function autoView(rows) {
 // nº de paquetes, SNR y RSSI medianos y SF). Sin recorrido, sin horas y sin celdas cerca del inicio/fin.
 let expLayer = null;
 const EXPORT_CELL = 250;   // tamaño fijo de las celdas exportadas: así los archivos de todos encajan
+// Paradas dentro de un tramo: sitios donde se queda ≥ 5 min en menos de 100 m aunque sigan llegando
+// posiciones (p. ej. el nodo encendido en el trabajo, o en casa sin cortar el registro)
+const STOP_MS = 5 * 60000, STOP_R = 100;
+function stopPoints(seq) {   // seq: [{lat, lon, ms}] ordenados por hora
+  const out = [];
+  let i = 0;
+  while (i < seq.length) {
+    const a = seq[i];
+    if (!a.ms) { i++; continue; }
+    let j = i + 1, sLat = a.lat, sLon = a.lon;
+    while (j < seq.length && RT.haversineM(a.lat, a.lon, seq[j].lat, seq[j].lon) <= STOP_R) { sLat += seq[j].lat; sLon += seq[j].lon; j++; }
+    const last = seq[j - 1];
+    if (last.ms && last.ms - a.ms >= STOP_MS) { out.push({ lat: sLat / (j - i), lon: sLon / (j - i) }); i = j; }
+    else i++;
+  }
+  return out;
+}
 function privacyPoints() {
-  // inicio y fin de cada tramo del recorrido (se corta en cada parada de más de 5 min: un registro de
-  // varios días empieza y acaba muchas veces en casa); si no hay recorrido, la primera y la última recepción
+  // inicio y fin de cada tramo del recorrido (se corta en cada hueco de más de 5 min: un registro de
+  // varios días empieza y acaba muchas veces en casa) y las paradas de 5 min o más dentro de un tramo;
+  // si no hay recorrido, la primera y la última recepción y las paradas según las recepciones
   const pts = [];
   for (const tr of fileTracks) for (const sg of tr.segs) {
     if (!sg.length) continue;
     const a = sg[0], z = sg[sg.length - 1];
     pts.push({ lat: a.lat, lon: a.lon });
     if (RT.haversineM(a.lat, a.lon, z.lat, z.lon) > 1) pts.push({ lat: z.lat, lon: z.lon });
+    pts.push(...stopPoints(sg));
   }
   if (!pts.length) {
-    const rx = (fileRows || []).filter(r => r.ms && r.rxLat != null && !isNaN(r.rxLat)).sort((a, b) => a.ms - b.ms);
+    const rx = (fileRows || []).filter(r => r.ms && !r.community && r.rxLat != null && !isNaN(r.rxLat)).sort((a, b) => a.ms - b.ms);
     if (rx.length) pts.push({ lat: rx[0].rxLat, lon: rx[0].rxLon }, { lat: rx[rx.length - 1].rxLat, lon: rx[rx.length - 1].rxLon });
+    pts.push(...stopPoints(rx.map(r => ({ lat: r.rxLat, lon: r.rxLon, ms: r.ms }))));
   }
   return pts;
 }
