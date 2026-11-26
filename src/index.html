@@ -26,10 +26,8 @@
   #selLang { padding:6px 8px; font-size:16px; border-radius:8px; }
   /* el mapa usa todo el ancho de la ventana (16 px de margen a cada lado) */
   #mapBox:not(.max) { margin-inline:calc((100% - (var(--vw, 100%) - 32px)) / 2); }
-  .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin:8px 0 12px; }
-  .stat { background:#1a2029; border:1px solid #2a3340; border-radius:10px; padding:0; text-align:center; }
-  .stat .v { font-size:16px; font-weight:700; font-variant-numeric:tabular-nums; }
-  .stat .l { font-size:16px; color:#9aa4b2; margin-top:2px; }
+  .tblinfo { margin:8px 0; font-size:16px; color:#9aa4b2; }
+  .tblinfo b { color:#e6e9ee; font-weight:600; }
   .tblwrap { overflow-x:auto; border:1px solid #2a3340; border-radius:10px; }
   table { border-collapse:collapse; width:100%; font-size:16px; font-variant-numeric:tabular-nums; }
   th, td { padding:5px 8px; text-align:right; border-bottom:1px solid #232b36; white-space:nowrap; }
@@ -185,13 +183,10 @@
   .seg { display:inline-flex; border-radius:10px; overflow:hidden; border:1px solid #2a3340; }
   .seg button { box-sizing:border-box; height:27px; display:inline-flex; align-items:center; gap:5px; border-radius:0; padding:0 11px; font-size:16px; background:#1a2029; }
   .seg button.on { background:#23456e; }
-  #cellWrap { display:inline-flex; align-items:center; gap:6px; }
-  #cellWrap[hidden] { display:none; }
   /* deslizador de celda con el mismo aspecto que el de saltos (un solo botón) */
   .filt.cellf { margin:0; gap:6px; }
   .filt.cellf .dual { flex:0 0 110px; width:110px; min-width:0; }
   .filt .dual.single input[type=range] { pointer-events:auto; cursor:pointer; }
-  #cellVal { color:#e6e9ee; min-width:3.6em; }
   .mapbtns { margin:6px 0; }
   .leaflet-control-layers-toggle, .leaflet-touch .leaflet-control-layers-toggle { width:30px !important; height:30px !important; background-size:18px 18px; background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMjIyIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0xMiAzIDIgOGwxMCA1IDEwLTV6Ii8+PHBhdGggZD0ibTIgMTIuNSAxMCA1IDEwLTUiLz48cGF0aCBkPSJtMiAxNyAxMCA1IDEwLTUiLz48L3N2Zz4=") !important; }
   .leaflet-touch .leaflet-control-layers { border:2px solid rgba(0,0,0,.2); }
@@ -239,7 +234,6 @@
         <input type="range" id="rngHops" min="0" max="7" step="1" value="7" data-i18n-aria="hopsMax">
       </span>
     </span>
-    <span id="cellWrap" class="filt cellf" hidden><span class="colon" data-i18n="cell">Cell</span> <span class="dual single"><span class="dual-track"></span><span class="dual-fill" id="cellFill"></span><input type="range" id="rngCell" min="0" max="4" step="1" value="2" data-i18n-aria="cellSize"></span><b id="cellVal">250 m</b></span>
   </div>
   <div id="expPanel" class="exppanel" hidden>
     <div class="exphead"><b>📤 <span data-i18n="expTitle">Export anonymous coverage</span></b><button id="btnExpClose" class="sec" data-i18n-aria="close">✕</button></div>
@@ -260,12 +254,7 @@
   <div id="cmpBox" hidden></div>
 </div>
 
-<div class="stats">
-  <div class="stat"><div class="v" id="sReg">0</div><div class="l" data-i18n="statRows">Records</div></div>
-  <div class="stat"><div class="v" id="sSnr">—</div><div class="l" data-i18n="statSnr">Best SNR dB</div></div>
-  <div class="stat"><div class="v" id="sDist">—</div><div class="l" data-i18n="statDist">Max dist. km</div></div>
-  <div class="stat"><div class="v" id="sDur">0m</div><div class="l" data-i18n="statDur">Duration</div></div>
-</div>
+<div class="tblinfo"><span data-i18n="statRows">Records</span>: <b id="sReg">0</b> · <span data-i18n="statDur">Duration</span>: <b id="sDur">0m</b></div>
 
 <div id="tblNote" hidden></div>
 <div class="tbltop" id="tblTop" hidden><div id="tblTopIn"></div></div>
@@ -323,7 +312,7 @@
       <h3>1. Antes de salir</h3>
       <ol>
         <li><b>Nodo fijo</b>: en la app, Posición → posición fija, «posición inteligente» desactivada e intervalo de difusión de 1 minuto.</li>
-        <li><b>Nodo de ruta</b>: rol <b>CLIENT_MUTE</b>, GPS activado con <b>intervalo de actualización del GPS de 20–30 s</b> y «posición inteligente» desactivada. El intervalo de difusión da igual (puede quedar en «unset»): el recorrido sale del GPS, no de lo que se emite. Los ajustes de radio (LoRa) tienen que ser iguales en los dos.</li>
+        <li><b>Nodo de ruta</b>: GPS activado con <b>intervalo de actualización del GPS de 20–30 s</b> y «posición inteligente» desactivada. El intervalo de difusión da igual (puede quedar en «unset»): el recorrido sale del GPS, no de lo que se emite. Los ajustes de radio (LoRa) tienen que ser iguales en los dos.</li>
         <li>Saca el nodo de ruta a cielo abierto unos minutos antes, para que coja satélites.</li>
         <li>En la app, conecta el móvil al nodo de ruta y vacía el registro: Ajustes → panel de depuración → borrar.</li>
       </ol>
@@ -337,7 +326,7 @@
       </ol>
       <h3>Cobertura general de la red</h3>
       <ol>
-        <li>No hace falta nodo fijo. El nodo de ruta, con los <b>mismos ajustes de radio que la red</b>, en CLIENT_MUTE, con GPS activado y actualización del GPS cada 20–30 s (el intervalo de difusión da igual).</li>
+        <li>No hace falta nodo fijo. El nodo de ruta, con los <b>mismos ajustes de radio que la red</b>, con GPS activado y actualización del GPS cada 20–30 s (el intervalo de difusión da igual).</li>
         <li>Sal y exporta el registro igual que antes, y añádelo aquí.</li>
         <li>Al abrir el registro se elige sola <b>📶 Oído directamente → Mejor señal de cualquier nodo</b> en <b>🔳 Cuadrícula</b>. Cada celda sale del color del nodo que mejor se oye allí; al pinchar, dice cuál es. Para la cobertura de un repetidor concreto, elígelo en ese mismo grupo.</li>
         <li>Deja los saltos en 0–7. Suma registros de varios días o personas para completar la zona.</li>
@@ -372,10 +361,7 @@
       <ul>
         <li>Los ajustes de radio (región, ancho de banda, SF, coding rate y frequency slot) tienen que ser <b>idénticos</b> en los dos nodos.</li>
         <li>Con SF altos, envía con menos frecuencia: en Europa solo se puede transmitir el 10 % del tiempo.</li>
-        <li>El nodo de ruta en <b>CLIENT_MUTE</b>, no TRACKER (TRACKER duerme y deja de escuchar).</li>
       </ul>
-      <h3>🔳 En la cuadrícula salen celdas «sin recepción» sueltas</h3>
-      <div>La celda es más pequeña que lo que avanzas entre dos paquetes: súbele el tamaño.</div>
     </div>
 
     <div class="page" data-p="3" data-lang="es" hidden>
@@ -386,10 +372,10 @@
       <div>Cada nuevo recorrido que pasa por una celda se suma a su media, así que su color se va afinando con cada pase. Con el selector <b>🌍 Todos los datos / Últimos 12, 6 o 3 meses</b> se quitan los datos antiguos, por si la red ha cambiado (cuenta el mes en que se grabó el registro).</div>
       <h3>🚶 Aportar tu recorrido</h3>
       <ol>
-        <li>Prepara el nodo de ruta como en «Cómo usar → Cobertura general de la red»: <b>mismos ajustes de radio que la red</b>, CLIENT_MUTE, GPS activado con actualización cada 20–30 s y «posición inteligente» desactivada. El intervalo de difusión puede quedar en «unset» o largo: así tampoco emites tu recorrido en directo.</li>
-        <li><b>Canal propio para la posición</b>: crea un canal tuyo con clave (PSK), como primario o secundario, y actívale la posición con precisión completa. En los demás canales (por ejemplo el público) deja la posición <b>desactivada</b>. Así tu recorrido se registra con precisión completa (en un canal público el firmware la limita a unos 730 m), solo lo ve quien tenga tu clave, y sigues oyendo a toda la red.</li>
+        <li>Prepara el nodo de ruta como en «Cómo usar → Cobertura general de la red»: <b>mismos ajustes de radio que la red</b>, GPS activado con actualización cada 20–30 s y «posición inteligente» desactivada. El intervalo de difusión puede quedar en «unset» o largo: así tampoco emites tu recorrido en directo.</li>
+        <li>Configura un <b>único canal para transmitir la posición</b> y que tenga <b>PSK</b>, para que la precisión sea máxima. Es indiferente que sea primario o secundario, pero debe ser el único con <b>Posición</b> activado.</li>
         <li><b>Si tu nodo no tiene GPS</b>: en la app, activa <b>Ajustes › «Proporcionar la ubicación del teléfono a la malla»</b>: el nodo usa la posición del móvil. Si aun así el registro no trae tu recorrido, graba la ruta con cualquier app de rutas del móvil, expórtala en <b>GPX</b> y abre el <code>.gpx</code> junto con el <code>.txt</code> (en cualquier orden): los paquetes sin posición se colocan según la hora del GPX.</li>
-        <li>En la app, vacía el registro (Ajustes → panel de depuración → borrar), haz el recorrido con la pantalla apagada y al volver <b>exporta</b> el registro.</li>
+        <li>En la app Meshtastic conviene vaciar el registro antes de la ruta si tienes un registro anterior largo en condiciones de nodo, antena… muy diferentes a lo habitual. Se hace en Ajustes → Panel de depuración → Borrar. Haz el recorrido con la pantalla apagada y al volver <b>exporta</b> el registro.</li>
         <li>Aquí, <b>📂 Añadir registros</b> con ese <code>.txt</code>.</li>
         <li>Pulsa <b>📤 Exportar cobertura</b>. El mapa pasa a mostrar <b>exactamente lo que se va a compartir</b>: «Mejor señal de cualquier nodo», celdas de 250 m.</li>
         <li>Mueve el deslizador <b>«Quitar alrededor del inicio y del final»</b> hasta que no quede ninguna celda cerca de tu casa: las celdas desaparecen del mapa según lo subes (círculos rojos).</li>
@@ -451,7 +437,7 @@
       <h3>1. Before you leave</h3>
       <ol>
         <li><b>Fixed node</b>: in the app, Position → fixed position, «smart position» off and broadcast interval of 1 minute.</li>
-        <li><b>Route node</b>: role <b>CLIENT_MUTE</b>, GPS on with a <b>GPS update interval of 20–30 s</b> and «smart position» off. The broadcast interval does not matter (it can stay «unset»): the track comes from the GPS, not from what is broadcast. Radio (LoRa) settings must be the same on both.</li>
+        <li><b>Route node</b>: GPS on with a <b>GPS update interval of 20–30 s</b> and «smart position» off. The broadcast interval does not matter (it can stay «unset»): the track comes from the GPS, not from what is broadcast. Radio (LoRa) settings must be the same on both.</li>
         <li>Take the route node outdoors a few minutes before, so it gets a satellite fix.</li>
         <li>In the app, connect the phone to the route node and clear the log: Settings → debug panel → clear.</li>
       </ol>
@@ -465,7 +451,7 @@
       </ol>
       <h3>General coverage of the mesh</h3>
       <ol>
-        <li>No fixed node needed. The route node, with the <b>same radio settings as the mesh</b>, in CLIENT_MUTE, with GPS on and a GPS update every 20–30 s (the broadcast interval does not matter).</li>
+        <li>No fixed node needed. The route node, with the <b>same radio settings as the mesh</b>, with GPS on and a GPS update every 20–30 s (the broadcast interval does not matter).</li>
         <li>Go out and export the log as before, and add it here.</li>
         <li>Opening the log picks <b>📶 Heard directly → Best signal of any node</b> in <b>🔳 Grid</b> for you. Each cell takes the colour of the node heard best there; tap it to see which one. For the coverage of a specific repeater, pick it in that same group.</li>
         <li>Leave hops at 0–7. Add logs from several days or people to complete the area.</li>
@@ -500,10 +486,7 @@
       <ul>
         <li>Radio settings (region, bandwidth, SF, coding rate and frequency slot) must be <b>identical</b> on both nodes.</li>
         <li>With high SF, send less often: in Europe you can only transmit 10 % of the time.</li>
-        <li>Route node in <b>CLIENT_MUTE</b>, not TRACKER (TRACKER sleeps and stops listening).</li>
       </ul>
-      <h3>🔳 The grid shows isolated «no reception» cells</h3>
-      <div>The cell is smaller than the distance you move between two packets: make it bigger.</div>
     </div>
     <div class="page" data-p="3" data-lang="en" hidden>
       <h3>🌍 Community coverage map</h3>
@@ -513,10 +496,10 @@
       <div>Each new route through a cell adds to its average, so its colour gets more accurate with every pass. The <b>🌍 All data / Last 12, 6 or 3 months</b> selector removes old data, in case the mesh has changed (it uses the month the log was recorded).</div>
       <h3>🚶 Contributing your route</h3>
       <ol>
-        <li>Set up the route node as in «How to use → General coverage of the mesh»: <b>same radio settings as the network</b>, CLIENT_MUTE, GPS on with updates every 20–30 s and «smart position» off. The broadcast interval can stay «unset» or long: that way you do not broadcast your route live either.</li>
-        <li><b>Your own channel for position</b>: create a channel of your own with a key (PSK), as primary or secondary, and turn on position for it with full precision. On the other channels (for example the public one) leave position <b>off</b>. That way your track is logged with full precision (on a public channel the firmware limits it to about 730 m), only people with your key see it, and you still hear the whole network.</li>
+        <li>Set up the route node as in «How to use → General coverage of the mesh»: <b>same radio settings as the network</b>, GPS on with updates every 20–30 s and «smart position» off. The broadcast interval can stay «unset» or long: that way you do not broadcast your route live either.</li>
+        <li>Set up a <b>single channel to send your position</b>, with a <b>PSK</b>, so precision is at its maximum. It does not matter whether it is primary or secondary, but it must be the only one with <b>Position</b> turned on.</li>
         <li><b>If your node has no GPS</b>: in the app, turn on <b>Settings › «Provide location to mesh»</b>: the node uses the phone's position. If the log still has no track, record the route with any route app on your phone, export it as <b>GPX</b> and open the <code>.gpx</code> together with the <code>.txt</code> (in any order): packets without a position are placed by the time in the GPX.</li>
-        <li>In the app, clear the log (Settings → debug panel → clear), do the route with the screen off and, back home, <b>export</b> the log.</li>
+        <li>In the Meshtastic app, it is worth clearing the log before the route if you have a long earlier log made with a very different node, antenna… than usual. It is done in Settings → Debug panel → Clear. Do the route with the screen off and, back home, <b>export</b> the log.</li>
         <li>Here, <b>📂 Add Logs</b> with that <code>.txt</code>.</li>
         <li>Press <b>📤 Export coverage</b>. The map now shows <b>exactly what will be shared</b>: «Best signal of any node», 250 m cells.</li>
         <li>Move the <b>«Remove around start and end»</b> slider until no cell is left near your home: cells disappear from the map as you raise it (red circles).</li>
@@ -609,8 +592,8 @@ const I18N = {
     cmpCell: (sf, n, m) => "SF" + sf + ": " + (n ? n + (n === 1 ? " packet" : " packets") + (m !== null ? " · margin " + m + " dB" : "") : "nothing received"), dotsTitle: "Show each reception as a dot", gridTitle: "Show coverage by cells",
     hops: "Hops", hopsMin: "Minimum hops", hopsMax: "Maximum hops",
     hopsTitle: "Hops. 0 = received directly; 1, 2… = relayed by other nodes. Drag both ends to pick a minimum and a maximum",
-    cell: "Cell", cellSize: "Cell size", to: "to", track: "Track", noRx: "No reception", nodeIcon: "Node",
-    statRows: "Records", statSnr: "Best SNR dB", statDist: "Max dist. km", statDur: "Duration",
+    to: "to", track: "Track", noRx: "No reception", nodeIcon: "Node",
+    statRows: "Records", statDur: "Duration",
     thDate: "Date and time", thType: "Type",
     tabWhat: "What for", tabHow: "How to use", tabFix: "Troubleshooting", tabComm: "Community map", noShow: "Don't show again", cancel: "Cancel",
     introOpenTitle: "📂 Add Logs", introOpenGo: "Choose file",
@@ -672,8 +655,8 @@ const I18N = {
     cmpCell: (sf, n, m) => "SF" + sf + ": " + (n ? n + (n === 1 ? " paquete" : " paquetes") + (m !== null ? " · margen " + m + " dB" : "") : "nada recibido"), dotsTitle: "Ver cada recepción como un punto", gridTitle: "Ver la cobertura por celdas",
     hops: "Saltos", hopsMin: "Saltos mínimos", hopsMax: "Saltos máximos",
     hopsTitle: "Saltos. 0 = recibido en directo; 1, 2… = llegó repetido por otros nodos. Mueve los dos extremos para elegir un mínimo y un máximo",
-    cell: "Celda", cellSize: "Tamaño de celda", to: "a", track: "Recorrido", noRx: "Sin recepción", nodeIcon: "Nodo",
-    statRows: "Registros", statSnr: "Mejor SNR dB", statDist: "Dist. máx km", statDur: "Duración",
+    to: "a", track: "Recorrido", noRx: "Sin recepción", nodeIcon: "Nodo",
+    statRows: "Registros", statDur: "Duración",
     thDate: "Fecha y hora", thType: "Tipo",
     tabWhat: "Para qué", tabHow: "Cómo usar", tabFix: "Soluciones", tabComm: "Mapa comunitario", noShow: "No volver a mostrar", cancel: "Cancelar",
     introOpenTitle: "📂 Añadir registros", introOpenGo: "Elegir archivo",
@@ -905,14 +888,6 @@ function render() {
   refreshFromSelect();
   const rows = rowsView();
   $("sReg").textContent = rows.reduce((a, r) => a + (r.w || 1), 0);
-  let bestSnr = null, maxD = null;
-  for (const r of rows) {
-    if (r.snr !== null && (bestSnr === null || r.snr > bestSnr)) bestSnr = r.snr;
-    const d = distFor(r);
-    if (d != null && !isNaN(d) && (maxD === null || d > maxD)) maxD = d;
-  }
-  $("sSnr").textContent = bestSnr === null ? "—" : bestSnr.toFixed(1);
-  $("sDist").textContent = maxD === null ? "—" : (maxD / 1000).toFixed(1);
   const timed = rows.filter(r => r.ms);
   if (timed.length) {
     let a = Infinity, z = -Infinity; for (const r of timed) { if (r.ms < a) a = r.ms; if (r.ms > z) z = r.ms; }
@@ -996,31 +971,22 @@ const LEAFLET_SRC = [
 let map = null, mapLayer = null, mapOn = false, mapDirty = true, mapFitted = false;
 let fileRows = null, fileNames = [], fileTracks = [];
 let fileVisited = [];   // centros de celdas sin recepción de archivos de cobertura importados
-let mapView = "dots", cellSize = 250;
-function saveMapPrefs() { try { localStorage.setItem("rangetest_mapprefs_v1", JSON.stringify({ mapView, cellSize })); } catch (e) {} }
+let mapView = "dots";
+const cellSize = 250;   // tamaño fijo de celda: el mismo que el de la exportación y el mapa comunitario
+function saveMapPrefs() { try { localStorage.setItem("rangetest_mapprefs_v1", JSON.stringify({ mapView })); } catch (e) {} }
 function loadMapPrefs() {
   try {
     const p = JSON.parse(localStorage.getItem("rangetest_mapprefs_v1") || "{}");
     if (["grid", "dots", "cmp"].includes(p.mapView)) mapView = p.mapView;
-    if ([50, 100, 250, 500, 1000].includes(p.cellSize)) cellSize = p.cellSize;
   } catch (e) {}
-  showView(); showCell();
+  showView();
   $("rngHops").value = String(maxHops); $("rngHopsMin").value = String(minHops); showHops();
 }
-const CELL_SIZES = [50, 100, 250, 500, 1000];
 function showView() {
   $("vDots").classList.toggle("on", mapView === "dots");
   $("vGrid").classList.toggle("on", mapView === "grid");
   $("vCmp").classList.toggle("on", mapView === "cmp");
-  $("cellWrap").hidden = mapView === "dots";
   $("cmpWrap").hidden = mapView !== "cmp" || $("vCmp").hidden;
-}
-function showCell() {
-  $("rngCell").value = String(Math.max(0, CELL_SIZES.indexOf(cellSize)));
-  $("cellVal").textContent = cellSize >= 1000 ? cellSize / 1000 + " km" : cellSize + " m";
-  // franja azul desde el principio hasta el botón (los 12 px son medio botón)
-  $("cellFill").style.left = "12px";
-  $("cellFill").style.width = "calc((100% - 24px) * " + Math.max(0, CELL_SIZES.indexOf(cellSize)) / (CELL_SIZES.length - 1) + ")";
 }
 function setView(v) { mapView = v; showView(); saveMapPrefs(); mapDirty = true; dirtyRender = true; }
 let leafletPromise = null;
@@ -1424,7 +1390,7 @@ function drawMap(fit, fromZoom) {
   useMargin = withSnr.length > 0 && withSnr.every(r => r.sf);
   drawLegendScale(useMargin ? [...new Set(withSnr.map(r => r.sf))].sort((a, b) => a - b) : null);
   showView();
-  if (mapView === "cmp" && !cmp) { $("vGrid").classList.add("on"); $("cellWrap").hidden = false; }
+  if (mapView === "cmp" && !cmp) $("vGrid").classList.add("on");
   $("lgNone").hidden = !grid;
   $("cmpBox").hidden = !cmp;
   if (cmp) pts.push(...drawCompare(rows, tracks, sfList));
@@ -1893,12 +1859,12 @@ let expPreview = null;
 function exportPreviewOn() { return !!expPreview && !$("expPanel").hidden; }
 function openExport() {
   if (!(fileRows && fileRows.length) && !fileTracks.length && !fileVisited.length) { say(t("expNoData")); return; }
-  if (!expPreview) expPreview = { selFrom, cellSize, mapView, minHops, maxHops };
+  if (!expPreview) expPreview = { selFrom, mapView, minHops, maxHops };
   $("expPanel").hidden = false;
   if ([...$("selFrom").options].some(o => o.value === "h*")) selFrom = "h*";
-  cellSize = EXPORT_CELL; minHops = 0; maxHops = 7;
+  minHops = 0; maxHops = 7;
   $("rngHopsMin").value = "0"; $("rngHops").value = "7"; showHops();
-  mapView = "grid"; showView(); showCell();
+  mapView = "grid"; showView();
   updateExport();
   mapDirty = true; mapFitted = true; dirtyRender = true; render(); if (map) drawMap(false);
   const pts = privacyPoints();
@@ -1908,9 +1874,9 @@ function closeExport() {
   $("expPanel").hidden = true; if (expLayer) expLayer.clearLayers();
   if (!expPreview) return;
   const p = expPreview; expPreview = null;
-  selFrom = p.selFrom; cellSize = p.cellSize; mapView = p.mapView; minHops = p.minHops; maxHops = p.maxHops;
+  selFrom = p.selFrom; mapView = p.mapView; minHops = p.minHops; maxHops = p.maxHops;
   $("rngHopsMin").value = String(minHops); $("rngHops").value = String(maxHops); showHops();
-  showView(); showCell();
+  showView();
   mapDirty = true; mapFitted = true; dirtyRender = true; render(); if (map) drawMap(false);
 }
 function coverageData() {
@@ -1999,11 +1965,8 @@ async function addCoverage(data, name, community) {
         hops: 0, hopLimit: null, port: null, kind: "coverage", payload: "" });
     }
     fileRows = (fileRows || []).concat(rows); fileNames.push(name);
-    // con celdas más pequeñas que las del archivo, cada celda importada saldría como un cuadradito suelto
-    const fsz = Number(data.cellSize) || EXPORT_CELL;
-    // la cobertura solo tiene sentido como cuadrícula, con el tamaño de celda del archivo
-    if (CELL_SIZES.includes(fsz)) cellSize = fsz;
-    mapView = "grid"; showView(); showCell(); saveMapPrefs();
+    // la cobertura solo tiene sentido como cuadrícula
+    mapView = "grid"; showView(); saveMapPrefs();
     if (!map) await startMap();
     mapDirty = true; refreshFromSelect(); dirtyRender = true; drawMap(true);
 }
@@ -2179,7 +2142,6 @@ $("vDots").addEventListener("click", () => setView("dots"));
 $("vGrid").addEventListener("click", () => setView("grid"));
 $("vCmp").addEventListener("click", () => setView("cmp"));
 for (const id of ["cmpA", "cmpB"]) $(id).addEventListener("change", e => { cmpPick[id] = Number(e.target.value); mapDirty = true; dirtyRender = true; if (map) drawMap(false); });
-$("rngCell").addEventListener("input", e => { cellSize = CELL_SIZES[Number(e.target.value)] || 250; showCell(); saveMapPrefs(); mapDirty = true; dirtyRender = true; });
 function showHops() {
   $("hopsVal").textContent = minHops === maxHops ? String(maxHops) : minHops + "–" + maxHops;
   // franja azul entre los dos extremos (los 12 px son medio botón)
