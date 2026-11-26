@@ -384,7 +384,7 @@
       <div>Un mapa común de la <b>cobertura real de la red</b>, hecho entre todas/os: cada persona que hace un recorrido con su nodo suma sus celdas, y el mapa se va completando zona a zona.</div>
       <h3>👀 Verlo</h3>
       <div>Pulsa <b>🌍 Mapa comunitario</b>. Se carga en <b>cuadrícula de 250 m</b>: cada celda sale del color del nodo que mejor se oye allí. Las celdas grises son sitios por los que alguien pasó <b>sin recibir nada</b>. Puedes sumarle tus propios registros con <b>📂 Añadir registros</b> sin subirlos.</div>
-      <div>Cada nuevo recorrido que pasa por una celda se suma a su media, así que su color se va afinando con cada pase. Al <b>tocar una celda</b> se ven sus pasadas, en cuántas se recibió algo, la fiabilidad (baja con 1 pasada, media con 2–4, buena con 5 o más) y el mes del dato más reciente. Con el selector <b>🌍 Todos los datos / Últimos 12, 6 o 3 meses</b> se quitan los datos antiguos, por si la red ha cambiado (cuenta el mes en que se grabó el registro).</div>
+      <div>Cada nuevo recorrido que pasa por una celda se suma a su media, así que su color se va afinando con cada pase. Al <b>tocar una celda</b> se ven sus pasadas (1, 2–4 o 5 o más), si se recibió siempre, a veces o nunca, la fiabilidad (baja, media o buena) y el mes del dato más reciente. Con el selector <b>🌍 Todos los datos / Últimos 12, 6 o 3 meses</b> se quitan los datos antiguos, por si la red ha cambiado (cuenta el mes en que se grabó el registro).</div>
       <h3>🚶 Aportar tu recorrido</h3>
       <ol>
         <li>Prepara el nodo de ruta como en «Cómo usar → Cobertura general de la red»: <b>mismos ajustes de radio que la red</b>, GPS activado con actualización cada 20–30 s y «posición inteligente» desactivada. El intervalo de difusión puede quedar en «unset» o largo: así tampoco emites tu recorrido en directo.</li>
@@ -417,7 +417,8 @@
       <h3>🚫 Qué no se sube</h3>
       <ul>
         <li>Ni el recorrido, ni horas, ni días, ni el orden en que pasaste.</li>
-        <li>Nada cerca de donde empieza y acaba cada ruta, ni de donde te paraste más de 5 min (círculos rojos; tú eliges el radio).</li>
+        <li>Nada cerca de donde empieza y acaba cada ruta, ni de donde te paraste más de 5 min (círculos rojos; tú eliges el radio). Cada círculo se desplaza al azar y crece un poco, para que el centro del hueco no coincida con tu casa.</li>
+        <li>El mapa comunitario no publica números exactos de pasadas, solo franjas (1, 2–4, 5 o más) y si se recibió siempre, a veces o nunca: con pocas personas subiendo, los números exactos alrededor de un hueco darían pistas.</li>
         <li>Ni tu nombre, ni tu nodo, ni tu móvil, ni ningún dato de cuenta.</li>
       </ul>
       <h3>🔍 Cómo comprobarlo antes</h3>
@@ -516,7 +517,7 @@
       <div>A shared map of the <b>real coverage of the network</b>, built by everyone: each person who does a route with their node adds their cells, and the map fills in area by area.</div>
       <h3>👀 Viewing it</h3>
       <div>Press <b>🌍 Community map</b>. It loads as a <b>250 m grid</b>: each cell takes the colour of the node heard best there. Grey cells are places someone passed <b>without receiving anything</b>. You can add your own logs on top with <b>📂 Add Logs</b> without uploading them.</div>
-      <div>Each new route through a cell adds to its average, so its colour gets more accurate with every pass. <b>Tap a cell</b> to see its passes, in how many something was received, the reliability (low with 1 pass, medium with 2–4, good with 5 or more) and the month of the newest data. The <b>🌍 All data / Last 12, 6 or 3 months</b> selector removes old data, in case the mesh has changed (it uses the month the log was recorded).</div>
+      <div>Each new route through a cell adds to its average, so its colour gets more accurate with every pass. <b>Tap a cell</b> to see its passes (1, 2–4 or 5 or more), whether reception was always, sometimes or never, the reliability (low, medium or good) and the month of the newest data. The <b>🌍 All data / Last 12, 6 or 3 months</b> selector removes old data, in case the mesh has changed (it uses the month the log was recorded).</div>
       <h3>🚶 Contributing your route</h3>
       <ol>
         <li>Set up the route node as in «How to use → General coverage of the mesh»: <b>same radio settings as the network</b>, GPS on with updates every 20–30 s and «smart position» off. The broadcast interval can stay «unset» or long: that way you do not broadcast your route live either.</li>
@@ -549,7 +550,8 @@
       <h3>🚫 What is not uploaded</h3>
       <ul>
         <li>No track, no times, no days, no order in which you passed.</li>
-        <li>Nothing near where each route starts and ends, or where you stopped for more than 5 min (red circles; you choose the radius).</li>
+        <li>Nothing near where each route starts and ends, or where you stopped for more than 5 min (red circles; you choose the radius). Each circle is shifted at random and grows a little, so the centre of the gap is not your home.</li>
+        <li>The community map does not publish exact numbers of passes, only ranges (1, 2–4, 5 or more) and whether reception was always, sometimes or never: with few people uploading, exact numbers around a gap would give clues.</li>
         <li>Not your name, your node, your phone or any account data.</li>
       </ul>
       <h3>🔍 How to check it first</h3>
@@ -640,7 +642,7 @@ const I18N = {
     noRxText: "You passed here and no packet arrived.", noRxComm: "Routes passed here and nothing was heard directly from a relaying node.",
     txTitle: "Transmission", txCell: (a, n) => a + " of " + n + " messages reached the mesh", txMsg: "Message sent",
     txOk: "✓ The mesh heard it: a node relayed or acknowledged it.", txKo: "✗ Nobody relayed it after 3 tries.", lgTx: "Message sent: mesh heard it / nobody",
-    commPasses: n => n === 1 ? "1 pass" : n + " passes", commRx: (a, b) => "reception in " + a + " of " + b, reliability: "Reliability",
+    commPass1: "1 pass", commPass2: "2–4 passes", commPass5: "5 or more passes", commRx: "reception", rxNever: "never", rxSome: "sometimes", rxAll: "always", reliability: "Reliability",
     relLow: "low (a single pass, just a hint)", relMid: "medium (few passes)", relHigh: "good (5 or more passes)", lastData: "Newest data", expected: n => "About " + n + " packets were expected",
     gpsPos: "GPS position", lastHop: "from the last hop, not the origin node", distance: "distance",
     direct: "direct", nHops: n => n + (n === 1 ? " hop" : " hops"), routePos: "position of the route node",
@@ -712,7 +714,7 @@ const I18N = {
     noRxText: "Pasaste por aquí y no llegó ningún paquete.", noRxComm: "Han pasado recorridos por aquí y no se oyó directamente a ningún nodo que repita.",
     txTitle: "Transmisión", txCell: (a, n) => a + " de " + n + " mensajes llegaron a la red", txMsg: "Mensaje enviado",
     txOk: "✓ La red lo oyó: un nodo lo retransmitió o lo confirmó.", txKo: "✗ Nadie lo retransmitió tras 3 intentos.", lgTx: "Mensaje enviado: la red lo oyó / nadie",
-    commPasses: n => n === 1 ? "1 pasada" : n + " pasadas", commRx: (a, b) => "recepción en " + a + " de " + b, reliability: "Fiabilidad",
+    commPass1: "1 pasada", commPass2: "2–4 pasadas", commPass5: "5 pasadas o más", commRx: "recepción", rxNever: "nunca", rxSome: "a veces", rxAll: "siempre", reliability: "Fiabilidad",
     relLow: "baja (una sola pasada, solo orientativo)", relMid: "media (pocas pasadas)", relHigh: "buena (5 pasadas o más)", lastData: "Dato más reciente", expected: n => "Se esperaban ≈ " + n + " paquetes",
     gpsPos: "Posición GPS", lastHop: "del último salto, no del nodo de origen", distance: "distancia",
     direct: "directo", nHops: n => n + (n === 1 ? " salto" : " saltos"), routePos: "posición del nodo de ruta",
@@ -1334,13 +1336,13 @@ function buildGrid(rows, tracks, size) {
   }
   const out = [];
   // vista previa de la exportación: sin las celdas que se recortan por privacidad
-  const cut = exportPreviewOn() ? privRadius() : 0, priv = cut > 0 ? privacyPoints() : [], half = size * Math.SQRT1_2;
+  const cut = exportPreviewOn() ? privRadius() : 0, priv = privacyCircles(cut), half = size * Math.SQRT1_2;
   for (const c of cells.values()) {
     const [iy, ix] = c.k.split(":").map(Number);
     c.bounds = [[iy * size / mLat, ix * size / mLon], [(iy + 1) * size / mLat, (ix + 1) * size / mLon]];
     if (cut > 0) {
       const lat = (iy + .5) * size / mLat, lon = (ix + .5) * size / mLon;
-      if (priv.some(q => RT.haversineM(q.lat, q.lon, lat, lon) < cut + half)) continue;
+      if (priv.some(q => RT.haversineM(q.lat, q.lon, lat, lon) < q.r + half)) continue;
     }
     out.push(c);
   }
@@ -1350,7 +1352,7 @@ function buildGrid(rows, tracks, size) {
 // datos del mapa comunitario en una celda: nº de subidas que pasan por ella (f), en cuántas se recibió algo (fr) y último mes
 function commCell(c, r) {
   c.cf = Math.max(c.cf || 0, r.cf || 1);
-  if (r.cfr != null) c.cfr = Math.max(c.cfr || 0, r.cfr);
+  if (r.cfr != null) c.cfr = r.cfr;
   if (r.clast && (!c.clast || r.clast > c.clast)) c.clast = r.clast;
 }
 // mensajes enviados que se ven: con posición y fuera de la vista previa de exportación (no se exportan)
@@ -1363,7 +1365,7 @@ function commInfo(c) {
   if (!c.cf) return "";
   const lvl = c.cf >= 5 ? "relHigh" : c.cf >= 2 ? "relMid" : "relLow";
   return "<hr style='border:0;border-top:1px solid #8884;margin:6px 0'>🌍 <b>" + t("commName") + "</b><br>" +
-    t("commPasses", c.cf) + (c.cfr != null ? " · " + t("commRx", c.cfr, c.cf) : "") + "<br>" +
+    t(c.cf >= 5 ? "commPass5" : c.cf >= 2 ? "commPass2" : "commPass1") + (c.cfr != null ? " · " + t("commRx") + ": " + t(["rxNever", "rxSome", "rxAll"][c.cfr]) : "") + "<br>" +
     t("reliability") + ": <b>" + t(lvl) + "</b>" + (c.clast ? "<br>" + t("lastData") + ": " + c.clast : "");
 }
 
@@ -1964,13 +1966,13 @@ function coverageCells(size, radius) {
       cell(key(p[i].lat, p[i].lon));
     }
   }
-  const priv = privacyPoints(), half = size * Math.SQRT1_2, out = [];
+  const priv = privacyCircles(radius), half = size * Math.SQRT1_2, out = [];
   let removed = 0;
   for (const c of cells.values()) {
     const [iy, ix] = c.k.split(":").map(Number);
     const lat = (iy + .5) * size / mLat, lon = (ix + .5) * size / mLon;
     // fuera toda celda que toque el círculo de privacidad
-    if (radius > 0 && priv.some(q => RT.haversineM(q.lat, q.lon, lat, lon) < radius + half)) { removed++; continue; }
+    if (radius > 0 && priv.some(q => RT.haversineM(q.lat, q.lon, lat, lon) < q.r + half)) { removed++; continue; }
     const r1 = v => Math.round(v * 10) / 10;
     out.push({ lat: Math.round(lat * 1e6) / 1e6, lon: Math.round(lon * 1e6) / 1e6, n: c.n,
       nodes: [...c.by].map(([id, b]) => {
@@ -1983,6 +1985,22 @@ function coverageCells(size, radius) {
       }) });
   }
   return { cells: out, removed, priv };
+}
+// Huecos de privacidad descentrados: cada punto (inicio, fin, parada) se tapa con un círculo cuyo centro
+// se desplaza al azar hasta media «r» y cuyo radio crece lo justo para que todo lo que está a menos de
+// «r» del punto siga dentro (+ hasta un 20 % más al azar). Así el centro del hueco no es tu casa.
+// El azar se guarda por punto mientras la página está abierta, para que mover el deslizador no lo cambie.
+const privJitter = new Map();
+function rnd01() { const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] / 4294967296; }
+function privacyCircles(r) {
+  if (!(r > 0)) return [];
+  return privacyPoints().map(q => {
+    const k = q.lat.toFixed(6) + "," + q.lon.toFixed(6);
+    if (!privJitter.has(k)) privJitter.set(k, { a: rnd01() * 2 * Math.PI, d: Math.sqrt(rnd01()), x: rnd01() });
+    const j = privJitter.get(k), d = j.d * r / 2;
+    const lat = q.lat + d * Math.cos(j.a) / 111320, lon = q.lon + d * Math.sin(j.a) / (111320 * Math.cos(q.lat * Math.PI / 180));
+    return { lat, lon, r: r + d + j.x * r * 0.2 };
+  });
 }
 function privRadius() { return Number($("rngPriv").value); }
 function fmtM(m) { return m >= 1000 ? (m / 1000).toFixed(m % 1000 ? 2 : 0).replace(/\.?0+$/, "") + " km" : m + " m"; }
@@ -1997,7 +2015,7 @@ function updateExport() {
   if (!map) return;
   if (!expLayer) expLayer = L.layerGroup();
   expLayer.clearLayers(); expLayer.addTo(map);
-  if (r > 0) for (const q of res.priv) L.circle([q.lat, q.lon], { radius: r, color: "#d7352b", weight: 2, dashArray: "6 6", fillColor: "#d7352b", fillOpacity: .18, interactive: false }).addTo(expLayer);
+  if (r > 0) for (const q of res.priv) L.circle([q.lat, q.lon], { radius: q.r, color: "#d7352b", weight: 2, dashArray: "6 6", fillColor: "#d7352b", fillOpacity: .18, interactive: false }).addTo(expLayer);
 }
 // Vista previa: mientras el panel está abierto el mapa muestra justo lo que se exporta
 // («Mejor señal de cualquier nodo», cuadrícula de 250 m, todos los saltos, sin las celdas recortadas).
@@ -2095,7 +2113,7 @@ async function addCoverage(data, name, community) {
       const lat = Number(c.lat), lon = Number(c.lon);
       if (!isFinite(lat) || !isFinite(lon)) continue;
       const n = Math.max(0, Number(c.n) || 0), cf = Math.max(1, Number(c.f) || 1),
-        cfr = c.fr != null && isFinite(Number(c.fr)) ? Number(c.fr) : null, clast = /^\d{4}-\d{2}$/.test(String(c.last || "")) ? String(c.last) : "";
+        cfr = [0, 1, 2].includes(c.rx) ? c.rx : null, clast = /^\d{4}-\d{2}$/.test(String(c.last || "")) ? String(c.last) : "";
       if (!n) { fileVisited.push({ lat, lon, community: !!community, cf, cfr, clast }); continue; }
       let known = 0;
       for (const o of c.nodes || []) {
