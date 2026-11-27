@@ -250,7 +250,7 @@
       <button id="vCmp" data-i18n-title="cmpTitle" hidden>⚖️ <span data-i18n="cmp">Compare</span></button>
     </span>
     <span id="cmpWrap" class="filt cmpf" hidden>SF <select id="cmpA" data-i18n-aria="cmpA"></select> <span data-i18n="vs">vs</span> SF <select id="cmpB" data-i18n-aria="cmpB"></select></span>
-    <span id="ageWrap" class="filt agef" hidden data-i18n-title="ageTitle">📅 <select id="selAge" data-i18n-aria="ageTitle"><option value="0" data-i18n="ageAll">All data</option><option value="12" data-i18n="age12">Last 12 months</option><option value="6" data-i18n="age6">Last 6 months</option><option value="3" data-i18n="age3">Last 3 months</option></select></span>
+    <span id="ageWrap" class="filt agef" hidden data-i18n-title="ageTitle"><select id="selAge" data-i18n-aria="ageTitle"><option value="0" data-i18n="ageAll">All data</option><option value="12" data-i18n="age12">Last 12 months</option><option value="6" data-i18n="age6">Last 6 months</option><option value="3" data-i18n="age3">Last 3 months</option></select></span>
     <span class="filt hops" data-i18n-title="hopsTitle">
       <span class="lbl"><span data-i18n="hops">Hops</span>:</span> <span class="hv" id="hopsVal">0–7</span>
       <span class="dual" id="hopsDual">
@@ -620,7 +620,7 @@ const I18N = {
     dropHere: "📂 Drop the files here", lowPrec: m => "⚠️ Your node's positions come with reduced precision (~" + m + "), so they are not used for the route or the cells. In the app, turn on position with full precision only on a channel of your own with a key (primary or secondary), and turn it off on the public channel.", errGpx: "the file is not a valid GPX",
     errNoTrack: "it has no track points", errOpen: (f, m) => "Could not open " + f + ": " + m,
     nodeSearch: "Search node", noMatch: "No node matches",
-    ageTitle: "Age of the coverage map data", ageAll: "All data", age12: "Last 12 months", age6: "Last 6 months", age3: "Last 3 months",
+    ageTitle: "Age of the coverage map data", ageAll: "📅 All data", age12: "📅 Last 12 months", age6: "📅 Last 6 months", age3: "📅 Last 3 months",
     communityBtn: "Coverage map", communityTitle: "Add the shared coverage map uploaded by everyone",
     expUp: "Upload to coverage map", expPrivLink: "What exactly is saved or uploaded?", upConfirm: n => "Upload these " + n + " cells to the public coverage map? They are added for everyone.\n\nPrivacy: the uploaded file contains no personal data, but you can check it first by downloading it with the «Download file» button and opening it with any text editor, or by reviewing the open source code, yourself or with an AI, at https://github.com/flydecision/meshcover",
     upOk: n => "✅ Uploaded: " + n + " cells added to the coverage map. Thanks!", upBusy: "Uploading…",
@@ -696,7 +696,7 @@ const I18N = {
     dropHere: "📂 Suelta aquí los archivos", lowPrec: m => "⚠️ Las posiciones de tu nodo vienen con precisión reducida (~" + m + "), así que no se usan para el recorrido ni para las celdas. En la app, activa la posición con precisión completa solo en un canal propio con clave (primario o secundario), y desactívala en el público.", errGpx: "el archivo no es un GPX válido",
     errNoTrack: "no tiene puntos de recorrido", errOpen: (f, m) => "No se pudo abrir " + f + ": " + m,
     nodeSearch: "Buscar nodo", noMatch: "Ningún nodo coincide",
-    ageTitle: "Antigüedad de los datos del mapa de cobertura", ageAll: "Todos los datos", age12: "Últimos 12 meses", age6: "Últimos 6 meses", age3: "Últimos 3 meses",
+    ageTitle: "Antigüedad de los datos del mapa de cobertura", ageAll: "📅 Todos los datos", age12: "📅 Últimos 12 meses", age6: "📅 Últimos 6 meses", age3: "📅 Últimos 3 meses",
     communityBtn: "Mapa de cobertura", communityTitle: "Añadir el mapa de cobertura compartido que ha subido todo el mundo",
     expUp: "Subir al mapa de cobertura", expPrivLink: "¿Qué se guarda o sube exactamente?", upConfirm: n => "¿Subir estas " + n + " celdas al mapa de cobertura público? Se suman para todo el mundo.\n\nPrivacidad: el archivo que se sube no lleva ningún dato personal, pero puedes revisarlo antes descargándolo con el botón «Descargar archivo» y abriéndolo con cualquier editor de texto, o consultando el código abierto, por tu cuenta o con una IA, en https://github.com/flydecision/meshcover",
     upOk: n => "✅ Subido: " + n + " celdas añadidas al mapa de cobertura. ¡Gracias!", upBusy: "Subiendo…",
@@ -1664,8 +1664,10 @@ function drawMap(fit, fromZoom) {
     pts.push([x.lat, x.lon]); ownPts.push([x.lat, x.lon]);
   }
   $("lgTx").hidden = cmp || !txVisible().length;
-  // en Transmisión no se dibujan recorridos ni nodos
-  $("lgTrack").hidden = $("lgNode").hidden = txv;
+  // recorridos, nodos y saltos solo salen con registros propios, y nunca en Transmisión
+  const own = hasOwnData();
+  $("lgNode").hidden = txv || !own;
+  $("lgTrack").hidden = txv || !tracks.some(tr => !tr.gpx);
   $("lgGpx").hidden = txv || !tracks.some(tr => tr.gpx);
 
   // emisores
@@ -1708,8 +1710,8 @@ function drawMap(fit, fromZoom) {
       .addTo(mapLayer);
   }
 
-  if (!fileRows && !fileTracks.length) { $("lgRelay").hidden = maxHops === 0 || heard || cmp || txv; return; }
-  $("lgRelay").hidden = maxHops === 0 || heard || cmp || txv;
+  if (!fileRows && !fileTracks.length) { $("lgRelay").hidden = maxHops === 0 || heard || cmp || txv || !hasOwnData(); return; }
+  $("lgRelay").hidden = maxHops === 0 || heard || cmp || txv || !hasOwnData();
 
   const fp = ownPts.length ? ownPts : pts;
   if (fp.length && (fit || !mapFitted) && !keepUrlView) {
