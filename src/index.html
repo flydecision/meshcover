@@ -326,7 +326,7 @@
       <h3>1. Prepara el nodo que llevas</h3>
       <ul>
         <li>Mismos ajustes de radio (LoRa) que la red o que el nodo que quieres medir.</li>
-        <li>GPS activado, actualización cada <b>20–30 s</b>, «posición inteligente» desactivada, intervalo de difusión 5 min o más.</li>
+        <li>GPS activado, actualización cada <b>20–30 s</b>, «posición inteligente» desactivada, intervalo de difusión <b>72 h</b> (el máximo).</li>
         <li>Un canal propio <b>con PSK</b> que sea el único con <b>Posición</b> activada (así la posición se guarda con precisión).</li>
         <li>Sin GPS en el nodo: activa en la app «Proporcionar la ubicación del teléfono a la malla», o graba la ruta en GPX con otra app y ábrelo junto al registro.</li>
       </ul>
@@ -363,7 +363,7 @@
             <li>Si no lo tienes ya, crea un <b>canal privado con PSK</b> y configúralo para que sea el único que reciba la posición (la PSK es necesaria para que la precisión de ubicación sea máxima): Ajustes › Canales › Nombre del canal: el que quieras; PSK: botón «recargar» para que genere una; MQTT Uplink y Downlink <b>desactivados</b>; Posición <b>activada</b> y Ubicación precisa <b>activada</b>.</li>
             <li>Ajustes › Configuración del dispositivo › Posición:
               <ul>
-                <li>Intervalo de transmisión: <b>5 min o más</b> (no es necesario transmitir, pero sí es necesario para que la posición quede en el registro).</li>
+                <li>Intervalo de transmisión: <b>72 h</b> (no es necesario transmitir, pero sí es necesario para que la posición quede en el registro).</li>
                 <li>Ubicación inteligente: <b>desactivada</b>. Posición fija: <b>desactivada</b>.</li>
                 <li>Modo GPS: <b>habilitado</b>, con intervalo de actualización de <b>20 s</b>.</li>
                 <li>Marcas de posición: <b>todas desactivadas</b>.</li>
@@ -427,7 +427,7 @@
       <h3>1. Set up the node you carry</h3>
       <ul>
         <li>Same radio (LoRa) settings as the mesh or as the node you want to measure.</li>
-        <li>GPS on, update every <b>20–30 s</b>, «smart position» off, broadcast interval 5 min or more.</li>
+        <li>GPS on, update every <b>20–30 s</b>, «smart position» off, broadcast interval <b>72 h</b> (the maximum).</li>
         <li>An own channel <b>with a PSK</b> that is the only one with <b>Position</b> enabled (so the position is stored precisely).</li>
         <li>No GPS on the node: in the app enable «Provide phone location to mesh», or record the route as GPX with another app and open it with the log.</li>
       </ul>
@@ -464,7 +464,7 @@
             <li>If you don't have one yet, create a <b>private channel with a PSK</b> and set it as the only one that gets the position (the PSK is needed for maximum location precision): Settings › Channels › Channel name: any; PSK: «reload» button to generate one; MQTT Uplink and Downlink <b>off</b>; Position <b>on</b> and Precise location <b>on</b>.</li>
             <li>Settings › Device configuration › Position:
               <ul>
-                <li>Broadcast interval: <b>5 min or more</b> (broadcasting is not needed, but it is needed so the position is stored in the log).</li>
+                <li>Broadcast interval: <b>72 h</b> (broadcasting is not needed, but it is needed so the position is stored in the log).</li>
                 <li>Smart position: <b>off</b>. Fixed position: <b>off</b>.</li>
                 <li>GPS mode: <b>enabled</b>, with an update interval of <b>20 s</b>.</li>
                 <li>Position flags: <b>all off</b>.</li>
@@ -623,7 +623,7 @@ const I18N = {
     heardFrom: "Heard directly from", marginTxt: m => "margin " + m + " dB", lgMargin: "Margin",
     medMargin: (m, w, b) => "Median margin " + m + " dB (worst " + w + ", best " + b + ")",
     bestNode: n => "Best node: " + n, nNodes: n => n + " nodes heard", sfLimitTxt: (sf, l) => "SF" + sf + " limit " + l + " dB",
-    restore: "Restore", maximize: "Maximize map",
+    restore: "Restore", maximize: "Maximize map", myLoc: "Go to my location", myLocErr: "Could not get your location (check the browser location permission).",
     directPl: "direct", lastPos: "Last position", lastHeard: "Last heard", relayedWord: "relayed", maxDist: "Max distance"
   },
   es: {
@@ -699,7 +699,7 @@ const I18N = {
     heardFrom: "Oído directamente de", marginTxt: m => "margen " + m + " dB", lgMargin: "Margen",
     medMargin: (m, w, b) => "Margen mediano " + m + " dB (peor " + w + ", mejor " + b + ")",
     bestNode: n => "Mejor nodo: " + n, nNodes: n => n + " nodos oídos", sfLimitTxt: (sf, l) => "SF" + sf + " límite " + l + " dB",
-    restore: "Volver", maximize: "Maximizar mapa",
+    restore: "Volver", maximize: "Maximizar mapa", myLoc: "Ir a mi ubicación", myLocErr: "No se pudo obtener tu ubicación (revisa el permiso de ubicación del navegador).",
     directPl: "directos", lastPos: "Última posición", lastHeard: "Último paquete", relayedWord: "con saltos", maxDist: "Distancia máxima"
   }
 };
@@ -1192,6 +1192,36 @@ function addLayersControl() {
   const named = {};
   for (const id of Object.keys(baseLayers)) named[t("layer_" + id)] = baseLayers[id];
   layersCtl = L.control.layers(named, null, { position: "topright", collapsed: true }).addTo(map);
+  addLocateControl();   // siempre debajo del de capas (se vuelve a poner al cambiar de idioma)
+}
+// Botón «ir a mi ubicación»: centra el mapa en la posición actual del dispositivo y la marca con un punto azul
+const ICON_LOC = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>';
+let locCtl = null, locMark = null;
+function addLocateControl() {
+  if (locCtl) locCtl.remove();
+  const Ctl = L.Control.extend({
+    options: { position: "topright" },
+    onAdd: function () {
+      const box = L.DomUtil.create("div", "leaflet-bar leaflet-control leaflet-control-max");
+      const a = L.DomUtil.create("a", "", box);
+      a.href = "#"; a.setAttribute("role", "button"); a.innerHTML = ICON_LOC;
+      a.title = t("myLoc"); a.setAttribute("aria-label", a.title);
+      L.DomEvent.disableClickPropagation(box);
+      L.DomEvent.on(a, "click", e => { L.DomEvent.preventDefault(e); goToMyLocation(); });
+      return box;
+    }
+  });
+  locCtl = new Ctl(); map.addControl(locCtl);
+}
+function goToMyLocation() {
+  if (!navigator.geolocation) { say(t("myLocErr")); return; }
+  navigator.geolocation.getCurrentPosition(p => {
+    const ll = [p.coords.latitude, p.coords.longitude];
+    if (locMark) locMark.remove();
+    locMark = L.circleMarker(ll, { radius: 8, color: "#fff", weight: 2, fillColor: "#2f7df6", fillOpacity: 1 }).addTo(map);
+    keepUrlView = true;   // que no se recoloque el mapa sobre los datos
+    map.flyTo(ll, Math.max(map.getZoom(), 15), { duration: 0.8 });
+  }, () => say(t("myLocErr")), { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 });
 }
 function addBaseLayers() {
   baseLayers = {
