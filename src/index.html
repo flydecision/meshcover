@@ -602,7 +602,7 @@ const I18N = {
     medRssi: m => "Median RSSI " + m + " dBm", directOnly: "direct only", timeInCell: "Time in cell",
     noRxText: "You passed here and no packet arrived.", noRxComm: "Routes passed here and nothing was heard directly from a relaying node.",
     txView: "Transmission", txViewTitle: "Transmission: did the mesh hear the messages you sent? (cells by messages sent)",
-    txLgAll: "Transmission: reached the mesh ≥ 75 %", txLgSome: "25–75 %", txLgNever: "< 25 %",
+    txLgHead: "Transmission:", txLgAll: "≥ 75 %", txLgSome: "25–75 %", txLgNever: "< 25 %",
     txTitle: "Transmission", txCell: (a, n) => a + " of " + n + " messages reached the mesh", txMsg: "Message sent",
     txOk: "✓ The mesh heard it: a node relayed or acknowledged it.", txKo: "✗ Nobody relayed it after 3 tries.", lgTx: "Message sent: mesh heard it / nobody",
     commFew: "There are still few uploads: passes and reliability will show when there are more.", commPass1: "1 pass", commPass2: "2–4 passes", commPass5: "5 or more passes", commRx: "reception", rxNever: "never", rxSome: "sometimes", rxAll: "always", reliability: "Reliability",
@@ -633,7 +633,7 @@ const I18N = {
     heardNote: n => "📶 Packets heard directly from " + n + ": its own and the ones it relayed from other nodes. The Node column is the original sender.",
     heardNoteAll: "📶 Packets heard directly from a node that relays (CLIENT_MUTE nodes, which do not relay, are left out). The Node column is the original sender.",
     grpHeard: "📶 Heard directly", grpSender: "📡 Sent by", bestAll: "Best signal of any node",
-    heardFrom: "Heard directly from", marginTxt: m => "margin " + m + " dB", lgMargin: "Margin",
+    heardFrom: "Heard directly from", marginTxt: m => "margin " + m + " dB", lgMargin: "Reception (margin):", lgSnr: "Reception (SNR):",
     medMargin: (m, w, b) => "Median margin " + m + " dB (worst " + w + ", best " + b + ")",
     bestNode: n => "Best node: " + n, nNodes: n => n + " nodes heard", sfLimitTxt: (sf, l) => "SF" + sf + " limit " + l + " dB",
     restore: "Restore", maximize: "Maximize map", myLoc: "Go to my location", myLocErr: "Could not get your location (check the browser location permission).",
@@ -678,7 +678,7 @@ const I18N = {
     medRssi: m => "RSSI mediano " + m + " dBm", directOnly: "solo directos", timeInCell: "Tiempo en la celda",
     noRxText: "Pasaste por aquí y no llegó ningún paquete.", noRxComm: "Han pasado recorridos por aquí y no se oyó directamente a ningún nodo que repita.",
     txView: "Transmisión", txViewTitle: "Transmisión: ¿la red oyó los mensajes que enviaste? (celdas según los mensajes enviados)",
-    txLgAll: "Transmisión: llegó a la red ≥ 75 %", txLgSome: "25–75 %", txLgNever: "< 25 %",
+    txLgHead: "Transmisión:", txLgAll: "≥ 75 %", txLgSome: "25–75 %", txLgNever: "< 25 %",
     txTitle: "Transmisión", txCell: (a, n) => a + " de " + n + " mensajes llegaron a la red", txMsg: "Mensaje enviado",
     txOk: "✓ La red lo oyó: un nodo lo retransmitió o lo confirmó.", txKo: "✗ Nadie lo retransmitió tras 3 intentos.", lgTx: "Mensaje enviado: la red lo oyó / nadie",
     commFew: "Aún hay pocas subidas: las pasadas y la fiabilidad se mostrarán cuando haya más.", commPass1: "1 pasada", commPass2: "2–4 pasadas", commPass5: "5 pasadas o más", commRx: "recepción", rxNever: "nunca", rxSome: "a veces", rxAll: "siempre", reliability: "Fiabilidad",
@@ -709,7 +709,7 @@ const I18N = {
     heardNote: n => "📶 Paquetes oídos directamente de " + n + ": los suyos y los que repitió de otros nodos. La columna Nodo es el emisor original.",
     heardNoteAll: "📶 Paquetes oídos directamente de un nodo que repite (se dejan fuera los CLIENT_MUTE, que no repiten). La columna Nodo es el emisor original.",
     grpHeard: "📶 Oído directamente", grpSender: "📡 Enviado por", bestAll: "Mejor señal de cualquier nodo",
-    heardFrom: "Oído directamente de", marginTxt: m => "margen " + m + " dB", lgMargin: "Margen",
+    heardFrom: "Oído directamente de", marginTxt: m => "margen " + m + " dB", lgMargin: "Recepción (margen):", lgSnr: "Recepción (SNR):",
     medMargin: (m, w, b) => "Margen mediano " + m + " dB (peor " + w + ", mejor " + b + ")",
     bestNode: n => "Mejor nodo: " + n, nNodes: n => n + " nodos oídos", sfLimitTxt: (sf, l) => "SF" + sf + " límite " + l + " dB",
     restore: "Volver", maximize: "Maximizar mapa", myLoc: "Ir a mi ubicación", myLocErr: "No se pudo obtener tu ubicación (revisa el permiso de ubicación del navegador).",
@@ -817,9 +817,9 @@ function drawLegendScale(sfs) {
   const to = " " + esc(t("to")) + " ", sw = c => '<span><i style="background:' + c + '"></i>';
   const minus = v => String(v).replace("-", "−");
   $("lgScale").innerHTML = sfs
-    ? sw(SIG_COLORS[2]) + esc(t("lgMargin")) + " ≥ 6 dB</span>" + sw(SIG_COLORS[1]) + "0" + to + "6</span>" + sw(SIG_COLORS[0]) + "&lt; 0</span>" +
+    ? '<span>' + esc(t("lgMargin")) + "</span>" + sw(SIG_COLORS[2]) + "≥ 6 dB</span>" + sw(SIG_COLORS[1]) + "0" + to + "6</span>" + sw(SIG_COLORS[0]) + "&lt; 0</span>" +
       '<span class="lgsf">(' + sfs.map(sf => esc(t("sfLimitTxt", sf, minus(sfLimit(sf))))).join(", ") + ")</span>"
-    : sw(SIG_COLORS[2]) + "SNR ≥ 0</span>" + sw(SIG_COLORS[1]) + "−10" + to + "0</span>" + sw(SIG_COLORS[0]) + "&lt; −10</span>";
+    : '<span>' + esc(t("lgSnr")) + "</span>" + sw(SIG_COLORS[2]) + "≥ 0</span>" + sw(SIG_COLORS[1]) + "−10" + to + "0</span>" + sw(SIG_COLORS[0]) + "&lt; −10</span>";
 }
 function fmtDist(d) { return d == null || isNaN(d) ? "—" : (d >= 1000 ? (d / 1000).toFixed(2) + " km" : Math.round(d) + " m"); }
 let bestNames = new Map();   // nodo → mejor nombre conocido (para tabla y popups)
@@ -1572,7 +1572,7 @@ function drawMap(fit, fromZoom) {
   useMargin = withSnr.length > 0 && withSnr.every(r => r.sf);
   drawLegendScale(useMargin ? [...new Set(withSnr.map(r => r.sf))].sort((a, b) => a - b) : null);
   // vista «Tx»: la leyenda es la de la transmisión
-  if (txv) $("lgScale").innerHTML = [2, 1, 0].map(i => '<span><i style="background:' + TX_COLORS[i] + ';border-radius:1px"></i>' + esc(t(["txLgNever", "txLgSome", "txLgAll"][i])) + "</span>").join("");
+  if (txv) $("lgScale").innerHTML = "<span>" + esc(t("txLgHead")) + "</span>" + [2, 1, 0].map(i => '<span><i style="background:' + TX_COLORS[i] + ';border-radius:1px"></i>' + esc(t(["txLgNever", "txLgSome", "txLgAll"][i])) + "</span>").join("");
   showView();
   if (mapView === "cmp" && !cmp) $("vGrid").classList.add("on");
   $("lgNone").hidden = !grid || txv;
