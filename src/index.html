@@ -202,8 +202,8 @@
 .txm{width:18px;height:18px;border-radius:50%;border:2px solid #fff;color:#fff;font:700 12px/1 system-ui,sans-serif;display:flex;align-items:center;justify-content:center;box-shadow:0 0 3px rgba(0,0,0,.7);box-sizing:border-box}
 .txm.ok{background:#1fa64a}.txm.ko{background:#d93025}
 .leaflet-popup-content .plist{margin:4px 0 0;padding-left:18px}.leaflet-popup-content .plist li{margin:2px 0}
-.leaflet-popup-content .plist li:has(>.pdot:first-child){list-style:none}.leaflet-popup-content .plist li>.pdot:first-child{margin-left:-17px;margin-right:7px}
-.leaflet-popup-content .ptitle{font-weight:700;margin-bottom:1px}
+.leaflet-popup-content .ptitle{font-weight:700;padding-bottom:3px;border-bottom:1px solid #8886}
+.leaflet-popup-content .plist .pdot{margin:0}
 .leaflet-popup-content .pdot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:0;border:1px solid #0006}
 </style>
 </head>
@@ -392,7 +392,7 @@
       <div>Un mapa común de la <b>cobertura real de la red</b>, hecho entre todas/os: cada persona que hace un recorrido con su nodo suma sus celdas, y el mapa se va completando zona a zona.</div>
       <h3>👀 Verlo</h3>
       <div>Pulsa <b>🌍 Mapa comunitario</b>. Se carga en <b>cuadrícula de 250 m</b>: cada celda sale del color del nodo que mejor se oye allí. Las celdas grises son sitios por los que alguien pasó <b>sin recibir nada</b>. Puedes sumarle tus propios registros con <b>📂 Añadir registros</b> sin subirlos.</div>
-      <div>Cada nuevo recorrido que pasa por una celda se suma a su media, así que su color se va afinando con cada pase. Al <b>tocar una celda</b> se ven los paquetes, la mediana de SNR y de RSSI y la fiabilidad (baja, media o alta), con las pasadas (1, 2–4 o 5+) y el mes del último dato. En 📤 Transmisión se ve si los mensajes llegaron a la red siempre, a veces o nunca. Con el selector <b>🌍 Todos los datos / Últimos 12, 6 o 3 meses</b> se quitan los datos antiguos, por si la red ha cambiado (cuenta el mes en que se grabó el registro).</div>
+      <div>Cada nuevo recorrido que pasa por una celda se suma a su media, así que su color se va afinando con cada pase. Al <b>tocar una celda</b> se ven los paquetes, la mediana de SNR y de RSSI y la fiabilidad (baja, media o alta), con las pasadas (1, 2–4 o 5+) y el mes del último dato. En 📤 Transmisión se ve si los mensajes llegaron a la red siempre, a veces o nunca. Las celdas <b>rayadas</b> tienen fiabilidad baja (una sola pasada). Con el selector <b>🌍 Todos los datos / Últimos 12, 6 o 3 meses</b> se quitan los datos antiguos, por si la red ha cambiado (cuenta el mes en que se grabó el registro).</div>
       <h3>🚶 Aportar tu recorrido</h3>
       <ol>
         <li>Prepara el nodo de ruta como en «Cómo usar → Cobertura general de la red»: <b>mismos ajustes de radio que la red</b>, GPS activado con actualización cada 20–30 s y «posición inteligente» desactivada. El intervalo de difusión puede quedar en «unset» o largo: así tampoco emites tu recorrido en directo.</li>
@@ -526,7 +526,7 @@
       <div>A shared map of the <b>real coverage of the network</b>, built by everyone: each person who does a route with their node adds their cells, and the map fills in area by area.</div>
       <h3>👀 Viewing it</h3>
       <div>Press <b>🌍 Community map</b>. It loads as a <b>250 m grid</b>: each cell takes the colour of the node heard best there. Grey cells are places someone passed <b>without receiving anything</b>. You can add your own logs on top with <b>📂 Add Logs</b> without uploading them.</div>
-      <div>Each new route through a cell adds to its average, so its colour gets more accurate with every pass. <b>Tap a cell</b> to see its packets, median SNR and RSSI and the reliability (low, medium or high), with the passes (1, 2–4 or 5+) and the month of the last data. In 📤 Transmission it shows whether messages reached the mesh always, sometimes or never. The <b>🌍 All data / Last 12, 6 or 3 months</b> selector removes old data, in case the mesh has changed (it uses the month the log was recorded).</div>
+      <div>Each new route through a cell adds to its average, so its colour gets more accurate with every pass. <b>Tap a cell</b> to see its packets, median SNR and RSSI and the reliability (low, medium or high), with the passes (1, 2–4 or 5+) and the month of the last data. In 📤 Transmission it shows whether messages reached the mesh always, sometimes or never. <b>Striped</b> cells have low reliability (a single pass). The <b>🌍 All data / Last 12, 6 or 3 months</b> selector removes old data, in case the mesh has changed (it uses the month the log was recorded).</div>
       <h3>🚶 Contributing your route</h3>
       <ol>
         <li>Set up the route node as in «How to use → General coverage of the mesh»: <b>same radio settings as the network</b>, GPS on with updates every 20–30 s and «smart position» off. The broadcast interval can stay «unset» or long: that way you do not broadcast your route live either.</li>
@@ -655,7 +655,7 @@ const I18N = {
     txOk: "✓ The mesh heard it: a node relayed or acknowledged it.", txKo: "✗ Nobody relayed it after 3 tries.", lgTx: "Message sent: mesh heard it / nobody",
     commFew: "There are still few uploads: passes and reliability will show when there are more.", commPass1: "1 pass", commPass2: "2–4 passes", commPass5: "5 or more passes", commRx: "reception", rxNever: "never", rxSome: "sometimes", rxAll: "always", reliability: "Reliability",
     relLow: "Low", relMid: "Medium", relHigh: "High", passes: "Passes", lastShort: "Last data", relFew: "not enough uploads yet",
-    pSnr: m => "Median SNR: " + m + " dB", pMargin: m => "Median margin: " + m + " dB", pRssi: m => "Median RSSI: " + m + " dBm", pTx: (a, n) => "Messages that reached the mesh: " + a + " of " + n, pTxBand: b => "Messages reached the mesh: " + b, lastData: "Newest data", expected: n => "About " + n + " packets were expected",
+    pSnr: m => "Median SNR: <b>" + m + " dB</b>", pMargin: m => "Median margin: <b>" + m + " dB</b>", pRssi: m => "Median RSSI: <b>" + m + " dBm</b>", pTx: (a, n) => "Messages sent OK: <b>" + a + "</b> of <b>" + n + "</b>", pTxBand: b => "Messages sent OK: " + b, lastData: "Newest data", expected: n => "About " + n + " packets were expected",
     gpsPos: "GPS position", lastHop: "from the last hop, not the origin node", distance: "distance",
     direct: "direct", nHops: n => n + (n === 1 ? " hop" : " hops"), routePos: "position of the route node",
     errEmpty: "the file is empty", errCsv: "it does not look like a CSV from this page",
@@ -731,7 +731,7 @@ const I18N = {
     txOk: "✓ La red lo oyó: un nodo lo retransmitió o lo confirmó.", txKo: "✗ Nadie lo retransmitió tras 3 intentos.", lgTx: "Mensaje enviado: la red lo oyó / nadie",
     commFew: "Aún hay pocas subidas: las pasadas y la fiabilidad se mostrarán cuando haya más.", commPass1: "1 pasada", commPass2: "2–4 pasadas", commPass5: "5 pasadas o más", commRx: "recepción", rxNever: "nunca", rxSome: "a veces", rxAll: "siempre", reliability: "Fiabilidad",
     relLow: "Baja", relMid: "Media", relHigh: "Alta", passes: "Pasadas", lastShort: "Último dato", relFew: "aún hay pocas subidas",
-    pSnr: m => "Mediana de SNR: " + m + " dB", pMargin: m => "Mediana del margen: " + m + " dB", pRssi: m => "Mediana de RSSI: " + m + " dBm", pTx: (a, n) => "Mensajes que llegaron a la red: " + a + " de " + n, pTxBand: b => "Mensajes que llegaron a la red: " + b, lastData: "Dato más reciente", expected: n => "Se esperaban ≈ " + n + " paquetes",
+    pSnr: m => "Mediana de SNR: <b>" + m + " dB</b>", pMargin: m => "Mediana del margen: <b>" + m + " dB</b>", pRssi: m => "Mediana de RSSI: <b>" + m + " dBm</b>", pTx: (a, n) => "Mensajes transmitidos ok: <b>" + a + "</b> de <b>" + n + "</b>", pTxBand: b => "Mensajes transmitidos ok: " + b, lastData: "Dato más reciente", expected: n => "Se esperaban ≈ " + n + " paquetes",
     gpsPos: "Posición GPS", lastHop: "del último salto, no del nodo de origen", distance: "distancia",
     direct: "directo", nHops: n => n + (n === 1 ? " salto" : " saltos"), routePos: "posición del nodo de ruta",
     errEmpty: "el archivo está vacío", errCsv: "no parece un CSV de esta página",
@@ -1395,11 +1395,31 @@ function relLine(c) {
   const lvl = c.cf >= 5 ? "relHigh" : c.cf >= 2 ? "relMid" : "relLow";
   return t("reliability") + ": <b>" + t(lvl) + "</b> (" + t("passes") + ": " + (c.cf >= 5 ? "5+" : c.cf >= 2 ? "2–4" : "1") + (last ? ", " + last : "") + ")";
 }
+// fiabilidad baja (1 sola pasada en el mapa comunitario): la celda va rayada en diagonal
+function lowRel(c) { return !!(c.comm && c.cf && c.cf < 2); }
+const hatchIds = new Map();
+function hatch(layer, color) {
+  const svg = layer._renderer && layer._renderer._container, path = layer._path;
+  if (!svg || !path) return;
+  const NS = "http://www.w3.org/2000/svg";
+  if (!hatchIds.has(color)) hatchIds.set(color, "hatch" + hatchIds.size);
+  const id = hatchIds.get(color);
+  if (!svg.querySelector("#" + id)) {
+    const defs = svg.querySelector("defs") || svg.insertBefore(document.createElementNS(NS, "defs"), svg.firstChild);
+    const pat = document.createElementNS(NS, "pattern");
+    pat.id = id;
+    pat.setAttribute("patternUnits", "userSpaceOnUse"); pat.setAttribute("width", 10); pat.setAttribute("height", 10);
+    pat.setAttribute("patternTransform", "rotate(45)");
+    // rayas alternas: el color normal y el mismo color más transparente
+    pat.innerHTML = '<rect width="10" height="10" fill="' + color + '" fill-opacity=".35"/><rect width="5" height="10" fill="' + color + '"/>';
+    defs.appendChild(pat);
+  }
+  path.setAttribute("fill", "url(#" + id + ")");
+}
 function txPopup(c) {
   const n = c.txOk + c.txFail;
   return popList("📤 " + t("txTitle"), [
-    n ? '<i class="pdot" style="background:' + TX_COLORS[c.txOk === n ? 2 : c.txOk ? 1 : 0] + '"></i>' + t("pTx", c.txOk, n)
-      : c.txb != null ? '<i class="pdot" style="background:' + TX_COLORS[c.txb] + '"></i>' + t("pTxBand", "<b>" + t(RX_BANDS[c.txb]) + "</b>") : "",
+    n ? t("pTx", c.txOk, n) : c.txb != null ? t("pTxBand", "<b>" + t(RX_BANDS[c.txb]) + "</b>") : "",
     relLine(c)]);
 }
 // estado de transmisión de una celda: 2 siempre llegó, 1 a veces, 0 nunca, null sin mensajes
@@ -1552,9 +1572,10 @@ function drawMap(fit, fromZoom) {
         const st = txState(c);
         if (st == null) continue;
         nCells++;
-        L.rectangle(c.bounds, { color: "#0b0d10", weight: .5, fillColor: TX_COLORS[st], fillOpacity: .65 })
+        const tr = L.rectangle(c.bounds, { color: "#0b0d10", weight: .5, fillColor: TX_COLORS[st], fillOpacity: .65 })
           .bindPopup(txPopup(c))
           .addTo(mapLayer);
+        if (lowRel(c)) hatch(tr, TX_COLORS[st]);
         pts.push(c.bounds[0], c.bounds[1]);
         continue;
       }
@@ -1581,10 +1602,11 @@ function drawMap(fit, fromZoom) {
            ...(onlyRelay
              ? [t("onlyRelay", fmtN(median(c.snrRelay), 1))]
              : [best && bestNode !== null ? t("bestNode", esc(bestNames.get(bestNode) || hexId(bestNode))) + (c.by.size > 1 ? " · " + t("nNodes", c.by.size) : "") : "",
-                '<i class="pdot" style="background:' + sigColor(med) + '"></i>' + t(useMargin ? "pMargin" : "pSnr", fmtN(med, 1)),
+                t(useMargin ? "pMargin" : "pSnr", fmtN(med, 1)) + ' (<i class="pdot" style="background:' + sigColor(med) + '"></i>)',
                 c.rssi.length ? t("pRssi", fmtN(median(c.rssi))) + (c.nRelay ? " <i>(" + t("directOnly") + ")</i>" : "") : ""])];
       rect.bindPopup(popList("📥 " + t("rxTitle"), rxLines.concat(relLine(c))));
       rect.addTo(mapLayer);
+      if (has && !onlyRelay && lowRel(c)) hatch(rect, sigColor(med));
       // el gris solo dentro del borde: así el borde se ve sobre el mapa con el mismo tono que las celdas en directo
       if (onlyRelay) L.rectangle(insetBounds(c.bounds, RELAY_BORDER), { stroke: false, fillColor: "#2b2f36", fillOpacity: .6, interactive: false }).addTo(mapLayer);
       if (onlyRelay) L.rectangle(insetBounds(c.bounds, RELAY_BORDER / 2), { color: sigColor(median(c.snrRelay)), weight: RELAY_BORDER, opacity: .65, fill: false, interactive: false }).addTo(mapLayer);
