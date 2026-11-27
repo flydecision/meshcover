@@ -607,7 +607,7 @@ const I18N = {
     txOk: "✓ The mesh heard it: a node relayed or acknowledged it.", txKo: "✗ Nobody relayed it after 3 tries.", lgTx: "Message sent: mesh heard it / nobody",
     commFew: "There are still few uploads: passes and reliability will show when there are more.", commPass1: "1 pass", commPass2: "2–4 passes", commPass5: "5 or more passes", commRx: "reception", rxNever: "never", rxSome: "sometimes", rxAll: "always", reliability: "Reliability",
     relLow: "Low", relMid: "Medium", relHigh: "High", passes: "Passes", lastShort: "Last data", relFew: "not enough uploads yet",
-    pSnr: m => "Median SNR: <b>" + m + "</b> dB", pMargin: m => "Median margin: <b>" + m + "</b> dB", pRssi: m => "Median RSSI: <b>" + m + "</b> dBm", pTx: p => "Messages sent OK: <b>" + p + " %</b> (approx.)", pTxBand: b => "Messages sent OK: " + b, lastData: "Newest data", expected: n => "About " + n + " packets were expected",
+    pSnr: m => "Median SNR: <b>" + m + "</b> dB", pMargin: m => "Median margin: <b>" + m + "</b> dB", pRssi: m => "Median RSSI: <b>" + m + "</b> dBm", pTx: p => "Messages sent OK: <b>" + p + " %</b> (approx.)", txHi: "over 95", txLo: "under 5", pTxBand: b => "Messages sent OK: " + b, lastData: "Newest data", expected: n => "About " + n + " packets were expected",
     trackGpx: "Track (GPX)", gpsPos: "GPS position", lastHop: "from the last hop, not the origin node", distance: "distance",
     direct: "direct", nHops: n => n + (n === 1 ? " hop" : " hops"), routePos: "position of the route node",
     errEmpty: "the file is empty", errCsv: "it does not look like a CSV from this page",
@@ -683,7 +683,7 @@ const I18N = {
     txOk: "✓ La red lo oyó: un nodo lo retransmitió o lo confirmó.", txKo: "✗ Nadie lo retransmitió tras 3 intentos.", lgTx: "Mensaje enviado: la red lo oyó / nadie",
     commFew: "Aún hay pocas subidas: las pasadas y la fiabilidad se mostrarán cuando haya más.", commPass1: "1 pasada", commPass2: "2–4 pasadas", commPass5: "5 pasadas o más", commRx: "recepción", rxNever: "nunca", rxSome: "a veces", rxAll: "siempre", reliability: "Fiabilidad",
     relLow: "Baja", relMid: "Media", relHigh: "Alta", passes: "Pasadas", lastShort: "Último dato", relFew: "aún hay pocas subidas",
-    pSnr: m => "Mediana de SNR: <b>" + m + "</b> dB", pMargin: m => "Mediana del margen: <b>" + m + "</b> dB", pRssi: m => "Mediana de RSSI: <b>" + m + "</b> dBm", pTx: p => "Mensajes transmitidos ok: <b>" + p + " %</b> (aprox.)", pTxBand: b => "Mensajes transmitidos ok: " + b, lastData: "Dato más reciente", expected: n => "Se esperaban ≈ " + n + " paquetes",
+    pSnr: m => "Mediana de SNR: <b>" + m + "</b> dB", pMargin: m => "Mediana del margen: <b>" + m + "</b> dB", pRssi: m => "Mediana de RSSI: <b>" + m + "</b> dBm", pTx: p => "Mensajes transmitidos ok: <b>" + p + " %</b> (aprox.)", txHi: "más del 95", txLo: "menos del 5", pTxBand: b => "Mensajes transmitidos ok: " + b, lastData: "Dato más reciente", expected: n => "Se esperaban ≈ " + n + " paquetes",
     trackGpx: "Recorrido (GPX)", gpsPos: "Posición GPS", lastHop: "del último salto, no del nodo de origen", distance: "distancia",
     direct: "directo", nHops: n => n + (n === 1 ? " salto" : " saltos"), routePos: "posición del nodo de ruta",
     errEmpty: "el archivo está vacío", errCsv: "no parece un CSV de esta página",
@@ -1400,6 +1400,12 @@ function commCell(c, r) {
 // mensajes enviados que se ven: con posición y fuera de la vista previa de exportación (no se exportan)
 function txVisible() { return exportPreviewOn() ? [] : fileTx.filter(x => x.lat != null && !isNaN(x.lat)); }
 // Popup de celda: título (📥 Recepción o 📤 Transmisión, según la vista) y una lista con viñetas (las vacías se omiten)
+// % redondeado a decenas, sin contradecir el color: «a veces» nunca dice 100 % ni 0 %
+function txPctTxt(p, band) {
+  if (band === 1 && p >= 100) return t("txHi");
+  if (band === 1 && p <= 0) return t("txLo");
+  return p;
+}
 function popList(title, items) {
   return '<div class="ptitle">' + title + '</div><ul class="plist">' + items.filter(Boolean).map(l => "<li>" + l + "</li>").join("") + "</ul>";
 }
@@ -1436,7 +1442,7 @@ function hatch(layer, color) {
 function txPopup(c) {
   const n = c.txOk + c.txFail;
   return popList("📤 " + t("txTitle"), [
-    n ? t("pTx", Math.round(10 * c.txOk / n) * 10) : c.txp != null ? t("pTx", c.txp) : c.txb != null ? t("pTxBand", "<b>" + t(RX_BANDS[c.txb]) + "</b>") : "",
+    n ? t("pTx", txPctTxt(Math.round(10 * c.txOk / n) * 10, c.txOk === 0 ? 0 : c.txOk >= n ? 2 : 1)) : c.txp != null ? t("pTx", txPctTxt(c.txp, c.txb)) : c.txb != null ? t("pTxBand", "<b>" + t(RX_BANDS[c.txb]) + "</b>") : "",
     relLine(c)]);
 }
 // estado de transmisión de una celda: 2 siempre llegó, 1 a veces, 0 nunca, null sin mensajes
