@@ -307,272 +307,152 @@
     <div class="mbody" id="helpBody">
     <div class="page" data-p="0" data-lang="es" hidden>
       <h3>🎯 Para qué sirve</h3>
-      <div>Para dibujar un <b>mapa de cobertura</b> Meshtastic a partir del registro que exporta la <b>app oficial de Android</b>: saber <b>hasta dónde llega la señal de un nodo concreto</b> o ver la cobertura general de la red con todos los nodos que oíste.</div>
-      <div style="margin-top:6px">La app graba en segundo plano, con la pantalla apagada. Esta página solo analiza ese registro después, así que funciona en <b>cualquier navegador</b>, en el móvil o en el PC.</div>
-      <div style="margin-top:6px;opacity:.75;font-size:.9em">MeshCover es un proyecto independiente, sin relación con el proyecto Meshtastic®. Meshtastic es una marca registrada de Meshtastic LLC.</div>
-      <h3>⚙️ Cómo funciona</h3>
-      <ol>
-        <li>Un <b>nodo fijo</b> envía su posición cada minuto.</li>
-        <li>Tú sales con otro nodo, el <b>nodo de ruta</b>, conectado por Bluetooth a la app oficial. Su GPS va guardando por dónde pasas.</li>
-        <li>Al volver exportas el registro de la app y lo abres aquí. Cada paquete recibido se coloca donde estabas en ese momento, con su <b>SNR</b> y <b>RSSI</b>.</li>
-        <li>Donde pasaste sin recibir nada queda el recorrido (línea azul) sin puntos: ahí no hay cobertura.</li>
-      </ol>
-      <h3>📊 Qué obtienes</h3>
+      <div>Dibuja un <b>mapa de cobertura</b> a partir del registro que exporta la <b>app oficial de Android</b>: dónde oyes a la red (📥 Recepción) y dónde la red te oye a ti (📤 Transmisión). Todo se analiza en tu navegador.</div>
+      <h3>📊 Qué ves</h3>
       <ul>
-        <li>Con <b>🔵</b> (detalle), un punto por paquete recibido, de color según la señal: <b>verde</b> buena, <b>amarillo</b> justa, <b>rojo</b> al límite. Si el registro trae el SF (lo vuelca la app al conectar), el color es el <b>margen</b>: cuántos dB sobran sobre el límite de ese SF (−7,5 dB a SF7 … −20 dB a SF12), así se pueden comparar pruebas con distinto SF.</li>
-        <li>La vista <b>📥 Recepción</b>: la zona en celdas con la señal de cada una, y en <b>gris oscuro translúcido</b> las celdas por las que pasaste sin recibir nada. El color usa solo lo recibido en directo; una celda <b>gris con borde de color</b> es que allí solo llegó lo repetido por otro nodo (el borde es la señal del último salto).</li>
-        <li>Puedes abrir varios registros a la vez (de varios días o de otras personas): se suman en el mapa.</li>
+        <li>Celdas de color según la señal: <b>verde</b> buena, <b>amarillo</b> justa, <b>rojo</b> al límite. <b>Gris</b>: pasaste y no llegó nada.</li>
+        <li>Al alejar el mapa las celdas se agrandan para ver dónde hay datos; al acercar vuelven a 250 m.</li>
+        <li>Toca una celda para ver sus datos. Las <b>rayadas</b> tienen pocos datos (una sola pasada).</li>
       </ul>
+      <div style="margin-top:6px;opacity:.75;font-size:.9em">MeshCover es un proyecto independiente, sin relación con el proyecto Meshtastic®. Meshtastic es una marca registrada de Meshtastic LLC.</div>
     </div>
 
     <div class="page" data-p="1" data-lang="es" hidden>
-      <h3>1. Antes de salir</h3>
-      <ol>
-        <li><b>Nodo fijo</b>: en la app, Posición → posición fija, «posición inteligente» desactivada e intervalo de difusión de 1 minuto.</li>
-        <li><b>Nodo de ruta</b>: GPS activado con <b>intervalo de actualización del GPS de 20–30 s</b> y «posición inteligente» desactivada. El intervalo de difusión da igual (puede quedar en «unset»): el recorrido sale del GPS, no de lo que se emite. Los ajustes de radio (LoRa) tienen que ser iguales en los dos.</li>
-        <li>Saca el nodo de ruta a cielo abierto unos minutos antes, para que coja satélites.</li>
-        <li>En la app, conecta el móvil al nodo de ruta y vacía el registro: Ajustes → panel de depuración → borrar.</li>
-      </ol>
-      <h3>2. Durante la ruta</h3>
-      <div>Nada: lleva el móvil con la pantalla apagada. La app sigue grabando.</div>
-      <h3>3. Al volver</h3>
-      <ol>
-        <li>En la app: Ajustes → panel de depuración → <b>exportar</b>. Mejor sin filtros.</li>
-        <li>Aquí, <b>📂 Añadir registros</b> y elige el <code>.txt</code> (en el ordenador también puedes arrastrarlo a la página). Cada archivo se suma a lo que ya hay en el mapa. También abre CSV y GPX de versiones anteriores de esta página.</li>
-        <li>Al abrir el primer registro, si casi todo lo recibido viene de un nodo, se elige ese nodo y la vista <b>📥 Recepción</b> sin hacer nada. Si no, elige el nodo fijo en <b>Nodo</b>.</li>
-      </ol>
-      <h3>Cobertura general de la red</h3>
-      <ol>
-        <li>No hace falta nodo fijo. El nodo de ruta, con los <b>mismos ajustes de radio que la red</b>, con GPS activado y actualización del GPS cada 20–30 s (el intervalo de difusión da igual).</li>
-        <li>Sal y exporta el registro igual que antes, y añádelo aquí.</li>
-        <li>Al abrir el registro se elige sola <b>📶 Oído directamente → Mejor señal de cualquier nodo</b> en <b>📥 Recepción</b>. Cada celda sale del color del nodo que mejor se oye allí; al pinchar, dice cuál es. Para la cobertura de un repetidor concreto, elígelo en ese mismo grupo.</li>
-        <li>Deja los saltos en 0–7. Suma registros de varios días o personas para completar la zona.</li>
-      </ol>
-      <h3>📤 Transmisión (¿la red me oye a mí?)</h3>
-      <div>Lo anterior mide lo que <b>tu nodo oye</b>. Para saber si <b>la red te oye a ti</b>, durante la ruta manda de vez en cuando un mensaje corto a un canal (cada pocos minutos o en los puntos que te interesen; el texto da igual). Tu nodo escucha si algún nodo lo retransmite y la app lo apunta en el registro.</div>
+      <h3>1. Prepara el nodo que llevas</h3>
       <ul>
-        <li>En el mapa sale <b>✓ verde</b> donde la red lo oyó y <b>✗ roja</b> donde nadie lo retransmitió tras 3 intentos. Al pinchar una celda: «3 de 4 mensajes llegaron a la red».</li>
-        <li>El botón <b>📤 Transmisión</b> pinta la cuadrícula según la transmisión: verde si los mensajes <b>siempre</b> llegaron a la red, amarillo si <b>a veces</b> y rojo si <b>nunca</b>. Se exporta y se sube al mapa de cobertura junto con la recepción (allí solo como siempre / a veces / nunca).</li>
-        <li>Para no llenar el canal público de pruebas, mándalos a tu canal propio con PSK: los repetidores con la retransmisión por defecto también reenvían lo que no pueden leer.</li>
-        <li>La hora es la del resultado: el ✓ llega en segundos, pero la ✗ puede llegar hasta un minuto después de enviarlo. Si vas en coche, la ✗ puede salir algo más adelante de donde la mandaste.</li>
+        <li>Mismos ajustes de radio (LoRa) que la red o que el nodo que quieres medir.</li>
+        <li>GPS activado, actualización cada <b>20–30 s</b>, «posición inteligente» desactivada, intervalo de difusión 5 min o más.</li>
+        <li>Un canal propio <b>con PSK</b> que sea el único con <b>Posición</b> activada (así la posición se guarda con precisión).</li>
+        <li>Sin GPS en el nodo: activa en la app «Proporcionar la ubicación del teléfono a la malla», o graba la ruta en GPX con otra app y ábrelo junto al registro.</li>
       </ul>
-      <h3>⚖️ Comparar SF (¿cuánto ganamos subiendo a SF10?)</h3>
+      <h3>2. Haz la ruta</h3>
+      <div>Móvil conectado al nodo por Bluetooth, con la pantalla apagada. Para medir la <b>transmisión</b>, manda de vez en cuando un mensaje corto a tu canal privado.</div>
+      <h3>3. Ábrelo aquí</h3>
       <ol>
-        <li>Con el nodo fijo y el de ruta en <b>SF7</b>, haz una ruta. Cambia <b>los dos</b> a <b>SF10</b> (mismo BW, CR y frecuencia) y repite <b>la misma ruta</b>, mejor el mismo día y despacio (andando o en bici).</li>
-        <li>Exporta el registro (o los dos) y añádelos aquí. Normalmente no hay que apuntar nada: la página sabe con qué SF iba cada paquete y cada tramo del recorrido. Si el registro no trae los ajustes LoRa (por ejemplo, exportado solo con «Packets» o vaciado después de conectar), la página te pregunta el SF de ese archivo.</li>
-        <li>En <b>Nodo</b>, elige el nodo fijo y pulsa <b>⚖️ Comparar</b> (solo sale si hay dos SF o más). Con tres SF o más, la tabla los compara todos a la vez; el mapa compara los dos que elijas en los selectores <b>SF … frente a SF …</b>.</li>
-        <li>Cada celda sale verde si recibieron <b>los dos</b>, azul si <b>solo el SF alto</b>, naranja si <b>solo el bajo</b> y gris si <b>ninguno</b>. Debajo, una tabla con el % de celdas con recepción, la distancia máxima y el margen mediano de cada SF.</li>
-        <li>Solo cuentan las celdas por las que pasaste con los dos SF. Con más de dos SF, elige cuáles comparar.</li>
+        <li>En la app: Ajustes → panel de depuración → <b>exportar</b>.</li>
+        <li>Aquí: <b>📂 Añadir registros</b> y elige el <code>.txt</code> (o arrástralo). Puedes sumar varios.</li>
+        <li>Elige la vista: <b>📥 Recepción</b>, <b>📤 Transmisión</b> o <b>🔵</b> (un punto por paquete).</li>
       </ol>
       <h3>Controles</h3>
       <ul>
-        <li><b>Nodo</b>: en <b>📡 Enviado por</b>, los paquetes que envió un nodo. En <b>📶 Oído directamente</b>, lo que oíste directamente de un nodo, aunque fuera repitiendo paquetes de otros: su SNR sí es de ese nodo, así que es su cobertura real. «Mejor señal de cualquier nodo» pinta en cada celda el nodo que mejor se oye: la cobertura de la red. Aquí no cuentan los nodos en <b>CLIENT_MUTE</b> (según su rol en el registro): solo emiten y no repiten, así que no dan acceso a la red. Salen en «Enviado por», pero no aquí ni en lo que se exporta.</li>
-        <li><b>Saltos</b>: deslizador doble con mínimo y máximo. Al abrir la página empieza en 0–7 (todo). 0–0 = solo lo que llega <b>directo</b>, que es lo que mide la cobertura de cada nodo. Sube el máximo para ver también lo repetido por otros nodos, o el mínimo para ver <b>solo</b> lo repetido. Con <b>📡 Enviado por</b>, lo repetido sale como <b>cuadrado negro</b>: su SNR es el del último salto, no el del nodo de origen.</li>
-        <li><b>🗑 Limpiar</b>: quita del mapa todo lo abierto.</li>
-        <li><b>⬆️ Exportar cobertura</b> y <b>🗺️ Mapa de cobertura</b>: ver la pestaña «Mapa de cobertura».</li>
-        <li>En el mapa: capas (topográfico, satélite, relieve…) y ⛶ pantalla completa.</li>
+        <li><b>Nodo</b>: «Mejor señal de cualquier nodo» es la cobertura de la red; elige un nodo para ver solo la suya.</li>
+        <li><b>Saltos</b>: 0–0 = solo lo recibido directo.</li>
+        <li><b>⚖️ Comparar</b>: sale si abres rutas con distinto SF; compara celda a celda.</li>
       </ul>
     </div>
 
     <div class="page" data-p="2" data-lang="es" hidden>
-      <h3>📍 Los paquetes no salen en el mapa</h3>
-      <ul>
-        <li>El nodo de ruta no tenía posición: revisa que tenga el GPS activado, con cobertura de satélites, y un intervalo de actualización del GPS corto (20–30 s).</li>
-        <li>Sácalo a cielo abierto antes de salir: dentro de casa no coge satélites.</li>
-      </ul>
-      <h3>🚶 El nodo fijo aparece «moviéndose»</h3>
-      <div>Su GPS da posiciones que bailan. Ponle <b>posición fija</b> en la app.</div>
+      <h3>📍 No sale el recorrido o los paquetes</h3>
+      <div>El nodo no tenía posición: saca el nodo a cielo abierto unos minutos antes de salir y revisa el paso 1 de «Cómo usar».</div>
+      <h3>🚶 Un nodo fijo aparece «moviéndose»</h3>
+      <div>Su GPS baila. Ponle <b>posición fija</b> en la app.</div>
       <h3>📡 No llega nada del nodo que quieres medir</h3>
-      <ul>
-        <li>Los ajustes de radio (región, ancho de banda, SF, coding rate y frequency slot) tienen que ser <b>idénticos</b> en los dos nodos.</li>
-        <li>Con SF altos, envía con menos frecuencia: en Europa solo se puede transmitir el 10 % del tiempo.</li>
-      </ul>
+      <div>Los ajustes de radio (región, BW, SF, CR y frequency slot) tienen que ser <b>idénticos</b> en los dos nodos.</div>
     </div>
 
     <div class="page" data-p="3" data-lang="es" hidden>
       <h3>🗺️ Mapa de cobertura</h3>
-      <div>Un mapa común de la <b>cobertura real de la red</b>, hecho entre todas/os: cada persona que hace un recorrido con su nodo suma sus celdas, y el mapa se va completando zona a zona.</div>
-      <h3>👀 Verlo</h3>
-      <div>Pulsa <b>🗺️ Mapa de cobertura</b>. Se carga en <b>cuadrícula de 250 m</b>: cada celda sale del color del nodo que mejor se oye allí. Las celdas grises son sitios por los que alguien pasó <b>sin recibir nada</b>. Puedes sumarle tus propios registros con <b>📂 Añadir registros</b> sin subirlos.</div>
-      <div>Cada nuevo recorrido que pasa por una celda se suma a su media, así que su color se va afinando con cada pase. Al <b>tocar una celda</b> se ven los paquetes, la mediana de SNR y de RSSI y la fiabilidad (baja, media o alta), con las pasadas (1, 2–4 o 5+) y el mes del último dato. En 📤 Transmisión se ve el % aproximado (en decenas) de mensajes que llegaron a la red. Las celdas <b>rayadas</b> tienen fiabilidad baja (una sola pasada). Con el selector <b>🗺️ Todos los datos / Últimos 12, 6 o 3 meses</b> se quitan los datos antiguos, por si la red ha cambiado (cuenta el mes en que se grabó el registro).</div>
-      <h3>🚶 Aportar tu recorrido</h3>
+      <div>Un mapa común de la red hecho entre todas/os. Pulsa <b>🗺️ Mapa de cobertura</b> para verlo; con el selector de meses quitas datos antiguos.</div>
+      <h3>☁️ Subir tu recorrido</h3>
       <ol>
-        <li>Prepara el nodo de ruta como en «Cómo usar → Cobertura general de la red»: <b>mismos ajustes de radio que la red</b>, GPS activado con actualización cada 20–30 s y «posición inteligente» desactivada. El intervalo de difusión puede quedar en «unset» o largo: así tampoco emites tu recorrido en directo.</li>
-        <li>Configura un <b>único canal para transmitir la posición</b> y que tenga <b>PSK</b>, para que la precisión sea máxima. Es indiferente que sea primario o secundario, pero debe ser el único con <b>Posición</b> activado.</li>
-        <li><b>Si tu nodo no tiene GPS</b>: en la app, activa <b>Ajustes › «Proporcionar la ubicación del teléfono a la malla»</b>: el nodo usa la posición del móvil. Si aun así el registro no trae tu recorrido, graba la ruta con cualquier app de rutas del móvil, expórtala en <b>GPX</b> y abre el <code>.gpx</code> junto con el <code>.txt</code> (en cualquier orden): los paquetes sin posición se colocan según la hora del GPX.</li>
-        <li>En la app Meshtastic conviene vaciar el registro antes de la ruta si tienes un registro anterior largo en condiciones de nodo, antena… muy diferentes a lo habitual. Se hace en Ajustes → Panel de depuración → Borrar. Haz el recorrido con la pantalla apagada y al volver <b>exporta</b> el registro.</li>
-        <li>Aquí, <b>📂 Añadir registros</b> con ese <code>.txt</code>.</li>
-        <li>Pulsa <b>⬆️ Exportar cobertura</b>. El mapa pasa a mostrar <b>exactamente lo que se va a compartir</b>: «Mejor señal de cualquier nodo», celdas de 250 m.</li>
-        <li>Mueve el deslizador <b>«Quitar alrededor del inicio y del final»</b> hasta que no quede ninguna celda cerca de tu casa: las celdas desaparecen del mapa según lo subes (círculos rojos).</li>
-        <li>Pulsa <b>☁️ Subir a la comunidad</b> y confirma. Se suma al momento al mapa común. Si prefieres no subirlo, <b>💾 Descargar archivo</b> guarda el mismo <code>.json</code> para compartirlo a mano; quien lo reciba lo abre con <b>📂 Añadir registros</b>.</li>
+        <li>Abre tu registro con <b>📂 Añadir registros</b>.</li>
+        <li>Pulsa <b>⬆️ Exportar cobertura</b>: el mapa muestra exactamente lo que se compartirá.</li>
+        <li>Sube el deslizador hasta que no quede ninguna celda cerca de tu casa.</li>
+        <li>Pulsa <b>☁️ Subir a la comunidad</b>. O <b>💾 Descargar archivo</b> para compartirlo a mano.</li>
       </ol>
-      <h3>💡 Consejos</h3>
-      <ul>
-        <li>Mejor si no empiezas ni acabas en casa; si lo haces, el recorte por defecto (300 m) quita esa zona. Las paradas de más de 5 min también se recortan, aunque el nodo siga encendido (por eso no hace falta vaciar el registro de la app antes de salir).</li>
-        <li>Varias pasadas por la misma zona se suman: cuanta más gente, más fiable el mapa. Un archivo idéntico a otro ya subido no se vuelve a sumar.</li>
-        <li>Todo se guarda siempre en celdas de 250 m, para que los archivos de todo el mundo encajen.</li>
-        <li>Para evitar abusos, como mucho 6 subidas por hora desde la misma conexión.</li>
-        <li>Qué se sube exactamente y cómo comprobarlo: pestaña <b>Privacidad</b>.</li>
-      </ul>
+      <div>Cuantas más pasadas por una zona, más fiable. Las paradas de más de 5 min se recortan solas.</div>
     </div>
+
     <div class="page" data-p="4" data-lang="es" hidden>
       <h3>🔒 Privacidad</h3>
-      <div>Tus registros (<code>.txt</code>, CSV, GPX) <b>no salen de tu dispositivo</b>: se leen y se dibujan dentro del navegador. Solo se envía algo al servidor si pulsas <b>☁️ Subir a la comunidad</b>.</div>
+      <div>Tus registros <b>no salen de tu dispositivo</b>. Solo se envía algo si pulsas <b>⬆️ Exportar cobertura</b> y luego <b>☁️ Subir a la comunidad</b>.</div>
       <h3>📦 Qué se sube</h3>
       <ul>
-        <li>Celdas de <b>250 m</b>: el centro de cada celda y cuántos paquetes se recibieron en ella (0 si pasaste sin recibir).</li>
-        <li>Por cada nodo oído en la celda: su <b>id</b> (<code>!xxxxxxxx</code>, sin el nombre), nº de paquetes, SNR y RSSI medios, SF y ancho de banda.</li>
-        <li>El <b>mes</b> (año-mes) de la exportación.</li>
+        <li>Celdas de 250 m con los paquetes recibidos y, por nodo oído, su id (sin nombre), SNR, RSSI y SF. Los nodos con «OK to MQTT» desactivado van sin id.</li>
+        <li>El % de mensajes que llegaron a la red y el mes.</li>
       </ul>
       <h3>🚫 Qué no se sube</h3>
       <ul>
-        <li>Ni el recorrido, ni horas, ni días, ni el orden en que pasaste.</li>
-        <li>Nada cerca de donde empieza y acaba cada ruta, ni de donde te paraste más de 5 min (círculos rojos; tú eliges el radio). Cada círculo se desplaza al azar y crece un poco, para que el centro del hueco no coincida con tu casa.</li>
-        <li>El mapa de cobertura no publica números exactos de pasadas, solo franjas (1, 2–4, 5 o más) si se recibió siempre, a veces o nunca y el % de transmisión redondeado a decenas: con pocas personas subiendo, los números exactos alrededor de un hueco darían pistas. Y mientras haya menos de 5 subidas en total, no publica ni eso.</li>
-        <li>Ni tu nombre, ni tu nodo, ni tu móvil, ni ningún dato de cuenta.</li>
+        <li>Ni el recorrido, ni horas, ni tu nombre o tu nodo.</li>
+        <li>Nada cerca del inicio, el final y las paradas (círculos rojos, desplazados al azar).</li>
+        <li>El mapa público solo muestra franjas aproximadas, nunca números exactos.</li>
       </ul>
-      <h3>🔍 Cómo comprobarlo antes</h3>
-      <div>Pulsa <b>💾 Descargar archivo</b>: es exactamente lo mismo que se subiría. Ábrelo con cualquier editor de texto, o vuelve a abrirlo aquí con <b>📂 Añadir registros</b> en una página limpia, y mira en el mapa que no hay celdas cerca de tu casa. Si no te convence, sube el radio o no lo subas.</div>
-      <h3>🗺️ Qué pasa con lo subido</h3>
-      <ul>
-        <li>Se suma al <b>mapa de cobertura</b>, que es <b>público</b>: cualquiera puede verlo y descargarlo.</li>
-        <li>Cada subida se guarda como un archivo aparte. Para evitar abusos, el servidor guarda durante una hora una huella (hash) de la IP (no la IP), solo para limitar a 6 subidas por hora. El alojamiento web, como cualquier web, puede guardar registros técnicos de acceso.</li>
-        <li>No hay cuentas, así que la página no puede saber qué subida es tuya. Si quieres que se retire algo, abre una incidencia en <a href="https://github.com/flydecision/meshcover/issues" target="_blank" rel="noopener">GitHub</a> indicando la zona y la fecha aproximada.</li>
-      </ul>
+      <div><b>💾 Descargar archivo</b> guarda exactamente lo que se subiría, para revisarlo antes. Para retirar algo, abre una incidencia en <a href="https://github.com/flydecision/meshcover/issues" target="_blank" rel="noopener">GitHub</a>.</div>
     </div>
+
     <div class="page" data-p="0" data-lang="en" hidden>
       <h3>🎯 What it is for</h3>
-      <div>It draws a Meshtastic <b>coverage map</b> from the log exported by the <b>official Android app</b>: how far <b>the signal of a specific node</b> reaches, or the general coverage of the mesh with every node you heard.</div>
-      <div style="margin-top:6px">The app records in the background with the screen off. This page only analyses that log afterwards, so it works in <b>any browser</b>, on a phone or a PC.</div>
-      <div style="margin-top:6px;opacity:.75;font-size:.9em">MeshCover is an independent project, not affiliated with the Meshtastic® project. Meshtastic is a registered trademark of Meshtastic LLC.</div>
-      <h3>⚙️ How it works</h3>
-      <ol>
-        <li>A <b>fixed node</b> broadcasts its position every minute.</li>
-        <li>You walk or drive with another node, the <b>route node</b>, connected over Bluetooth to the official app. Its GPS records where you go.</li>
-        <li>When you are back, you export the app's log and open it here. Each received packet is placed where you were at that moment, with its <b>SNR</b> and <b>RSSI</b>.</li>
-        <li>Where you passed without receiving anything, the track (blue line) has no dots: there is no coverage there.</li>
-      </ol>
-      <h3>📊 What you get</h3>
+      <div>Draws a <b>coverage map</b> from the log exported by the <b>official Android app</b>: where you hear the mesh (📥 Reception) and where the mesh hears you (📤 Transmission). Everything is analysed in your browser.</div>
+      <h3>📊 What you see</h3>
       <ul>
-        <li>With <b>🔵</b> (detail), one dot per received packet, coloured by signal: <b>green</b> good, <b>yellow</b> fair, <b>red</b> at the limit. If the log includes the SF (the app writes it when it connects), the colour is the <b>margin</b>: how many dB are left above that SF's limit (−7.5 dB at SF7 … −20 dB at SF12), so tests with different SF can be compared.</li>
-        <li>The <b>📥 Reception</b> view: the area split into cells with the signal of each one, and in <b>translucent dark grey</b> the cells you passed through without receiving anything. The colour only uses packets received directly; a <b>grey cell with a coloured border</b> means only packets relayed by another node arrived there (the border is the signal of the last hop).</li>
-        <li>You can open several logs at once (from different days or people): they add up on the map.</li>
+        <li>Cells coloured by signal: <b>green</b> good, <b>yellow</b> fair, <b>red</b> at the limit. <b>Grey</b>: you passed and nothing arrived.</li>
+        <li>Zooming out makes cells larger so you can see where there is data; zooming in brings them back to 250 m.</li>
+        <li>Tap a cell to see its data. <b>Striped</b> cells have little data (a single pass).</li>
       </ul>
+      <div style="margin-top:6px;opacity:.75;font-size:.9em">MeshCover is an independent project, not affiliated with the Meshtastic® project. Meshtastic is a registered trademark of Meshtastic LLC.</div>
     </div>
 
     <div class="page" data-p="1" data-lang="en" hidden>
-      <h3>1. Before you leave</h3>
-      <ol>
-        <li><b>Fixed node</b>: in the app, Position → fixed position, «smart position» off and broadcast interval of 1 minute.</li>
-        <li><b>Route node</b>: GPS on with a <b>GPS update interval of 20–30 s</b> and «smart position» off. The broadcast interval does not matter (it can stay «unset»): the track comes from the GPS, not from what is broadcast. Radio (LoRa) settings must be the same on both.</li>
-        <li>Take the route node outdoors a few minutes before, so it gets a satellite fix.</li>
-        <li>In the app, connect the phone to the route node and clear the log: Settings → debug panel → clear.</li>
-      </ol>
-      <h3>2. On the way</h3>
-      <div>Nothing: carry the phone with the screen off. The app keeps recording.</div>
-      <h3>3. When you are back</h3>
-      <ol>
-        <li>In the app: Settings → debug panel → <b>export</b>. Better without filters.</li>
-        <li>Here, <b>📂 Add Logs</b> and pick the <code>.txt</code> (on a computer you can also drag it onto the page). Each file adds to what is already on the map. It also opens CSV and GPX files from older versions of this page.</li>
-        <li>When you open the first log, if almost everything received comes from one node, that node and <b>📥 Reception</b> are picked for you. If not, pick the fixed node in <b>Node</b>.</li>
-      </ol>
-      <h3>General coverage of the mesh</h3>
-      <ol>
-        <li>No fixed node needed. The route node, with the <b>same radio settings as the mesh</b>, with GPS on and a GPS update every 20–30 s (the broadcast interval does not matter).</li>
-        <li>Go out and export the log as before, and add it here.</li>
-        <li>Opening the log picks <b>📶 Heard directly → Best signal of any node</b> in <b>📥 Reception</b> for you. Each cell takes the colour of the node heard best there; tap it to see which one. For the coverage of a specific repeater, pick it in that same group.</li>
-        <li>Leave hops at 0–7. Add logs from several days or people to complete the area.</li>
-      </ol>
-      <h3>📤 Transmission (does the mesh hear me?)</h3>
-      <div>The above measures what <b>your node hears</b>. To know whether <b>the mesh hears you</b>, send a short message to a channel now and then during the route (every few minutes or at the places you care about; the text does not matter). Your node listens for another node relaying it and the app writes it in the log.</div>
+      <h3>1. Set up the node you carry</h3>
       <ul>
-        <li>The map shows a <b>green ✓</b> where the mesh heard it and a <b>red ✗</b> where nobody relayed it after 3 tries. Tap a cell: «3 of 4 messages reached the mesh».</li>
-        <li>The <b>📤 Transmission</b> button colours the grid by transmission: green if the messages <b>always</b> reached the mesh, yellow if <b>sometimes</b> and red if <b>never</b>. It is exported and uploaded to the coverage map along with reception (there only as always / sometimes / never).</li>
-        <li>To avoid filling the public channel with tests, send them to your own channel with a PSK: repeaters with the default rebroadcast mode also forward what they cannot read.</li>
-        <li>The time is that of the result: the ✓ comes within seconds, but the ✗ can come up to a minute after sending. In a car, the ✗ may appear a bit further on than where you sent it.</li>
+        <li>Same radio (LoRa) settings as the mesh or as the node you want to measure.</li>
+        <li>GPS on, update every <b>20–30 s</b>, «smart position» off, broadcast interval 5 min or more.</li>
+        <li>An own channel <b>with a PSK</b> that is the only one with <b>Position</b> enabled (so the position is stored precisely).</li>
+        <li>No GPS on the node: in the app enable «Provide phone location to mesh», or record the route as GPX with another app and open it with the log.</li>
       </ul>
-      <h3>⚖️ Compare SF (how much do we gain going up to SF10?)</h3>
+      <h3>2. Do the route</h3>
+      <div>Phone connected to the node over Bluetooth, screen off. To measure <b>transmission</b>, send a short message to your private channel now and then.</div>
+      <h3>3. Open it here</h3>
       <ol>
-        <li>With the fixed and the route node on <b>SF7</b>, do a route. Switch <b>both</b> to <b>SF10</b> (same BW, CR and frequency) and repeat <b>the same route</b>, ideally the same day and slowly (walking or cycling).</li>
-        <li>Export the log (or both) and add them here. Usually no need to note anything: the page knows which SF each packet and each part of the track used. If the log has no LoRa settings (for example, exported with only «Packets», or cleared after connecting), the page asks you for that file's SF.</li>
-        <li>In <b>Node</b>, choose the fixed node and press <b>⚖️ Compare</b> (it only appears with two or more SF). With three SF or more, the table compares them all at once; the map compares the two you pick in the <b>SF … vs SF …</b> selectors.</li>
-        <li>Each cell is green if <b>both</b> received, blue if <b>only the higher SF</b>, orange if <b>only the lower</b> and grey if <b>neither</b>. Below, a table with the % of cells with reception, the maximum distance and the median margin of each SF.</li>
-        <li>Only cells you passed with both SF count. With more than two SF, choose which ones to compare.</li>
+        <li>In the app: Settings → debug panel → <b>export</b>.</li>
+        <li>Here: <b>📂 Add Logs</b> and pick the <code>.txt</code> (or drag it in). You can add several.</li>
+        <li>Pick the view: <b>📥 Reception</b>, <b>📤 Transmission</b> or <b>🔵</b> (one dot per packet).</li>
       </ol>
       <h3>Controls</h3>
       <ul>
-        <li><b>Node</b>: under <b>📡 Sent by</b>, the packets a node sent. Under <b>📶 Heard directly</b>, what you heard directly from a node, even when it was relaying other nodes' packets: that SNR does belong to that node, so it is its real coverage. «Best signal of any node» paints each cell with the node heard best: the coverage of the mesh. Nodes in <b>CLIENT_MUTE</b> (by their role in the log) do not count here: they only transmit and do not relay, so they give no access to the mesh. They show under «Sent by», but not here or in what is exported.</li>
-        <li><b>Hops</b>: double slider with minimum and maximum. It starts at 0–7 (everything). 0–0 = only what arrives <b>directly</b>, which is what measures each node's coverage. Raise the maximum to also see packets relayed by other nodes, or the minimum to see <b>only</b> relayed ones. With <b>📡 Sent by</b>, relayed packets show as a <b>black square</b>: their SNR is the last hop's, not the origin node's.</li>
-        <li><b>🗑 Clear</b>: removes everything opened from the map.</li>
-        <li><b>⬆️ Export coverage</b> and <b>🗺️ Coverage map</b>: see the «Coverage map» tab.</li>
-        <li>On the map: layers (topographic, satellite, hillshade…) and ⛶ full screen.</li>
+        <li><b>Node</b>: «Best signal of any node» is the mesh coverage; pick a node to see only its own.</li>
+        <li><b>Hops</b>: 0–0 = only what was received directly.</li>
+        <li><b>⚖️ Compare</b>: shows up when you open routes with different SF; compares cell by cell.</li>
       </ul>
     </div>
 
     <div class="page" data-p="2" data-lang="en" hidden>
-      <h3>📍 Packets do not show on the map</h3>
-      <ul>
-        <li>The route node had no position: check its GPS is on, has satellite coverage, and a short GPS update interval (20–30 s).</li>
-        <li>Take it outdoors before leaving: indoors it does not get satellites.</li>
-      </ul>
-      <h3>🚶 The fixed node appears to be «moving»</h3>
-      <div>Its GPS gives positions that wander. Give it a <b>fixed position</b> in the app.</div>
+      <h3>📍 No route or packets on the map</h3>
+      <div>The node had no position: take it outdoors a few minutes before leaving and check step 1 of «How to use».</div>
+      <h3>🚶 A fixed node appears to be «moving»</h3>
+      <div>Its GPS wanders. Give it a <b>fixed position</b> in the app.</div>
       <h3>📡 Nothing arrives from the node you want to measure</h3>
-      <ul>
-        <li>Radio settings (region, bandwidth, SF, coding rate and frequency slot) must be <b>identical</b> on both nodes.</li>
-        <li>With high SF, send less often: in Europe you can only transmit 10 % of the time.</li>
-      </ul>
+      <div>Radio settings (region, BW, SF, CR and frequency slot) must be <b>identical</b> on both nodes.</div>
     </div>
+
     <div class="page" data-p="3" data-lang="en" hidden>
       <h3>🗺️ Coverage map</h3>
-      <div>A shared map of the <b>real coverage of the network</b>, built by everyone: each person who does a route with their node adds their cells, and the map fills in area by area.</div>
-      <h3>👀 Viewing it</h3>
-      <div>Press <b>🗺️ Coverage map</b>. It loads as a <b>250 m grid</b>: each cell takes the colour of the node heard best there. Grey cells are places someone passed <b>without receiving anything</b>. You can add your own logs on top with <b>📂 Add Logs</b> without uploading them.</div>
-      <div>Each new route through a cell adds to its average, so its colour gets more accurate with every pass. <b>Tap a cell</b> to see its packets, median SNR and RSSI and the reliability (low, medium or high), with the passes (1, 2–4 or 5+) and the month of the last data. In 📤 Transmission it shows the approximate % (in tens) of messages that reached the mesh. <b>Striped</b> cells have low reliability (a single pass). The <b>🗺️ All data / Last 12, 6 or 3 months</b> selector removes old data, in case the mesh has changed (it uses the month the log was recorded).</div>
-      <h3>🚶 Contributing your route</h3>
+      <div>A shared map of the mesh made by everyone. Press <b>🗺️ Coverage map</b> to see it; the months selector removes old data.</div>
+      <h3>☁️ Upload your route</h3>
       <ol>
-        <li>Set up the route node as in «How to use → General coverage of the mesh»: <b>same radio settings as the network</b>, GPS on with updates every 20–30 s and «smart position» off. The broadcast interval can stay «unset» or long: that way you do not broadcast your route live either.</li>
-        <li>Set up a <b>single channel to send your position</b>, with a <b>PSK</b>, so precision is at its maximum. It does not matter whether it is primary or secondary, but it must be the only one with <b>Position</b> turned on.</li>
-        <li><b>If your node has no GPS</b>: in the app, turn on <b>Settings › «Provide location to mesh»</b>: the node uses the phone's position. If the log still has no track, record the route with any route app on your phone, export it as <b>GPX</b> and open the <code>.gpx</code> together with the <code>.txt</code> (in any order): packets without a position are placed by the time in the GPX.</li>
-        <li>In the Meshtastic app, it is worth clearing the log before the route if you have a long earlier log made with a very different node, antenna… than usual. It is done in Settings → Debug panel → Clear. Do the route with the screen off and, back home, <b>export</b> the log.</li>
-        <li>Here, <b>📂 Add Logs</b> with that <code>.txt</code>.</li>
-        <li>Press <b>⬆️ Export coverage</b>. The map now shows <b>exactly what will be shared</b>: «Best signal of any node», 250 m cells.</li>
-        <li>Move the <b>«Remove around start and end»</b> slider until no cell is left near your home: cells disappear from the map as you raise it (red circles).</li>
-        <li>Press <b>☁️ Upload to community</b> and confirm. It is added to the shared map right away. If you prefer not to upload it, <b>💾 Download file</b> saves the same <code>.json</code> to share by hand; whoever gets it opens it with <b>📂 Add Logs</b>.</li>
+        <li>Open your log with <b>📂 Add Logs</b>.</li>
+        <li>Press <b>⬆️ Export coverage</b>: the map shows exactly what will be shared.</li>
+        <li>Raise the slider until no cell is left near your home.</li>
+        <li>Press <b>☁️ Upload to community</b>. Or <b>💾 Download file</b> to share it by hand.</li>
       </ol>
-      <h3>💡 Tips</h3>
-      <ul>
-        <li>Better not to start or end at home; if you do, the default cut (300 m) removes that area. Stops longer than 5 min are cut too, even with the node still on (so you don't need to clear the app's log before going out).</li>
-        <li>Several passes over the same area add up: the more people, the more reliable the map. A file identical to one already uploaded is not added again.</li>
-        <li>Everything is always stored in 250 m cells, so everyone's files fit together.</li>
-        <li>To prevent abuse, at most 6 uploads per hour from the same connection.</li>
-        <li>What exactly is uploaded and how to check it: <b>Privacy</b> tab.</li>
-      </ul>
+      <div>The more passes over an area, the more reliable. Stops longer than 5 min are cut out automatically.</div>
     </div>
+
     <div class="page" data-p="4" data-lang="en" hidden>
       <h3>🔒 Privacy</h3>
-      <div>Your logs (<code>.txt</code>, CSV, GPX) <b>never leave your device</b>: they are read and drawn inside the browser. Something is sent to the server only if you press <b>☁️ Upload to community</b>.</div>
+      <div>Your logs <b>never leave your device</b>. Something is sent only if you press <b>⬆️ Export coverage</b> and then <b>☁️ Upload to community</b>.</div>
       <h3>📦 What is uploaded</h3>
       <ul>
-        <li><b>250 m</b> cells: the centre of each cell and how many packets were received in it (0 if you passed without reception).</li>
-        <li>For each node heard in the cell: its <b>id</b> (<code>!xxxxxxxx</code>, without the name), number of packets, mean SNR and RSSI, SF and bandwidth.</li>
-        <li>The <b>month</b> (year-month) of the export.</li>
+        <li>250 m cells with the packets received and, per node heard, its id (no name), SNR, RSSI and SF. Nodes with «OK to MQTT» off go without id.</li>
+        <li>The % of messages that reached the mesh, and the month.</li>
       </ul>
       <h3>🚫 What is not uploaded</h3>
       <ul>
-        <li>No track, no times, no days, no order in which you passed.</li>
-        <li>Nothing near where each route starts and ends, or where you stopped for more than 5 min (red circles; you choose the radius). Each circle is shifted at random and grows a little, so the centre of the gap is not your home.</li>
-        <li>The coverage map does not publish exact numbers of passes, only ranges (1, 2–4, 5 or more) whether reception was always, sometimes or never and the transmission % rounded to tens: with few people uploading, exact numbers around a gap would give clues. And while there are fewer than 5 uploads in total, it does not publish even that.</li>
-        <li>Not your name, your node, your phone or any account data.</li>
+        <li>Not the route, times, your name or your node.</li>
+        <li>Nothing near the start, the end or stops (red circles, shifted at random).</li>
+        <li>The public map only shows approximate ranges, never exact numbers.</li>
       </ul>
-      <h3>🔍 How to check it first</h3>
-      <div>Press <b>💾 Download file</b>: it is exactly what would be uploaded. Open it with any text editor, or open it again here with <b>📂 Add Logs</b> on a clean page and check on the map that there are no cells near your home. If you are not happy, raise the radius or do not upload it.</div>
-      <h3>🗺️ What happens to uploads</h3>
-      <ul>
-        <li>They are added to the <b>coverage map</b>, which is <b>public</b>: anyone can view and download it.</li>
-        <li>Each upload is stored as a separate file. To prevent abuse, the server keeps a fingerprint (hash) of the IP (not the IP) for one hour, only to limit uploads to 6 per hour. The web host, like any website, may keep technical access logs.</li>
-        <li>There are no accounts, so the page cannot tell which upload is yours. If you want something removed, open an issue on <a href="https://github.com/flydecision/meshcover/issues" target="_blank" rel="noopener">GitHub</a> with the area and approximate date.</li>
-      </ul>
+      <div><b>💾 Download file</b> saves exactly what would be uploaded, so you can check it first. To have something removed, open an issue on <a href="https://github.com/flydecision/meshcover/issues" target="_blank" rel="noopener">GitHub</a>.</div>
     </div>
     </div>
     <div class="mfoot">
@@ -825,6 +705,10 @@ function heardMode() { return selFrom.startsWith("h"); }
 // último byte del id y la app a veces lo asigna a otro nodo. Sin rol conocido se cuenta.
 const NO_RELAY_ROLES = new Set(["CLIENT_MUTE"]);
 let nodeRoles = new Map();
+// Nodos con «OK to MQTT» desactivado en su último paquete: no se publica su id en el mapa de cobertura
+// (sus paquetes sí cuentan, como nodo anónimo !00000000). Sin paquete descifrado no se sabe y se publica.
+let nodeMqtt = new Map();
+function optedOut(n) { const v = nodeMqtt.get(n); return !!v && !v.ok; }
 function relays(n) { return n != null && !NO_RELAY_ROLES.has(nodeRoles.get(n)); }
 function covRow(r) { return r.community || relays(r.heard); }
 function rowsView() {
@@ -1042,7 +926,7 @@ function askSf(name) {
 function clearAll() {
   if (!fileRows && !fileTracks.length && !fileVisited.length) return;
   fileRows = null; fileNames = []; fileTracks = []; fileVisited = []; fileTx = []; fileTxCells = [];
-  nodeRoles = new Map();
+  nodeRoles = new Map(); nodeMqtt = new Map();
   $("sfAsk").innerHTML = "";
   $("ageWrap").hidden = true; setCommBtn(false);
   closeExport();
@@ -1062,7 +946,16 @@ let fileTxCells = [];   // transmisión por celda de archivos de cobertura (.jso
 let fileTx = [];        // mensajes enviados con su resultado (transmisión: ¿te oyó la red?)
 let fileVisited = [];   // centros de celdas sin recepción de archivos de cobertura importados
 let mapView = "grid";
-const cellSize = 250;   // tamaño fijo de celda: el mismo que el de la exportación y el mapa de cobertura
+const cellSize = 250;   // celda mínima: la misma que la de la exportación y el mapa de cobertura
+// Al alejar el mapa las celdas se agrandan (250 m, 500 m, 1 km, 2 km…) para que no queden diminutas:
+// así se ve dónde hay datos. Al acercar vuelven a 250 m, que es el mínimo. En la vista previa de exportación, siempre 250 m.
+function viewCell() {
+  if (!map || exportPreviewOn()) return cellSize;
+  const mpp = 40075016.686 * Math.cos(map.getCenter().lat * Math.PI / 180) / Math.pow(2, map.getZoom() + 8);
+  let size = cellSize;
+  while (size / mpp < 12 && size < 256000) size *= 2;
+  return size;
+}
 function saveMapPrefs() { try { localStorage.setItem("rangetest_mapprefs_v1", JSON.stringify({ mapView })); } catch (e) {} }
 function loadMapPrefs() {
   try {
@@ -1146,7 +1039,7 @@ async function initMap() {
   L.control.scale({ imperial: false, position: "bottomleft", maxWidth: 140 }).addTo(map);
   addMaxControl();
   addLayersControl();
-  map.on("zoomend", () => { if (mapView === "grid") { mapDirty = true; drawMap(false, true); } });
+  map.on("zoomend", () => { if (mapView === "grid" || mapView === "tx") { mapDirty = true; drawMap(false, true); } });
   map.on("popupclose", () => { if (pendingRedraw) setTimeout(() => { mapDirty = true; drawMap(false); }, 0); });
   // la URL lleva la vista del mapa (?lat=…&lon=…&zoom=…) para poder compartir un área
   const q = new URLSearchParams(location.search), qlat = parseFloat(q.get("lat")), qlon = parseFloat(q.get("lon")), qz = parseFloat(q.get("zoom"));
@@ -1583,7 +1476,7 @@ function drawMap(fit, fromZoom) {
   let nCells = 0, nEmpty = 0;
   if (grid) {
     const iv = heard ? null : typicalInterval(rows);
-    for (const c of buildGrid(rows, tracks, cellSize)) {
+    for (const c of buildGrid(rows, tracks, viewCell())) {
       if (!c.visited) continue;
       // vista «Tx»: solo celdas con mensajes enviados, del color de cómo llegaron a la red
       if (txv) {
@@ -1769,6 +1662,7 @@ function debugTxtToRows(text) {
   const mi = text.match(/my_node_num=(-?\d+)/); if (mi) myNum = Number(mi[1]) >>> 0;
   // rol de cada nodo (NodeInfo): sirve para saber si repite lo que oye
   const roles = new Map();
+  const mqttOk = new Map();   // «OK to MQTT» (bit 0 de bitfield) del paquete descifrado más reciente de cada nodo: {ms, ok}
   for (const m of text.matchAll(/User\{id=!([0-9a-f]{8}),[^}]*?\brole=([A-Z_]+)/g)) roles.set(hexNum(m[1]), m[2]);
   for (const m of text.matchAll(/User\{id=!([0-9a-f]{8}), long_name=([^,]*), short_name=([^,]*)/g)) {
     const n = hexNum(m[1]), label = RT.nodeLabel(m[3].trim(), m[2].trim()); if (label && !names.has(n)) names.set(n, label);
@@ -1823,6 +1717,8 @@ function debugTxtToRows(text) {
       continue;
     }
     if (tr !== "TRANSPORT_LORA") continue;
+    const bf = kv("bitfield", b);
+    if (bf !== null && (!mqttOk.has(from) || mqttOk.get(from).ms <= ms)) mqttOk.set(from, { ms, ok: (Number(bf) & 1) === 1 });
     const id = kv("id", s), key = from + ":" + id;
     if (seen.has(key)) continue; seen.add(key);
     const port = kv("portnum", b);
@@ -1943,7 +1839,7 @@ function debugTxtToRows(text) {
   const tracks = [];
   if (own.length) tracks.push(own);
   else for (const n of moving) tracks.push(senderTrack.get(n));
-  return { rows, tx, own, tracks, myNum, myName: names.get(myNum) || "", roles, hasCfg: loras.length > 0, noOwn: ownTotal === 0 && !moving.size, ownBits, ownLow, ownTotal, lowBits: ownLow ? lowBits[ownLow >> 1] : null };
+  return { rows, tx, own, tracks, myNum, myName: names.get(myNum) || "", roles, mqttOk, hasCfg: loras.length > 0, noOwn: ownTotal === 0 && !moving.size, ownBits, ownLow, ownTotal, lowBits: ownLow ? lowBits[ownLow >> 1] : null };
 }
 async function openDebugTxt(file) {
   try {
@@ -1953,6 +1849,7 @@ async function openDebugTxt(file) {
     fileRows = (fileRows || []).concat(r.rows); fileNames.push(file.name);
     for (const x of r.tx) fileTx.push(Object.assign(x, { file: file.name }));
     for (const [n, role] of r.roles) nodeRoles.set(n, role);
+    for (const [n, v] of r.mqttOk) if (!nodeMqtt.has(n) || nodeMqtt.get(n).ms <= v.ms) nodeMqtt.set(n, v);
     if (!r.hasCfg) askSf(file.name);
     for (const t of r.tracks) {
       const segs = trackSegments(t).map(seg => seg.map(p => ({ lat: p.lat, lon: p.lon, ms: p.ms, sf: p.sf || null })));
@@ -2053,8 +1950,9 @@ function coverageCells(size, radius) {
     if (r.heard != null && !covRow(r)) continue;
     c.n += w;
     if (r.heard == null) continue;
-    if (!c.by.has(r.heard)) c.by.set(r.heard, { n: 0, snr: [], rssi: [], sf: new Map(), bw: null, name: bestNames.get(r.heard) || r.heardName || "" });
-    const b = c.by.get(r.heard);
+    const hk = optedOut(r.heard) ? 0 : r.heard;   // 0 → «!00000000», nodo anónimo
+    if (!c.by.has(hk)) c.by.set(hk, { n: 0, snr: [], rssi: [], sf: new Map(), bw: null, name: hk ? bestNames.get(hk) || r.heardName || "" : "" });
+    const b = c.by.get(hk);
     b.n += w;
     if (r.snr != null && !isNaN(r.snr)) b.snr.push(r.snr);
     if (r.rssi != null && !isNaN(r.rssi)) b.rssi.push(r.rssi);
@@ -2238,10 +2136,12 @@ async function addCoverage(data, name, community) {
       if (!n) { fileVisited.push({ lat, lon, community: !!community, cf, cfr, clast }); continue; }
       let known = 0;
       for (const o of c.nodes || []) {
-        const id = parseInt(String(o.id || "").replace("!", ""), 16);
+        let id = parseInt(String(o.id || "").replace("!", ""), 16);
         if (isNaN(id)) continue;
+        // !00000000: nodo que no permite publicar su id («OK to MQTT» desactivado): cuenta su señal, sin nombre
+        const anon = id === 0;
         const w = Math.max(1, Number(o.n) || 1); known += w;
-        rows.push({ ms: null, synthetic: true, community: !!community, cf, cfr, clast, w, seq: null, from: id >>> 0, name: String(o.name || ""), heard: id >>> 0, heardName: String(o.name || ""),
+        rows.push({ ms: null, synthetic: true, community: !!community, cf, cfr, clast, w, seq: null, from: anon ? null : id >>> 0, name: anon ? "" : String(o.name || ""), heard: anon ? null : id >>> 0, heardName: anon ? "" : String(o.name || ""),
           senderLat: null, senderLon: null, rxLat: lat, rxLon: lon, rxAlt: null, rxAcc: null, rxSrc: "", dist: null,
           snr: o.snr != null ? Number(o.snr) : null, rssi: o.rssi != null ? Number(o.rssi) : null,
           sf: o.sf ? Number(o.sf) : null, bw: o.bw ? Number(o.bw) : null, hops: 0, hopLimit: null, port: null, kind: "coverage", payload: "" });
