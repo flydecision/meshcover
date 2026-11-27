@@ -614,7 +614,7 @@ const I18N = {
     direct: "direct", nHops: n => n + (n === 1 ? " hop" : " hops"), routePos: "position of the route node",
     errEmpty: "the file is empty", errCsv: "it does not look like a CSV from this page",
     errNoPkts: "there are no packets received over the radio in the file",
-    noOwnPos: "⚠️ Your node did not send a single position of its own in this log, so what was received cannot be placed on the map. Usually the node's GPS had no signal (indoors or in a pocket): before setting off, leave it under open sky until its position updates in the app.",
+    noOwnPos: "⚠️ Your node did not send a single position of its own in this log, so what was received cannot be placed on the map. Usually the node's GPS had no signal (indoors or in a pocket): before setting off, leave it under open sky until its position updates in the app. If you recorded the route with a phone app, open its GPX together with the log.",
     lowPrecSome: (n, tot, m) => "⚠️ " + n + " of " + tot + " positions of your node came with reduced precision (~" + m + ", probably while position was shared on the public channel). They have been discarded, and the packets received at those times are left off the map.",
     sfAskTxt: "has no LoRa settings. Which SF was it recorded with?",
     dropHere: "📂 Drop the files here", lowPrec: m => "⚠️ Your node's positions come with reduced precision (~" + m + "), so they are not used for the route or the cells. In the app, turn on position with full precision only on a channel of your own with a key (primary or secondary), and turn it off on the public channel.", errGpx: "the file is not a valid GPX",
@@ -690,7 +690,7 @@ const I18N = {
     direct: "directo", nHops: n => n + (n === 1 ? " salto" : " saltos"), routePos: "posición del nodo de ruta",
     errEmpty: "el archivo está vacío", errCsv: "no parece un CSV de esta página",
     errNoPkts: "no hay paquetes recibidos por radio en el archivo",
-    noOwnPos: "⚠️ Tu nodo no ha mandado ni una posición propia en este registro, así que lo recibido no se puede colocar en el mapa. Casi siempre es que el GPS del nodo no tenía señal (dentro de un edificio o en el bolsillo): antes de salir, déjalo a cielo abierto hasta que en la app se actualice su posición.",
+    noOwnPos: "⚠️ Tu nodo no ha mandado ni una posición propia en este registro, así que lo recibido no se puede colocar en el mapa. Casi siempre es que el GPS del nodo no tenía señal (dentro de un edificio o en el bolsillo): antes de salir, déjalo a cielo abierto hasta que en la app se actualice su posición. Si grabaste el recorrido con una app del móvil, abre su GPX junto con el registro.",
     lowPrecSome: (n, tot, m) => "⚠️ " + n + " de " + tot + " posiciones de tu nodo venían con precisión reducida (~" + m + ", seguramente de ratos en que la posición se compartía por el canal público). Se han descartado, y los paquetes recibidos en esos ratos no salen en el mapa.",
     sfAskTxt: "no trae los ajustes LoRa. ¿Con qué SF se grabó?",
     dropHere: "📂 Suelta aquí los archivos", lowPrec: m => "⚠️ Las posiciones de tu nodo vienen con precisión reducida (~" + m + "), así que no se usan para el recorrido ni para las celdas. En la app, activa la posición con precisión completa solo en un canal propio con clave (primario o secundario), y desactívala en el público.", errGpx: "el archivo no es un GPX válido",
@@ -961,8 +961,13 @@ async function openFiles(list) {
     else if (isDebugTxt(head)) await openDebugTxt(f);
     else await openCsvFile(f);
   }
-  if (placeFromGpx()) { mapDirty = true; dirtyRender = true; refreshFromSelect(); drawMap(true); }
+  const placed = placeFromGpx();
+  if (placed) { mapDirty = true; dirtyRender = true; refreshFromSelect(); drawMap(true); }
+  // registro sin posiciones propias: solo se avisa si no hay un GPX que haya colocado lo recibido
+  if (pendingNoOwn && !placed && !(fileRows || []).some(r => !r.community && r.rxSrc === "gpx")) say(t("noOwnPos"), 25000);
+  pendingNoOwn = false;
 }
+let pendingNoOwn = false;
 // Nodo sin GPS: los paquetes del registro sin posición se colocan según la hora en un GPX grabado
 // con el móvil (cualquier app de rutas). Se interpola entre dos puntos cercanos o se usa el más próximo (< 2 min)
 function placeFromGpx() {
@@ -1985,7 +1990,7 @@ async function openDebugTxt(file) {
     // aviso: posiciones propias recortadas (menos de 17 bits ≈ 180 m no sirven para celdas de 250 m)
     // posiciones propias imprecisas: todas (aviso de configurar el canal) o solo algunas (ratos con otra configuración)
     // ninguna posición propia: casi siempre el GPS del nodo de ruta sin señal
-    if (r.noOwn) say(t("noOwnPos"), 25000);
+    if (r.noOwn) pendingNoOwn = true;   // se avisa al final de openFiles, si el GPX no lo ha colocado
     else if (r.ownLow) {
       const m = fmtM(Math.round(23300 / Math.pow(2, r.lowBits - 10) / 10) * 10);
       say(r.ownLow === r.ownTotal ? t("lowPrec", m) : t("lowPrecSome", r.ownLow, r.ownTotal, m), 20000);
