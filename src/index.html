@@ -8,16 +8,18 @@
 <style>
   :root { color-scheme: dark; }
   * { box-sizing: border-box; }
-  body { font-family: system-ui, sans-serif; background:#0e1116; color:#e6e9ee; margin:0; padding:14px; max-width:760px; margin-inline:auto; }
+  body { font-family: system-ui, sans-serif; background:#1b2430; color:#e6e9ee; margin:0; padding:14px; max-width:760px; margin-inline:auto; }
   h1 { font-size:1.15rem; margin:0 0 4px; }
   .sub { color:#9aa4b2; font-size:16px; margin-bottom:12px; }
   .btns { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0; }
   button { background:#23456e; color:#fff; border:0; border-radius:10px; padding:11px 14px; font-size:16px; font-weight:400; }
   button.on { font-weight:700; }
   .filt.hops[hidden] { display:none; }
-  button.sec { background:#2a3340; }
+  button.sec { background:#34465c; }
   button.danger { background:#5e2620; }
   button:disabled { opacity:.45; }
+  button:not(:disabled) { cursor:pointer; transition:filter .12s; }
+  button:not(:disabled):hover { filter:brightness(1.25); }
   .btns button { box-sizing:border-box; height:29px; padding:0 11px; font-size:16px; display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
   .btns button[hidden] { display:none; }
   .sfask { display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:6px 0; padding:6px 10px; border:1px solid #2a3340; border-radius:10px; background:#1a2029; font-size:16px; color:#9aa4b2; }
@@ -42,8 +44,8 @@
   td.nodo { max-width:100px; overflow:hidden; text-overflow:ellipsis; }
   /* barra de desplazamiento visible y sombra a la derecha si hay más columnas */
   .tblwrap { scrollbar-width:auto; scrollbar-color:#4a5668 #1a2029;
-    background: linear-gradient(to right, #0e1116 30%, transparent) left / 24px 100% no-repeat local,
-                linear-gradient(to left, #0e1116 30%, transparent) right / 24px 100% no-repeat local,
+    background: linear-gradient(to right, #1b2430 30%, transparent) left / 24px 100% no-repeat local,
+                linear-gradient(to left, #1b2430 30%, transparent) right / 24px 100% no-repeat local,
                 linear-gradient(to right, rgba(0,0,0,.55), transparent) left / 14px 100% no-repeat scroll,
                 linear-gradient(to left, rgba(0,0,0,.55), transparent) right / 14px 100% no-repeat scroll; }
   .tblwrap::-webkit-scrollbar, .tbltop::-webkit-scrollbar { height:12px; }
@@ -99,7 +101,7 @@
   .mhead b { font-size:16px; }
   .mhead button { width:38px; height:38px; padding:0; border-radius:50%; }
   .tabs { display:flex; gap:6px; padding:0 12px 8px; flex-wrap:wrap; border-bottom:1px solid #2a3340; flex:none; }
-  .tabs button { padding:7px 11px; font-size:16px; border-radius:999px; background:#2a3340; white-space:nowrap; }
+  .tabs button { padding:7px 11px; font-size:16px; border-radius:999px; background:#34465c; white-space:nowrap; }
   .tabs button.on { background:#23456e; }
   .mbody { overflow-y:auto; padding:12px 14px; font-size:16px; line-height:1.5; flex:1; min-height:0; overscroll-behavior:contain; }
   .mbody h3 { font-size:16px; margin:14px 0 6px; }
@@ -118,7 +120,7 @@
   .page[hidden] { display:none; }
   button.on { background:#1f6b45; }
   /* mapa maximizado */
-  #mapBox.max { position:fixed; inset:0; z-index:2000; margin:0; background:#0e1116; display:flex; flex-direction:column;
+  #mapBox.max { position:fixed; inset:0; z-index:2000; margin:0; background:#1b2430; display:flex; flex-direction:column;
                 padding:8px 8px calc(8px + env(safe-area-inset-bottom)); }
   #mapBox.max #map { flex:1; height:auto; min-height:0; }
   #mapBox.max .legend { margin:4px 2px; }
@@ -191,7 +193,7 @@
   .seg button { box-sizing:border-box; height:27px; display:inline-flex; align-items:center; gap:5px; border-radius:0; padding:0 11px; font-size:16px; background:#1a2029; }
   /* botones que se quedan pulsados (vista y mapa de cobertura): hundidos, con borde azul por dentro */
   .seg button.on, #btnCommunity.on { background:#123760; color:#fff; box-shadow:inset 0 3px 6px #000c, inset 0 0 0 2px #4c9bff; }
-  .seg button:not(.on) { color:#c9d1db; background:#2a3340; }
+  .seg button:not(.on) { color:#c9d1db; background:#34465c; }
   /* deslizador de celda con el mismo aspecto que el de saltos (un solo botón) */
   .filt.cellf { margin:0; gap:6px; }
   .filt.cellf .dual { flex:0 0 110px; width:110px; min-width:0; }
