@@ -973,20 +973,29 @@ let pendingNoOwn = false;
 function placeFromGpx() {
   const pts = [];
   for (const t of fileTracks) if (t.gpx) for (const sg of t.segs) for (const q of sg) if (q.ms) pts.push(q);
-  if (!pts.length || !fileRows) return 0;
+  if (!pts.length) return 0;
   pts.sort((a, b) => a.ms - b.ms);
-  let n = 0;
-  for (const r of fileRows) {
-    if (!r.ms || (r.rxLat != null && !isNaN(r.rxLat))) continue;
+  const at = ms => {
     let lo = 0, hi = pts.length;
-    while (lo < hi) { const mid = (lo + hi) >> 1; if (pts[mid].ms < r.ms) lo = mid + 1; else hi = mid; }
+    while (lo < hi) { const mid = (lo + hi) >> 1; if (pts[mid].ms < ms) lo = mid + 1; else hi = mid; }
     const a = pts[lo - 1], b = pts[lo];
-    let p = null;
-    if (a && b && b.ms - a.ms <= 180000) { const f = b.ms === a.ms ? 0 : (r.ms - a.ms) / (b.ms - a.ms); p = { lat: a.lat + (b.lat - a.lat) * f, lon: a.lon + (b.lon - a.lon) * f }; }
-    else p = [a, b].filter(q => q && Math.abs(q.ms - r.ms) <= 120000).sort((x, y) => Math.abs(x.ms - r.ms) - Math.abs(y.ms - r.ms))[0] || null;
+    if (a && b && b.ms - a.ms <= 180000) { const f = b.ms === a.ms ? 0 : (ms - a.ms) / (b.ms - a.ms); return { lat: a.lat + (b.lat - a.lat) * f, lon: a.lon + (b.lon - a.lon) * f }; }
+    return [a, b].filter(q => q && Math.abs(q.ms - ms) <= 120000).sort((x, y) => Math.abs(x.ms - ms) - Math.abs(y.ms - ms))[0] || null;
+  };
+  let n = 0;
+  for (const r of fileRows || []) {
+    if (!r.ms || (r.rxLat != null && !isNaN(r.rxLat))) continue;
+    const p = at(r.ms);
     if (!p) continue;
     r.rxLat = p.lat; r.rxLon = p.lon; r.rxSrc = "gpx"; n++;
     if (r.senderLat != null && !(r.senderLat === 0 && r.senderLon === 0)) r.dist = RT.haversineM(r.senderLat, r.senderLon, p.lat, p.lon);
+  }
+  // los mensajes enviados (transmisión) se colocan igual, en la posición del GPX a la hora del resultado
+  for (const x of fileTx) {
+    if (!x.ms || (x.lat != null && !isNaN(x.lat))) continue;
+    const p = at(x.ms);
+    if (!p) continue;
+    x.lat = p.lat; x.lon = p.lon; n++;
   }
   return n;
 }
