@@ -320,7 +320,7 @@
       <div>Dibuja un <b>mapa de cobertura</b> a partir del registro que exporta la <b>app oficial de Android</b>: dónde oyes a la red (📥 Recepción) y dónde la red te oye a ti (📤 Transmisión). Todo se analiza en tu navegador.</div>
       <h3>📊 Qué ves</h3>
       <ul>
-        <li>Celdas de color según la señal: <b>verde</b> buena, <b>amarillo</b> justa, <b>rojo</b> al límite. <b>Gris</b>: pasaste y no llegó nada.</li>
+        <li>Celdas de color según la señal: <b>verde</b> buena, <b>amarillo</b> media, <b>rojo</b> mala. <b>Gris</b>: pasaste y no llegó nada.</li>
         <li>Al alejar el mapa las celdas se agrandan para ver dónde hay datos; al acercar vuelven a 250 m.</li>
         <li>Toca una celda para ver sus datos. Las <b>rayadas</b> tienen pocos datos (una sola pasada).</li>
       </ul>
@@ -425,7 +425,7 @@
       <div>Draws a <b>coverage map</b> from the log exported by the <b>official Android app</b>: where you hear the mesh (📥 Reception) and where the mesh hears you (📤 Transmission). Everything is analysed in your browser.</div>
       <h3>📊 What you see</h3>
       <ul>
-        <li>Cells coloured by signal: <b>green</b> good, <b>yellow</b> fair, <b>red</b> at the limit. <b>Grey</b>: you passed and nothing arrived.</li>
+        <li>Cells coloured by signal: <b>green</b> good, <b>yellow</b> medium, <b>red</b> bad. <b>Grey</b>: you passed and nothing arrived.</li>
         <li>Zooming out makes cells larger so you can see where there is data; zooming in brings them back to 250 m.</li>
         <li>Tap a cell to see its data. <b>Striped</b> cells have little data (a single pass).</li>
       </ul>
@@ -796,7 +796,7 @@ function rowsView() {
 // Margen sobre el límite de descodificación de LoRa, que depende del SF (SF7 −7,5 dB … SF12 −20 dB)
 function sfLimit(sf) { return -7.5 - 2.5 * (sf - 7); }
 function marginOf(r) { return (r.snr == null || isNaN(r.snr) || !r.sf) ? null : r.snr - sfLimit(r.sf); }
-// Tres niveles, los mismos colores que la transmisión: verde buena, amarillo justa, rojo al límite
+// Tres niveles, los mismos colores que la transmisión: verde buena, amarillo media, rojo mala
 // (la señal varía mucho con la antena, el momento y dónde está cada nodo: más detalle sería engañoso)
 const SIG_COLORS = ["#d93025", "#e6b31e", "#1fa64a"];
 function marginColor(m) {
