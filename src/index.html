@@ -602,7 +602,7 @@ const I18N = {
     medRssi: m => "Median RSSI " + m + " dBm", directOnly: "direct only", timeInCell: "Time in cell",
     noRxText: "You passed here and no packet arrived.", noRxComm: "Routes passed here and nothing was heard directly from a relaying node.",
     txView: "Transmission", txViewTitle: "Transmission: did the mesh hear the messages you sent? (cells by messages sent)",
-    txLgAll: "Transmission: always reached the mesh", txLgSome: "sometimes", txLgNever: "never",
+    txLgAll: "Transmission: reached the mesh ≥ 75 %", txLgSome: "25–75 %", txLgNever: "< 25 %",
     txTitle: "Transmission", txCell: (a, n) => a + " of " + n + " messages reached the mesh", txMsg: "Message sent",
     txOk: "✓ The mesh heard it: a node relayed or acknowledged it.", txKo: "✗ Nobody relayed it after 3 tries.", lgTx: "Message sent: mesh heard it / nobody",
     commFew: "There are still few uploads: passes and reliability will show when there are more.", commPass1: "1 pass", commPass2: "2–4 passes", commPass5: "5 or more passes", commRx: "reception", rxNever: "never", rxSome: "sometimes", rxAll: "always", reliability: "Reliability",
@@ -678,7 +678,7 @@ const I18N = {
     medRssi: m => "RSSI mediano " + m + " dBm", directOnly: "solo directos", timeInCell: "Tiempo en la celda",
     noRxText: "Pasaste por aquí y no llegó ningún paquete.", noRxComm: "Han pasado recorridos por aquí y no se oyó directamente a ningún nodo que repita.",
     txView: "Transmisión", txViewTitle: "Transmisión: ¿la red oyó los mensajes que enviaste? (celdas según los mensajes enviados)",
-    txLgAll: "Transmisión: siempre llegó a la red", txLgSome: "a veces", txLgNever: "nunca",
+    txLgAll: "Transmisión: llegó a la red ≥ 75 %", txLgSome: "25–75 %", txLgNever: "< 25 %",
     txTitle: "Transmisión", txCell: (a, n) => a + " de " + n + " mensajes llegaron a la red", txMsg: "Mensaje enviado",
     txOk: "✓ La red lo oyó: un nodo lo retransmitió o lo confirmó.", txKo: "✗ Nadie lo retransmitió tras 3 intentos.", lgTx: "Mensaje enviado: la red lo oyó / nadie",
     commFew: "Aún hay pocas subidas: las pasadas y la fiabilidad se mostrarán cuando haya más.", commPass1: "1 pasada", commPass2: "2–4 pasadas", commPass5: "5 pasadas o más", commRx: "recepción", rxNever: "nunca", rxSome: "a veces", rxAll: "siempre", reliability: "Fiabilidad",
@@ -1400,7 +1400,7 @@ function commCell(c, r) {
 // mensajes enviados que se ven: con posición y fuera de la vista previa de exportación (no se exportan)
 function txVisible() { return exportPreviewOn() ? [] : fileTx.filter(x => x.lat != null && !isNaN(x.lat)); }
 // Popup de celda: título (📥 Recepción o 📤 Transmisión, según la vista) y una lista con viñetas (las vacías se omiten)
-// % redondeado a decenas, sin contradecir el color: «a veces» nunca dice 100 % ni 0 %
+// % redondeado a decenas: si no llegaron todos (o llegó alguno) nunca dice 100 % (o 0 %)
 function txPctTxt(p, band) {
   if (band === 1 && p >= 100) return t("txHi");
   if (band === 1 && p <= 0) return t("txLo");
@@ -1445,11 +1445,14 @@ function txPopup(c) {
     n ? t("pTx", txPctTxt(Math.round(10 * c.txOk / n) * 10, c.txOk === 0 ? 0 : c.txOk >= n ? 2 : 1)) : c.txp != null ? t("pTx", txPctTxt(c.txp, c.txb)) : c.txb != null ? t("pTxBand", "<b>" + t(RX_BANDS[c.txb]) + "</b>") : "",
     relLine(c)]);
 }
-// estado de transmisión de una celda: 2 siempre llegó, 1 a veces, 0 nunca, null sin mensajes
+// estado de transmisión de una celda según el % de mensajes que llegaron a la red:
+// 2 = 75 % o más, 1 = entre 25 y 75 %, 0 = menos del 25 %, null sin mensajes
 function txState(c) {
-  const n = c.txOk + c.txFail, own = n ? (c.txOk === n ? 2 : c.txOk === 0 ? 0 : 1) : null;
-  if (own == null) return c.txb == null ? null : c.txb;
-  return c.txb == null || c.txb === own ? own : 1;
+  const n = c.txOk + c.txFail, own = n ? 100 * c.txOk / n : null;
+  // mapa de cobertura: el % redondeado a decenas; los datos antiguos sin % solo traen la franja
+  const comm = c.txp != null ? c.txp : c.txb == null ? null : [0, 50, 100][c.txb];
+  const p = own == null ? comm : comm == null ? own : (own + comm) / 2;
+  return p == null ? null : p >= 75 ? 2 : p < 25 ? 0 : 1;
 }
 const TX_COLORS = ["#d93025", "#e6b31e", "#1fa64a"];
 
