@@ -796,13 +796,12 @@ function rowsView() {
 // Margen sobre el límite de descodificación de LoRa, que depende del SF (SF7 −7,5 dB … SF12 −20 dB)
 function sfLimit(sf) { return -7.5 - 2.5 * (sf - 7); }
 function marginOf(r) { return (r.snr == null || isNaN(r.snr) || !r.sf) ? null : r.snr - sfLimit(r.sf); }
+// Tres niveles, los mismos colores que la transmisión: verde buena, amarillo justa, rojo al límite
+// (la señal varía mucho con la antena, el momento y dónde está cada nodo: más detalle sería engañoso)
+const SIG_COLORS = ["#d93025", "#e6b31e", "#1fa64a"];
 function marginColor(m) {
   if (m === null || m === undefined || isNaN(m)) return "#8a94a3";
-  if (m >= 10) return "#1fa64a";
-  if (m >= 6) return "#9acd32";
-  if (m >= 3) return "#f2c230";
-  if (m >= 0) return "#f07f2e";
-  return "#d7352b";
+  return SIG_COLORS[m >= 6 ? 2 : m >= 0 ? 1 : 0];
 }
 let useMargin = false;   // se colorea por margen si todo lo mostrado tiene SF conocido
 function sigOf(r) { return useMargin ? marginOf(r) : r.snr; }
@@ -818,11 +817,9 @@ function drawLegendScale(sfs) {
   const to = " " + esc(t("to")) + " ", sw = c => '<span><i style="background:' + c + '"></i>';
   const minus = v => String(v).replace("-", "−");
   $("lgScale").innerHTML = sfs
-    ? sw("#1fa64a") + esc(t("lgMargin")) + " ≥ 10 dB</span>" + sw("#9acd32") + "6" + to + "10</span>" + sw("#f2c230") + "3" + to + "6</span>" +
-      sw("#f07f2e") + "0" + to + "3</span>" + sw("#d7352b") + "&lt; 0</span>" +
+    ? sw(SIG_COLORS[2]) + esc(t("lgMargin")) + " ≥ 6 dB</span>" + sw(SIG_COLORS[1]) + "0" + to + "6</span>" + sw(SIG_COLORS[0]) + "&lt; 0</span>" +
       '<span class="lgsf">(' + sfs.map(sf => esc(t("sfLimitTxt", sf, minus(sfLimit(sf))))).join(", ") + ")</span>"
-    : sw("#1fa64a") + "SNR ≥ 5</span>" + sw("#9acd32") + "0" + to + "5</span>" + sw("#f2c230") + "−5" + to + "0</span>" +
-      sw("#f07f2e") + "−10" + to + "−5</span>" + sw("#d7352b") + "&lt; −10</span>";
+    : sw(SIG_COLORS[2]) + "SNR ≥ 0</span>" + sw(SIG_COLORS[1]) + "−10" + to + "0</span>" + sw(SIG_COLORS[0]) + "&lt; −10</span>";
 }
 function fmtDist(d) { return d == null || isNaN(d) ? "—" : (d >= 1000 ? (d / 1000).toFixed(2) + " km" : Math.round(d) + " m"); }
 let bestNames = new Map();   // nodo → mejor nombre conocido (para tabla y popups)
@@ -1074,11 +1071,7 @@ function loadLeaflet() {
 }
 function snrColor(snr) {
   if (snr === null || snr === undefined || isNaN(snr)) return "#8a94a3";
-  if (snr >= 5) return "#1fa64a";
-  if (snr >= 0) return "#9acd32";
-  if (snr >= -5) return "#f2c230";
-  if (snr >= -10) return "#f07f2e";
-  return "#d7352b";
+  return SIG_COLORS[snr >= 0 ? 2 : snr >= -10 ? 1 : 0];
 }
 function fmtN(v, d) { return (v === null || v === undefined || isNaN(v)) ? "—" : (d ? Number(v).toFixed(d) : Math.round(v)); }
 // El mapa está siempre visible. Si no hay internet al abrir la página,
@@ -1454,7 +1447,7 @@ function txState(c) {
   const p = own == null ? comm : comm == null ? own : (own + comm) / 2;
   return p == null ? null : p >= 75 ? 2 : p < 25 ? 0 : 1;
 }
-const TX_COLORS = ["#d93025", "#e6b31e", "#1fa64a"];
+const TX_COLORS = SIG_COLORS;
 
 /* ---------- comparar dos SF ---------- */
 let cmpPick = { cmpA: null, cmpB: null };
