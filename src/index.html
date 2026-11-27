@@ -185,7 +185,7 @@
   .filt .dual-fill { background:#2f7df6; }
   .seg { display:inline-flex; border-radius:10px; overflow:hidden; border:1px solid #2a3340; }
   .seg button { box-sizing:border-box; height:27px; display:inline-flex; align-items:center; gap:5px; border-radius:0; padding:0 11px; font-size:16px; background:#1a2029; }
-  /* botones que se quedan pulsados (vista y mapa comunitario): hundidos, con borde azul por dentro */
+  /* botones que se quedan pulsados (vista y mapa de cobertura): hundidos, con borde azul por dentro */
   .seg button.on, #btnCommunity.on { background:#123760; color:#fff; box-shadow:inset 0 3px 6px #000c, inset 0 0 0 2px #4c9bff; }
   .seg button:not(.on) { color:#c9d1db; background:#2a3340; }
   /* deslizador de celda con el mismo aspecto que el de saltos (un solo botón) */
@@ -202,7 +202,9 @@
 .txm{width:18px;height:18px;border-radius:50%;border:2px solid #fff;color:#fff;font:700 12px/1 system-ui,sans-serif;display:flex;align-items:center;justify-content:center;box-shadow:0 0 3px rgba(0,0,0,.7);box-sizing:border-box}
 .txm.ok{background:#1fa64a}.txm.ko{background:#d93025}
 .leaflet-popup-content .plist{margin:4px 0 0;padding-left:18px}.leaflet-popup-content .plist li{margin:2px 0}
-.leaflet-popup-content .ptitle{font-weight:700;padding-bottom:3px;border-bottom:1px solid #8886}
+.leaflet-popup-content .ptitle{font-weight:700;padding-bottom:3px;margin-bottom:7px;border-bottom:1px solid #8886}
+.leaflet-popup-content .plist{margin-top:0}
+#map .leaflet-popup a.leaflet-popup-close-button{font-size:34px;width:40px;height:40px;line-height:40px;font-weight:400}
 .leaflet-popup-content .plist .pdot{margin:0}
 .leaflet-popup-content .pdot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:0;border:1px solid #0006}
 </style>
@@ -221,8 +223,8 @@
 <div class="btns">
   <button id="btnOpen" class="sec" data-i18n-title="openTitle">📂 <span data-i18n="open">Add Logs</span></button>
   <button id="btnClear" class="sec" data-i18n-title="clearTitle">🗑 <span data-i18n="clear">Clear</span></button>
-  <button id="btnExport" class="sec" data-i18n-title="exportTitle">📤 <span data-i18n="exportBtn">Export coverage</span></button>
-  <button id="btnCommunity" class="sec" data-i18n-title="communityTitle">🌍 <span data-i18n="communityBtn">Community map</span></button>
+  <button id="btnExport" class="sec" data-i18n-title="exportTitle">⬆️ <span data-i18n="exportBtn">Export coverage</span></button>
+  <button id="btnCommunity" class="sec" data-i18n-title="communityTitle">🗺️ <span data-i18n="communityBtn">Coverage map</span></button>
   <input type="file" id="fileAny" accept=".csv,.gpx,.txt,.json,text/csv,text/plain,application/gpx+xml,application/xml,text/xml,application/json" multiple hidden>
 </div>
 <div id="toast" hidden role="alert"></div>
@@ -238,7 +240,7 @@
       <button id="vDots" data-i18n-title="dotsTitle" data-i18n-aria="dotsTitle">🔵</button>
     </span>
     <span id="cmpWrap" class="filt cmpf" hidden>SF <select id="cmpA" data-i18n-aria="cmpA"></select> <span data-i18n="vs">vs</span> SF <select id="cmpB" data-i18n-aria="cmpB"></select></span>
-    <span id="ageWrap" class="filt agef" hidden data-i18n-title="ageTitle">🌍 <select id="selAge" data-i18n-aria="ageTitle"><option value="0" data-i18n="ageAll">All data</option><option value="12" data-i18n="age12">Last 12 months</option><option value="6" data-i18n="age6">Last 6 months</option><option value="3" data-i18n="age3">Last 3 months</option></select></span>
+    <span id="ageWrap" class="filt agef" hidden data-i18n-title="ageTitle">🗺️ <select id="selAge" data-i18n-aria="ageTitle"><option value="0" data-i18n="ageAll">All data</option><option value="12" data-i18n="age12">Last 12 months</option><option value="6" data-i18n="age6">Last 6 months</option><option value="3" data-i18n="age3">Last 3 months</option></select></span>
     <span class="filt hops" data-i18n-title="hopsTitle">
       <span class="lbl"><span data-i18n="hops">Hops</span>:</span> <span class="hv" id="hopsVal">0–7</span>
       <span class="dual" id="hopsDual">
@@ -249,7 +251,7 @@
     </span>
   </div>
   <div id="expPanel" class="exppanel" hidden>
-    <div class="exphead"><b>📤 <span data-i18n="expTitle">Export anonymous coverage</span></b><button id="btnExpClose" class="sec" data-i18n-aria="close">✕</button></div>
+    <div class="exphead"><b>⬆️ <span data-i18n="expTitle">Export anonymous coverage</span></b><button id="btnExpClose" class="sec" data-i18n-aria="close">✕</button></div>
     <div><span data-i18n="expWhat"></span> <a href="#" id="lnkPriv" data-i18n="expPrivLink">What is uploaded?</a></div>
     <div class="exprow"><span data-i18n="expRadius">Remove around start and end</span> <span class="filt privf"><span class="dual single"><span class="dual-track"></span><span class="dual-fill" id="privFill"></span><input type="range" id="rngPriv" min="0" max="2000" step="50" value="300" data-i18n-aria="expRadius"></span></span> <b id="privVal">300 m</b></div>
     <div id="expInfo"></div>
@@ -299,7 +301,7 @@
       <button data-p="0" data-i18n="tabWhat">What for</button>
       <button data-p="1" data-i18n="tabHow">How to use</button>
       <button data-p="2" data-i18n="tabFix">Troubleshooting</button>
-      <button data-p="3" data-i18n="tabComm">Community map</button>
+      <button data-p="3" data-i18n="tabComm">Coverage map</button>
       <button data-p="4" data-i18n="tabPriv">Privacy</button>
     </div>
     <div class="mbody" id="helpBody">
@@ -350,7 +352,7 @@
       <div>Lo anterior mide lo que <b>tu nodo oye</b>. Para saber si <b>la red te oye a ti</b>, durante la ruta manda de vez en cuando un mensaje corto a un canal (cada pocos minutos o en los puntos que te interesen; el texto da igual). Tu nodo escucha si algún nodo lo retransmite y la app lo apunta en el registro.</div>
       <ul>
         <li>En el mapa sale <b>✓ verde</b> donde la red lo oyó y <b>✗ roja</b> donde nadie lo retransmitió tras 3 intentos. Al pinchar una celda: «3 de 4 mensajes llegaron a la red».</li>
-        <li>El botón <b>📤 Transmisión</b> pinta la cuadrícula según la transmisión: verde si los mensajes <b>siempre</b> llegaron a la red, amarillo si <b>a veces</b> y rojo si <b>nunca</b>. Se exporta y se sube al mapa comunitario junto con la recepción (allí solo como siempre / a veces / nunca).</li>
+        <li>El botón <b>📤 Transmisión</b> pinta la cuadrícula según la transmisión: verde si los mensajes <b>siempre</b> llegaron a la red, amarillo si <b>a veces</b> y rojo si <b>nunca</b>. Se exporta y se sube al mapa de cobertura junto con la recepción (allí solo como siempre / a veces / nunca).</li>
         <li>Para no llenar el canal público de pruebas, mándalos a tu canal propio con PSK: los repetidores con la retransmisión por defecto también reenvían lo que no pueden leer.</li>
         <li>La hora es la del resultado: el ✓ llega en segundos, pero la ✗ puede llegar hasta un minuto después de enviarlo. Si vas en coche, la ✗ puede salir algo más adelante de donde la mandaste.</li>
       </ul>
@@ -367,7 +369,7 @@
         <li><b>Nodo</b>: en <b>📡 Enviado por</b>, los paquetes que envió un nodo. En <b>📶 Oído directamente</b>, lo que oíste directamente de un nodo, aunque fuera repitiendo paquetes de otros: su SNR sí es de ese nodo, así que es su cobertura real. «Mejor señal de cualquier nodo» pinta en cada celda el nodo que mejor se oye: la cobertura de la red. Aquí no cuentan los nodos en <b>CLIENT_MUTE</b> (según su rol en el registro): solo emiten y no repiten, así que no dan acceso a la red. Salen en «Enviado por», pero no aquí ni en lo que se exporta.</li>
         <li><b>Saltos</b>: deslizador doble con mínimo y máximo. Al abrir la página empieza en 0–7 (todo). 0–0 = solo lo que llega <b>directo</b>, que es lo que mide la cobertura de cada nodo. Sube el máximo para ver también lo repetido por otros nodos, o el mínimo para ver <b>solo</b> lo repetido. Con <b>📡 Enviado por</b>, lo repetido sale como <b>cuadrado negro</b>: su SNR es el del último salto, no el del nodo de origen.</li>
         <li><b>🗑 Limpiar</b>: quita del mapa todo lo abierto.</li>
-        <li><b>📤 Exportar cobertura</b> y <b>🌍 Mapa comunitario</b>: ver la pestaña «Mapa comunitario».</li>
+        <li><b>⬆️ Exportar cobertura</b> y <b>🗺️ Mapa de cobertura</b>: ver la pestaña «Mapa de cobertura».</li>
         <li>En el mapa: capas (topográfico, satélite, relieve…) y ⛶ pantalla completa.</li>
       </ul>
     </div>
@@ -388,11 +390,11 @@
     </div>
 
     <div class="page" data-p="3" data-lang="es" hidden>
-      <h3>🌍 Mapa de cobertura comunitario</h3>
+      <h3>🗺️ Mapa de cobertura</h3>
       <div>Un mapa común de la <b>cobertura real de la red</b>, hecho entre todas/os: cada persona que hace un recorrido con su nodo suma sus celdas, y el mapa se va completando zona a zona.</div>
       <h3>👀 Verlo</h3>
-      <div>Pulsa <b>🌍 Mapa comunitario</b>. Se carga en <b>cuadrícula de 250 m</b>: cada celda sale del color del nodo que mejor se oye allí. Las celdas grises son sitios por los que alguien pasó <b>sin recibir nada</b>. Puedes sumarle tus propios registros con <b>📂 Añadir registros</b> sin subirlos.</div>
-      <div>Cada nuevo recorrido que pasa por una celda se suma a su media, así que su color se va afinando con cada pase. Al <b>tocar una celda</b> se ven los paquetes, la mediana de SNR y de RSSI y la fiabilidad (baja, media o alta), con las pasadas (1, 2–4 o 5+) y el mes del último dato. En 📤 Transmisión se ve si los mensajes llegaron a la red siempre, a veces o nunca. Las celdas <b>rayadas</b> tienen fiabilidad baja (una sola pasada). Con el selector <b>🌍 Todos los datos / Últimos 12, 6 o 3 meses</b> se quitan los datos antiguos, por si la red ha cambiado (cuenta el mes en que se grabó el registro).</div>
+      <div>Pulsa <b>🗺️ Mapa de cobertura</b>. Se carga en <b>cuadrícula de 250 m</b>: cada celda sale del color del nodo que mejor se oye allí. Las celdas grises son sitios por los que alguien pasó <b>sin recibir nada</b>. Puedes sumarle tus propios registros con <b>📂 Añadir registros</b> sin subirlos.</div>
+      <div>Cada nuevo recorrido que pasa por una celda se suma a su media, así que su color se va afinando con cada pase. Al <b>tocar una celda</b> se ven los paquetes, la mediana de SNR y de RSSI y la fiabilidad (baja, media o alta), con las pasadas (1, 2–4 o 5+) y el mes del último dato. En 📤 Transmisión se ve el % aproximado (en decenas) de mensajes que llegaron a la red. Las celdas <b>rayadas</b> tienen fiabilidad baja (una sola pasada). Con el selector <b>🗺️ Todos los datos / Últimos 12, 6 o 3 meses</b> se quitan los datos antiguos, por si la red ha cambiado (cuenta el mes en que se grabó el registro).</div>
       <h3>🚶 Aportar tu recorrido</h3>
       <ol>
         <li>Prepara el nodo de ruta como en «Cómo usar → Cobertura general de la red»: <b>mismos ajustes de radio que la red</b>, GPS activado con actualización cada 20–30 s y «posición inteligente» desactivada. El intervalo de difusión puede quedar en «unset» o largo: así tampoco emites tu recorrido en directo.</li>
@@ -400,7 +402,7 @@
         <li><b>Si tu nodo no tiene GPS</b>: en la app, activa <b>Ajustes › «Proporcionar la ubicación del teléfono a la malla»</b>: el nodo usa la posición del móvil. Si aun así el registro no trae tu recorrido, graba la ruta con cualquier app de rutas del móvil, expórtala en <b>GPX</b> y abre el <code>.gpx</code> junto con el <code>.txt</code> (en cualquier orden): los paquetes sin posición se colocan según la hora del GPX.</li>
         <li>En la app Meshtastic conviene vaciar el registro antes de la ruta si tienes un registro anterior largo en condiciones de nodo, antena… muy diferentes a lo habitual. Se hace en Ajustes → Panel de depuración → Borrar. Haz el recorrido con la pantalla apagada y al volver <b>exporta</b> el registro.</li>
         <li>Aquí, <b>📂 Añadir registros</b> con ese <code>.txt</code>.</li>
-        <li>Pulsa <b>📤 Exportar cobertura</b>. El mapa pasa a mostrar <b>exactamente lo que se va a compartir</b>: «Mejor señal de cualquier nodo», celdas de 250 m.</li>
+        <li>Pulsa <b>⬆️ Exportar cobertura</b>. El mapa pasa a mostrar <b>exactamente lo que se va a compartir</b>: «Mejor señal de cualquier nodo», celdas de 250 m.</li>
         <li>Mueve el deslizador <b>«Quitar alrededor del inicio y del final»</b> hasta que no quede ninguna celda cerca de tu casa: las celdas desaparecen del mapa según lo subes (círculos rojos).</li>
         <li>Pulsa <b>☁️ Subir a la comunidad</b> y confirma. Se suma al momento al mapa común. Si prefieres no subirlo, <b>💾 Descargar archivo</b> guarda el mismo <code>.json</code> para compartirlo a mano; quien lo reciba lo abre con <b>📂 Añadir registros</b>.</li>
       </ol>
@@ -426,14 +428,14 @@
       <ul>
         <li>Ni el recorrido, ni horas, ni días, ni el orden en que pasaste.</li>
         <li>Nada cerca de donde empieza y acaba cada ruta, ni de donde te paraste más de 5 min (círculos rojos; tú eliges el radio). Cada círculo se desplaza al azar y crece un poco, para que el centro del hueco no coincida con tu casa.</li>
-        <li>El mapa comunitario no publica números exactos de pasadas, solo franjas (1, 2–4, 5 o más) y si se recibió siempre, a veces o nunca: con pocas personas subiendo, los números exactos alrededor de un hueco darían pistas. Y mientras haya menos de 5 subidas en total, no publica ni eso.</li>
+        <li>El mapa de cobertura no publica números exactos de pasadas, solo franjas (1, 2–4, 5 o más) si se recibió siempre, a veces o nunca y el % de transmisión redondeado a decenas: con pocas personas subiendo, los números exactos alrededor de un hueco darían pistas. Y mientras haya menos de 5 subidas en total, no publica ni eso.</li>
         <li>Ni tu nombre, ni tu nodo, ni tu móvil, ni ningún dato de cuenta.</li>
       </ul>
       <h3>🔍 Cómo comprobarlo antes</h3>
       <div>Pulsa <b>💾 Descargar archivo</b>: es exactamente lo mismo que se subiría. Ábrelo con cualquier editor de texto, o vuelve a abrirlo aquí con <b>📂 Añadir registros</b> en una página limpia, y mira en el mapa que no hay celdas cerca de tu casa. Si no te convence, sube el radio o no lo subas.</div>
-      <h3>🌍 Qué pasa con lo subido</h3>
+      <h3>🗺️ Qué pasa con lo subido</h3>
       <ul>
-        <li>Se suma al <b>mapa comunitario</b>, que es <b>público</b>: cualquiera puede verlo y descargarlo.</li>
+        <li>Se suma al <b>mapa de cobertura</b>, que es <b>público</b>: cualquiera puede verlo y descargarlo.</li>
         <li>Cada subida se guarda como un archivo aparte. Para evitar abusos, el servidor guarda durante una hora una huella (hash) de la IP (no la IP), solo para limitar a 6 subidas por hora. El alojamiento web, como cualquier web, puede guardar registros técnicos de acceso.</li>
         <li>No hay cuentas, así que la página no puede saber qué subida es tuya. Si quieres que se retire algo, abre una incidencia en <a href="https://github.com/flydecision/meshcover/issues" target="_blank" rel="noopener">GitHub</a> indicando la zona y la fecha aproximada.</li>
       </ul>
@@ -485,7 +487,7 @@
       <div>The above measures what <b>your node hears</b>. To know whether <b>the mesh hears you</b>, send a short message to a channel now and then during the route (every few minutes or at the places you care about; the text does not matter). Your node listens for another node relaying it and the app writes it in the log.</div>
       <ul>
         <li>The map shows a <b>green ✓</b> where the mesh heard it and a <b>red ✗</b> where nobody relayed it after 3 tries. Tap a cell: «3 of 4 messages reached the mesh».</li>
-        <li>The <b>📤 Transmission</b> button colours the grid by transmission: green if the messages <b>always</b> reached the mesh, yellow if <b>sometimes</b> and red if <b>never</b>. It is exported and uploaded to the community map along with reception (there only as always / sometimes / never).</li>
+        <li>The <b>📤 Transmission</b> button colours the grid by transmission: green if the messages <b>always</b> reached the mesh, yellow if <b>sometimes</b> and red if <b>never</b>. It is exported and uploaded to the coverage map along with reception (there only as always / sometimes / never).</li>
         <li>To avoid filling the public channel with tests, send them to your own channel with a PSK: repeaters with the default rebroadcast mode also forward what they cannot read.</li>
         <li>The time is that of the result: the ✓ comes within seconds, but the ✗ can come up to a minute after sending. In a car, the ✗ may appear a bit further on than where you sent it.</li>
       </ul>
@@ -502,7 +504,7 @@
         <li><b>Node</b>: under <b>📡 Sent by</b>, the packets a node sent. Under <b>📶 Heard directly</b>, what you heard directly from a node, even when it was relaying other nodes' packets: that SNR does belong to that node, so it is its real coverage. «Best signal of any node» paints each cell with the node heard best: the coverage of the mesh. Nodes in <b>CLIENT_MUTE</b> (by their role in the log) do not count here: they only transmit and do not relay, so they give no access to the mesh. They show under «Sent by», but not here or in what is exported.</li>
         <li><b>Hops</b>: double slider with minimum and maximum. It starts at 0–7 (everything). 0–0 = only what arrives <b>directly</b>, which is what measures each node's coverage. Raise the maximum to also see packets relayed by other nodes, or the minimum to see <b>only</b> relayed ones. With <b>📡 Sent by</b>, relayed packets show as a <b>black square</b>: their SNR is the last hop's, not the origin node's.</li>
         <li><b>🗑 Clear</b>: removes everything opened from the map.</li>
-        <li><b>📤 Export coverage</b> and <b>🌍 Community map</b>: see the «Community map» tab.</li>
+        <li><b>⬆️ Export coverage</b> and <b>🗺️ Coverage map</b>: see the «Coverage map» tab.</li>
         <li>On the map: layers (topographic, satellite, hillshade…) and ⛶ full screen.</li>
       </ul>
     </div>
@@ -522,11 +524,11 @@
       </ul>
     </div>
     <div class="page" data-p="3" data-lang="en" hidden>
-      <h3>🌍 Community coverage map</h3>
+      <h3>🗺️ Coverage map</h3>
       <div>A shared map of the <b>real coverage of the network</b>, built by everyone: each person who does a route with their node adds their cells, and the map fills in area by area.</div>
       <h3>👀 Viewing it</h3>
-      <div>Press <b>🌍 Community map</b>. It loads as a <b>250 m grid</b>: each cell takes the colour of the node heard best there. Grey cells are places someone passed <b>without receiving anything</b>. You can add your own logs on top with <b>📂 Add Logs</b> without uploading them.</div>
-      <div>Each new route through a cell adds to its average, so its colour gets more accurate with every pass. <b>Tap a cell</b> to see its packets, median SNR and RSSI and the reliability (low, medium or high), with the passes (1, 2–4 or 5+) and the month of the last data. In 📤 Transmission it shows whether messages reached the mesh always, sometimes or never. <b>Striped</b> cells have low reliability (a single pass). The <b>🌍 All data / Last 12, 6 or 3 months</b> selector removes old data, in case the mesh has changed (it uses the month the log was recorded).</div>
+      <div>Press <b>🗺️ Coverage map</b>. It loads as a <b>250 m grid</b>: each cell takes the colour of the node heard best there. Grey cells are places someone passed <b>without receiving anything</b>. You can add your own logs on top with <b>📂 Add Logs</b> without uploading them.</div>
+      <div>Each new route through a cell adds to its average, so its colour gets more accurate with every pass. <b>Tap a cell</b> to see its packets, median SNR and RSSI and the reliability (low, medium or high), with the passes (1, 2–4 or 5+) and the month of the last data. In 📤 Transmission it shows the approximate % (in tens) of messages that reached the mesh. <b>Striped</b> cells have low reliability (a single pass). The <b>🗺️ All data / Last 12, 6 or 3 months</b> selector removes old data, in case the mesh has changed (it uses the month the log was recorded).</div>
       <h3>🚶 Contributing your route</h3>
       <ol>
         <li>Set up the route node as in «How to use → General coverage of the mesh»: <b>same radio settings as the network</b>, GPS on with updates every 20–30 s and «smart position» off. The broadcast interval can stay «unset» or long: that way you do not broadcast your route live either.</li>
@@ -534,7 +536,7 @@
         <li><b>If your node has no GPS</b>: in the app, turn on <b>Settings › «Provide location to mesh»</b>: the node uses the phone's position. If the log still has no track, record the route with any route app on your phone, export it as <b>GPX</b> and open the <code>.gpx</code> together with the <code>.txt</code> (in any order): packets without a position are placed by the time in the GPX.</li>
         <li>In the Meshtastic app, it is worth clearing the log before the route if you have a long earlier log made with a very different node, antenna… than usual. It is done in Settings → Debug panel → Clear. Do the route with the screen off and, back home, <b>export</b> the log.</li>
         <li>Here, <b>📂 Add Logs</b> with that <code>.txt</code>.</li>
-        <li>Press <b>📤 Export coverage</b>. The map now shows <b>exactly what will be shared</b>: «Best signal of any node», 250 m cells.</li>
+        <li>Press <b>⬆️ Export coverage</b>. The map now shows <b>exactly what will be shared</b>: «Best signal of any node», 250 m cells.</li>
         <li>Move the <b>«Remove around start and end»</b> slider until no cell is left near your home: cells disappear from the map as you raise it (red circles).</li>
         <li>Press <b>☁️ Upload to community</b> and confirm. It is added to the shared map right away. If you prefer not to upload it, <b>💾 Download file</b> saves the same <code>.json</code> to share by hand; whoever gets it opens it with <b>📂 Add Logs</b>.</li>
       </ol>
@@ -560,14 +562,14 @@
       <ul>
         <li>No track, no times, no days, no order in which you passed.</li>
         <li>Nothing near where each route starts and ends, or where you stopped for more than 5 min (red circles; you choose the radius). Each circle is shifted at random and grows a little, so the centre of the gap is not your home.</li>
-        <li>The community map does not publish exact numbers of passes, only ranges (1, 2–4, 5 or more) and whether reception was always, sometimes or never: with few people uploading, exact numbers around a gap would give clues. And while there are fewer than 5 uploads in total, it does not publish even that.</li>
+        <li>The coverage map does not publish exact numbers of passes, only ranges (1, 2–4, 5 or more) whether reception was always, sometimes or never and the transmission % rounded to tens: with few people uploading, exact numbers around a gap would give clues. And while there are fewer than 5 uploads in total, it does not publish even that.</li>
         <li>Not your name, your node, your phone or any account data.</li>
       </ul>
       <h3>🔍 How to check it first</h3>
       <div>Press <b>💾 Download file</b>: it is exactly what would be uploaded. Open it with any text editor, or open it again here with <b>📂 Add Logs</b> on a clean page and check on the map that there are no cells near your home. If you are not happy, raise the radius or do not upload it.</div>
-      <h3>🌍 What happens to uploads</h3>
+      <h3>🗺️ What happens to uploads</h3>
       <ul>
-        <li>They are added to the <b>community map</b>, which is <b>public</b>: anyone can view and download it.</li>
+        <li>They are added to the <b>coverage map</b>, which is <b>public</b>: anyone can view and download it.</li>
         <li>Each upload is stored as a separate file. To prevent abuse, the server keeps a fingerprint (hash) of the IP (not the IP) for one hour, only to limit uploads to 6 per hour. The web host, like any website, may keep technical access logs.</li>
         <li>There are no accounts, so the page cannot tell which upload is yours. If you want something removed, open an issue on <a href="https://github.com/flydecision/meshcover/issues" target="_blank" rel="noopener">GitHub</a> with the area and approximate date.</li>
       </ul>
@@ -633,10 +635,10 @@ const I18N = {
     to: "to", track: "Track", noRx: "No reception", nodeIcon: "Node",
     statRows: "Records", statDur: "Duration",
     thDate: "Date and time", thType: "Type",
-    tabWhat: "What for", tabHow: "How to use", tabFix: "Troubleshooting", tabComm: "Community map", noShow: "Don't show again", cancel: "Cancel",
+    tabWhat: "What for", tabHow: "How to use", tabFix: "Troubleshooting", tabComm: "Coverage map", noShow: "Don't show again", cancel: "Cancel",
     introOpenTitle: "📂 Add Logs", introOpenGo: "Choose file",
     introOpenBody: "<div>Open the <code>.txt</code> log exported from the official <b>Meshtastic</b> app:</div><div style=\"margin:8px 0\"><b>Settings › Debug panel › Packets › «Export logs»</b> button.</div><div>Each file is added to what is already on the map. You can also open coverage files (<code>.json</code>) shared by other people, and CSV/GPX from older versions of this page. Nothing leaves your device: the file is read in the browser.</div>",
-    introExpTitle: "📤 Export coverage", introExpGo: "Continue",
+    introExpTitle: "⬆️ Export coverage", introExpGo: "Continue",
     introExpBody: "<ol><li>The map will show <b>exactly what will be shared</b>: best signal of any node, in 250 m cells.</li><li>Move the <b>«Remove around start and end»</b> slider until no cell is left near your home (red circles).</li><li>Then <b>💾 Download file</b> to share it yourself, or <b>☁️ Upload to community</b> to add it to the shared map.</li></ol><div>Only cells are saved: no track, no times and no node names.</div>", tabPriv: "Privacy", prev: "Previous", next: "Next",
     packets: n => n === 1 ? "packet" : "packets",
     offline: "no connection",
@@ -655,7 +657,7 @@ const I18N = {
     txOk: "✓ The mesh heard it: a node relayed or acknowledged it.", txKo: "✗ Nobody relayed it after 3 tries.", lgTx: "Message sent: mesh heard it / nobody",
     commFew: "There are still few uploads: passes and reliability will show when there are more.", commPass1: "1 pass", commPass2: "2–4 passes", commPass5: "5 or more passes", commRx: "reception", rxNever: "never", rxSome: "sometimes", rxAll: "always", reliability: "Reliability",
     relLow: "Low", relMid: "Medium", relHigh: "High", passes: "Passes", lastShort: "Last data", relFew: "not enough uploads yet",
-    pSnr: m => "Median SNR: <b>" + m + " dB</b>", pMargin: m => "Median margin: <b>" + m + " dB</b>", pRssi: m => "Median RSSI: <b>" + m + " dBm</b>", pTx: (a, n) => "Messages sent OK: <b>" + a + "</b> of <b>" + n + "</b>", pTxBand: b => "Messages sent OK: " + b, lastData: "Newest data", expected: n => "About " + n + " packets were expected",
+    pSnr: m => "Median SNR: <b>" + m + "</b> dB", pMargin: m => "Median margin: <b>" + m + "</b> dB", pRssi: m => "Median RSSI: <b>" + m + "</b> dBm", pTx: p => "Messages sent OK: <b>" + p + " %</b> (approx.)", pTxBand: b => "Messages sent OK: " + b, lastData: "Newest data", expected: n => "About " + n + " packets were expected",
     gpsPos: "GPS position", lastHop: "from the last hop, not the origin node", distance: "distance",
     direct: "direct", nHops: n => n + (n === 1 ? " hop" : " hops"), routePos: "position of the route node",
     errEmpty: "the file is empty", errCsv: "it does not look like a CSV from this page",
@@ -666,12 +668,12 @@ const I18N = {
     dropHere: "📂 Drop the files here", lowPrec: m => "⚠️ Your node's positions come with reduced precision (~" + m + "), so they are not used for the route or the cells. In the app, turn on position with full precision only on a channel of your own with a key (primary or secondary), and turn it off on the public channel.", errGpx: "the file is not a valid GPX",
     errNoTrack: "it has no track points", errOpen: (f, m) => "Could not open " + f + ": " + m,
     nodeSearch: "Search node", noMatch: "No node matches",
-    ageTitle: "Age of the community map data", ageAll: "All data", age12: "Last 12 months", age6: "Last 6 months", age3: "Last 3 months",
-    communityBtn: "Community map", communityTitle: "Add the shared coverage map uploaded by everyone",
-    expUp: "Upload to community", expPrivLink: "What exactly is saved or uploaded?", upConfirm: n => "Upload these " + n + " cells to the public community map? They are added for everyone.\n\nPrivacy: the uploaded file contains no personal data, but you can check it first by downloading it with the «Download file» button and opening it with any text editor, or by reviewing the open source code, yourself or with an AI, at https://github.com/flydecision/meshcover",
-    upOk: n => "✅ Uploaded: " + n + " cells added to the community map. Thanks!", upBusy: "Uploading…",
-    upErr: m => "Could not upload (" + m + ").", upRate: "too many uploads from your connection, try again in an hour", upDup: "this file is already on the community map",
-    commEmpty: "The community map is still empty.", commErr: m => "Could not load the community map (" + m + ").", commName: "Community map",
+    ageTitle: "Age of the coverage map data", ageAll: "All data", age12: "Last 12 months", age6: "Last 6 months", age3: "Last 3 months",
+    communityBtn: "Coverage map", communityTitle: "Add the shared coverage map uploaded by everyone",
+    expUp: "Upload to community", expPrivLink: "What exactly is saved or uploaded?", upConfirm: n => "Upload these " + n + " cells to the public coverage map? They are added for everyone.\n\nPrivacy: the uploaded file contains no personal data, but you can check it first by downloading it with the «Download file» button and opening it with any text editor, or by reviewing the open source code, yourself or with an AI, at https://github.com/flydecision/meshcover",
+    upOk: n => "✅ Uploaded: " + n + " cells added to the coverage map. Thanks!", upBusy: "Uploading…",
+    upErr: m => "Could not upload (" + m + ").", upRate: "too many uploads from your connection, try again in an hour", upDup: "this file is already on the coverage map",
+    commEmpty: "The coverage map is still empty.", commErr: m => "Could not load the coverage map (" + m + ").", commName: "Coverage map",
     exportBtn: "Export coverage", exportTitle: "Save the coverage of what is open as an anonymous file to share",
     expTitle: "Export anonymous coverage", expRadius: "Remove around start and end", expGo: "Download file",
     expWhat: "Only the grid cells are saved (signal of each node heard and cells with no reception). No track, no times and nothing near where each route starts and ends (or stops for more than 5 min), where your home may be.",
@@ -709,10 +711,10 @@ const I18N = {
     to: "a", track: "Recorrido", noRx: "Sin recepción", nodeIcon: "Nodo",
     statRows: "Registros", statDur: "Duración",
     thDate: "Fecha y hora", thType: "Tipo",
-    tabWhat: "Para qué", tabHow: "Cómo usar", tabFix: "Soluciones", tabComm: "Mapa comunitario", noShow: "No volver a mostrar", cancel: "Cancelar",
+    tabWhat: "Para qué", tabHow: "Cómo usar", tabFix: "Soluciones", tabComm: "Mapa de cobertura", noShow: "No volver a mostrar", cancel: "Cancelar",
     introOpenTitle: "📂 Añadir registros", introOpenGo: "Elegir archivo",
     introOpenBody: "<div>Abre el registro <code>.txt</code> exportado desde la app oficial de <b>Meshtastic</b>:</div><div style=\"margin:8px 0\"><b>Configuración › Panel de depuración › Packets ›</b> botón <b>«Exportar registros»</b>.</div><div>Cada archivo se suma a lo que ya hay en el mapa. También puedes abrir archivos de cobertura (<code>.json</code>) compartidos por otras personas, y CSV/GPX de versiones anteriores de esta página. Nada sale de tu dispositivo: el archivo se lee en el navegador.</div>",
-    introExpTitle: "📤 Exportar cobertura", introExpGo: "Continuar",
+    introExpTitle: "⬆️ Exportar cobertura", introExpGo: "Continuar",
     introExpBody: "<ol><li>El mapa mostrará <b>exactamente lo que se va a compartir</b>: la mejor señal de cualquier nodo, en celdas de 250 m.</li><li>Mueve el deslizador <b>«Quitar alrededor del inicio y del final»</b> hasta que no quede ninguna celda cerca de tu casa (círculos rojos).</li><li>Después, <b>💾 Descargar archivo</b> para compartirlo tú, o <b>☁️ Subir a la comunidad</b> para sumarlo al mapa común.</li></ol><div>Solo se guardan celdas: sin recorrido, sin horas y sin nombres de nodos.</div>", tabPriv: "Privacidad", prev: "Anterior", next: "Siguiente",
     packets: n => n === 1 ? "packet" : "packets",
     offline: "sin conexión",
@@ -731,7 +733,7 @@ const I18N = {
     txOk: "✓ La red lo oyó: un nodo lo retransmitió o lo confirmó.", txKo: "✗ Nadie lo retransmitió tras 3 intentos.", lgTx: "Mensaje enviado: la red lo oyó / nadie",
     commFew: "Aún hay pocas subidas: las pasadas y la fiabilidad se mostrarán cuando haya más.", commPass1: "1 pasada", commPass2: "2–4 pasadas", commPass5: "5 pasadas o más", commRx: "recepción", rxNever: "nunca", rxSome: "a veces", rxAll: "siempre", reliability: "Fiabilidad",
     relLow: "Baja", relMid: "Media", relHigh: "Alta", passes: "Pasadas", lastShort: "Último dato", relFew: "aún hay pocas subidas",
-    pSnr: m => "Mediana de SNR: <b>" + m + " dB</b>", pMargin: m => "Mediana del margen: <b>" + m + " dB</b>", pRssi: m => "Mediana de RSSI: <b>" + m + " dBm</b>", pTx: (a, n) => "Mensajes transmitidos ok: <b>" + a + "</b> de <b>" + n + "</b>", pTxBand: b => "Mensajes transmitidos ok: " + b, lastData: "Dato más reciente", expected: n => "Se esperaban ≈ " + n + " paquetes",
+    pSnr: m => "Mediana de SNR: <b>" + m + "</b> dB", pMargin: m => "Mediana del margen: <b>" + m + "</b> dB", pRssi: m => "Mediana de RSSI: <b>" + m + "</b> dBm", pTx: p => "Mensajes transmitidos ok: <b>" + p + " %</b> (aprox.)", pTxBand: b => "Mensajes transmitidos ok: " + b, lastData: "Dato más reciente", expected: n => "Se esperaban ≈ " + n + " paquetes",
     gpsPos: "Posición GPS", lastHop: "del último salto, no del nodo de origen", distance: "distancia",
     direct: "directo", nHops: n => n + (n === 1 ? " salto" : " saltos"), routePos: "posición del nodo de ruta",
     errEmpty: "el archivo está vacío", errCsv: "no parece un CSV de esta página",
@@ -742,12 +744,12 @@ const I18N = {
     dropHere: "📂 Suelta aquí los archivos", lowPrec: m => "⚠️ Las posiciones de tu nodo vienen con precisión reducida (~" + m + "), así que no se usan para el recorrido ni para las celdas. En la app, activa la posición con precisión completa solo en un canal propio con clave (primario o secundario), y desactívala en el público.", errGpx: "el archivo no es un GPX válido",
     errNoTrack: "no tiene puntos de recorrido", errOpen: (f, m) => "No se pudo abrir " + f + ": " + m,
     nodeSearch: "Buscar nodo", noMatch: "Ningún nodo coincide",
-    ageTitle: "Antigüedad de los datos del mapa comunitario", ageAll: "Todos los datos", age12: "Últimos 12 meses", age6: "Últimos 6 meses", age3: "Últimos 3 meses",
-    communityBtn: "Mapa comunitario", communityTitle: "Añadir el mapa de cobertura compartido que ha subido todo el mundo",
-    expUp: "Subir a la comunidad", expPrivLink: "¿Qué se guarda o sube exactamente?", upConfirm: n => "¿Subir estas " + n + " celdas al mapa comunitario público? Se suman para todo el mundo.\n\nPrivacidad: el archivo que se sube no lleva ningún dato personal, pero puedes revisarlo antes descargándolo con el botón «Descargar archivo» y abriéndolo con cualquier editor de texto, o consultando el código abierto, por tu cuenta o con una IA, en https://github.com/flydecision/meshcover",
-    upOk: n => "✅ Subido: " + n + " celdas añadidas al mapa comunitario. ¡Gracias!", upBusy: "Subiendo…",
-    upErr: m => "No se pudo subir (" + m + ").", upRate: "demasiadas subidas desde tu conexión, prueba dentro de una hora", upDup: "este archivo ya está en el mapa comunitario",
-    commEmpty: "El mapa comunitario aún está vacío.", commErr: m => "No se pudo cargar el mapa comunitario (" + m + ").", commName: "Mapa comunitario",
+    ageTitle: "Antigüedad de los datos del mapa de cobertura", ageAll: "Todos los datos", age12: "Últimos 12 meses", age6: "Últimos 6 meses", age3: "Últimos 3 meses",
+    communityBtn: "Mapa de cobertura", communityTitle: "Añadir el mapa de cobertura compartido que ha subido todo el mundo",
+    expUp: "Subir a la comunidad", expPrivLink: "¿Qué se guarda o sube exactamente?", upConfirm: n => "¿Subir estas " + n + " celdas al mapa de cobertura público? Se suman para todo el mundo.\n\nPrivacidad: el archivo que se sube no lleva ningún dato personal, pero puedes revisarlo antes descargándolo con el botón «Descargar archivo» y abriéndolo con cualquier editor de texto, o consultando el código abierto, por tu cuenta o con una IA, en https://github.com/flydecision/meshcover",
+    upOk: n => "✅ Subido: " + n + " celdas añadidas al mapa de cobertura. ¡Gracias!", upBusy: "Subiendo…",
+    upErr: m => "No se pudo subir (" + m + ").", upRate: "demasiadas subidas desde tu conexión, prueba dentro de una hora", upDup: "este archivo ya está en el mapa de cobertura",
+    commEmpty: "El mapa de cobertura aún está vacío.", commErr: m => "No se pudo cargar el mapa de cobertura (" + m + ").", commName: "Mapa de cobertura",
     exportBtn: "Exportar cobertura", exportTitle: "Guardar la cobertura de lo abierto en un archivo anónimo para compartir",
     expTitle: "Exportar cobertura anónima", expRadius: "Quitar alrededor del inicio y del final", expGo: "Descargar archivo",
     expWhat: "Solo se guardan las celdas de la cuadrícula (señal de cada nodo oído y celdas sin recepción). Sin recorrido, sin horas y sin nada cerca de donde empieza y acaba cada ruta (o se para más de 5 min), donde puede estar tu casa.",
@@ -988,6 +990,7 @@ function linkScroll(a, b) { a.addEventListener("scroll", () => { if (b.scrollLef
 function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;"); }
 
 async function openFiles(list) {
+  keepUrlView = false;   // con registros propios sí se centra el mapa en ellos
   for (const f of list) {
     const head = await f.slice(0, 2000).text();
     const isGpx = /\.gpx$/i.test(f.name) || (!/\.csv$/i.test(f.name) && /^\s*</.test(head));
@@ -1052,13 +1055,14 @@ const LEAFLET_SRC = [
   ["https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js", "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"],
   ["https://unpkg.com/leaflet@1.9.4/dist/leaflet.js", "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"]
 ];
+let keepUrlView = false;
 let map = null, mapLayer = null, mapOn = false, mapDirty = true, mapFitted = false;
 let fileRows = null, fileNames = [], fileTracks = [];
-let fileTxCells = [];   // transmisión por celda de archivos de cobertura (.json propio: {ok, n}; mapa comunitario: franja b)
+let fileTxCells = [];   // transmisión por celda de archivos de cobertura (.json propio: {ok, n}; mapa de cobertura: franja b)
 let fileTx = [];        // mensajes enviados con su resultado (transmisión: ¿te oyó la red?)
 let fileVisited = [];   // centros de celdas sin recepción de archivos de cobertura importados
 let mapView = "grid";
-const cellSize = 250;   // tamaño fijo de celda: el mismo que el de la exportación y el mapa comunitario
+const cellSize = 250;   // tamaño fijo de celda: el mismo que el de la exportación y el mapa de cobertura
 function saveMapPrefs() { try { localStorage.setItem("rangetest_mapprefs_v1", JSON.stringify({ mapView })); } catch (e) {} }
 function loadMapPrefs() {
   try {
@@ -1068,11 +1072,14 @@ function loadMapPrefs() {
   showView();
   $("rngHops").value = String(maxHops); $("rngHopsMin").value = String(minHops); showHops();
 }
+// los botones de vista solo se ven hundidos cuando hay algo en el mapa
+function hasMapData() { return !!(fileRows || fileTracks.length || fileVisited.length || fileTx.length || fileTxCells.length); }
 function showView() {
-  $("vDots").classList.toggle("on", mapView === "dots");
-  $("vGrid").classList.toggle("on", mapView === "grid");
-  $("vCmp").classList.toggle("on", mapView === "cmp");
-  $("vTx").classList.toggle("on", mapView === "tx");
+  const d = hasMapData();
+  $("vDots").classList.toggle("on", d && mapView === "dots");
+  $("vGrid").classList.toggle("on", d && mapView === "grid");
+  $("vCmp").classList.toggle("on", d && mapView === "cmp");
+  $("vTx").classList.toggle("on", d && mapView === "tx");
   $("cmpWrap").hidden = mapView !== "cmp" || $("vCmp").hidden;
 }
 function setView(v) { mapView = v; showView(); saveMapPrefs(); mapDirty = true; dirtyRender = true; }
@@ -1141,7 +1148,17 @@ async function initMap() {
   addLayersControl();
   map.on("zoomend", () => { if (mapView === "grid") { mapDirty = true; drawMap(false, true); } });
   map.on("popupclose", () => { if (pendingRedraw) setTimeout(() => { mapDirty = true; drawMap(false); }, 0); });
-  map.setView([40.4, -3.7], 6);
+  // la URL lleva la vista del mapa (?lat=…&lon=…&zoom=…) para poder compartir un área
+  const q = new URLSearchParams(location.search), qlat = parseFloat(q.get("lat")), qlon = parseFloat(q.get("lon")), qz = parseFloat(q.get("zoom"));
+  if (isFinite(qlat) && isFinite(qlon) && Math.abs(qlat) <= 90 && Math.abs(qlon) <= 180) {
+    map.setView([qlat, qlon], isFinite(qz) ? Math.min(20, Math.max(1, qz)) : 12);
+    keepUrlView = true;   // no mover el mapa a los datos (p. ej. al cargar el mapa de cobertura): se respeta el área compartida
+  } else map.setView([40.4, -3.7], 6);
+  map.on("moveend", () => {
+    const c = map.getCenter(), u = new URL(location.href);
+    u.searchParams.set("lat", c.lat.toFixed(4)); u.searchParams.set("lon", c.lng.toFixed(4)); u.searchParams.set("zoom", map.getZoom().toFixed(2));
+    try { history.replaceState(null, "", u); } catch (e) {}
+  });
 }
 
 /* Leaflet.SmoothWheelZoom (mutsuyuki, licencia MIT), integrado aquí para no
@@ -1334,7 +1351,7 @@ function buildGrid(rows, tracks, size) {
   for (const x of txVisible()) { const c = cell(key(x.lat, x.lon)); c.visited = true; c.own = true; if (x.ok) c.txOk++; else c.txFail++; }
   if (!exportPreviewOn()) for (const x of fileTxCells) {
     const c = cell(key(x.lat, x.lon)); c.visited = true;
-    if (x.b != null) { c.comm = true; c.txb = c.txb == null ? x.b : (c.txb === x.b ? x.b : 1); }
+    if (x.b != null) { c.comm = true; c.txb = c.txb == null ? x.b : (c.txb === x.b ? x.b : 1); if (x.p != null) c.txp = x.p; }
     else { c.own = true; c.txOk += x.ok; c.txFail += x.n - x.ok; }
   }
   for (const v of fileVisited) { const c = cell(key(v.lat, v.lon)); c.visited = true; if (!v.community) c.own = true; else commCell(c, v); }
@@ -1373,7 +1390,7 @@ function buildGrid(rows, tracks, size) {
   return out;
 }
 
-// datos del mapa comunitario en una celda: nº de subidas que pasan por ella (f), en cuántas se recibió algo (fr) y último mes
+// datos del mapa de cobertura en una celda: nº de subidas que pasan por ella (f), en cuántas se recibió algo (fr) y último mes
 function commCell(c, r) {
   c.comm = true;
   if (r.cf != null) c.cf = Math.max(c.cf || 0, r.cf);
@@ -1387,7 +1404,7 @@ function popList(title, items) {
   return '<div class="ptitle">' + title + '</div><ul class="plist">' + items.filter(Boolean).map(l => "<li>" + l + "</li>").join("") + "</ul>";
 }
 const RX_BANDS = ["rxNever", "rxSome", "rxAll"];
-// fiabilidad de la celda en el mapa comunitario: por número de pasadas (franjas 1 / 2–4 / 5+)
+// fiabilidad de la celda en el mapa de cobertura: por número de pasadas (franjas 1 / 2–4 / 5+)
 function relLine(c) {
   if (!c.comm) return "";
   const last = c.clast ? t("lastShort") + ": " + c.clast : "";
@@ -1395,7 +1412,7 @@ function relLine(c) {
   const lvl = c.cf >= 5 ? "relHigh" : c.cf >= 2 ? "relMid" : "relLow";
   return t("reliability") + ": <b>" + t(lvl) + "</b> (" + t("passes") + ": " + (c.cf >= 5 ? "5+" : c.cf >= 2 ? "2–4" : "1") + (last ? ", " + last : "") + ")";
 }
-// fiabilidad baja (1 sola pasada en el mapa comunitario): la celda va rayada en diagonal
+// fiabilidad baja (1 sola pasada en el mapa de cobertura): la celda va rayada en diagonal
 function lowRel(c) { return !!(c.comm && c.cf && c.cf < 2); }
 const hatchIds = new Map();
 function hatch(layer, color) {
@@ -1419,7 +1436,7 @@ function hatch(layer, color) {
 function txPopup(c) {
   const n = c.txOk + c.txFail;
   return popList("📤 " + t("txTitle"), [
-    n ? t("pTx", c.txOk, n) : c.txb != null ? t("pTxBand", "<b>" + t(RX_BANDS[c.txb]) + "</b>") : "",
+    n ? t("pTx", Math.round(10 * c.txOk / n) * 10) : c.txp != null ? t("pTx", c.txp) : c.txb != null ? t("pTxBand", "<b>" + t(RX_BANDS[c.txb]) + "</b>") : "",
     relLine(c)]);
 }
 // estado de transmisión de una celda: 2 siempre llegó, 1 a veces, 0 nunca, null sin mensajes
@@ -1535,6 +1552,7 @@ let pendingRedraw = false;
 // Si cambias un filtro o la vista con un popup abierto, se cierra y se redibuja al momento.
 // Solo el redibujo por zoom (bordes de la cuadrícula) espera a que cierres el popup.
 function drawMap(fit, fromZoom) {
+  showView();
   if (!map || !mapOn) return;
   if (!mapDirty && !fit) return;
   if (fromZoom && map._popup && map.hasLayer(map._popup)) { pendingRedraw = true; return; }
@@ -1681,7 +1699,7 @@ function drawMap(fit, fromZoom) {
   if (!fileRows && !fileTracks.length) { $("lgRelay").hidden = maxHops === 0 || heard || cmp; return; }
   $("lgRelay").hidden = maxHops === 0 || heard || cmp;
 
-  if (pts.length && (fit || !mapFitted)) {
+  if (pts.length && (fit || !mapFitted) && !keepUrlView) {
     if (pts.length === 1) map.flyTo(pts[0], 15, { duration: 0.8 });
     else map.flyToBounds(L.latLngBounds(pts).pad(0.15), { maxZoom: 16, duration: 0.8 });
     mapFitted = true;
@@ -2143,7 +2161,7 @@ function coverageData() {
   const d = new Date(last || Date.now()), p = n => String(n).padStart(2, "0");
   return { format: "meshcover-coverage", version: 1, cellSize: EXPORT_CELL, date: d.getFullYear() + "-" + p(d.getMonth() + 1), cells: res.cells };
 }
-// Sube el archivo anónimo al servidor (api/upload.php), que lo valida y lo suma al mapa comunitario
+// Sube el archivo anónimo al servidor (api/upload.php), que lo valida y lo suma al mapa de cobertura
 async function uploadCoverage() {
   const data = coverageData(), msg = $("expUpMsg"), btn = $("btnExpUp");
   if (!data) return;
@@ -2177,7 +2195,7 @@ function dropCommunity() {
   fileTxCells = fileTxCells.filter(v => !v.community);
   fileNames = fileNames.filter(n => n !== t("commName"));
 }
-// el botón 🌍 se queda hundido mientras el mapa comunitario está en el mapa; al volver a pulsarlo se quita
+// el botón 🗺️ se queda hundido mientras el mapa de cobertura está en el mapa; al volver a pulsarlo se quita
 let commOn = false;
 function setCommBtn(on) { commOn = on; $("btnCommunity").classList.toggle("on", on); $("btnCommunity").setAttribute("aria-pressed", on); }
 function toggleCommunity() {
@@ -2213,10 +2231,10 @@ async function addCoverage(data, name, community) {
       if (!isFinite(lat) || !isFinite(lon)) continue;
       const n = Math.max(0, Number(c.n) || 0), cf = c.f != null && Number(c.f) >= 1 ? Number(c.f) : null,
         cfr = [0, 1, 2].includes(c.rx) ? c.rx : null, clast = /^\d{4}-\d{2}$/.test(String(c.last || "")) ? String(c.last) : "";
-      // transmisión: {ok, n} en un .json propio; franja 0/1/2 en el mapa comunitario
+      // transmisión: {ok, n} en un .json propio; franja 0/1/2 en el mapa de cobertura
       const tx = c.tx;
       if (tx && typeof tx === "object" && Number.isInteger(tx.n) && Number.isInteger(tx.ok) && tx.n > 0 && tx.ok >= 0 && tx.ok <= tx.n) fileTxCells.push({ lat, lon, community: !!community, ok: tx.ok, n: tx.n });
-      else if ([0, 1, 2].includes(tx)) fileTxCells.push({ lat, lon, community: !!community, b: tx });
+      else if ([0, 1, 2].includes(tx)) fileTxCells.push({ lat, lon, community: !!community, b: tx, p: Number.isInteger(c.txp) && c.txp >= 0 && c.txp <= 100 ? c.txp : null });
       if (!n) { fileVisited.push({ lat, lon, community: !!community, cf, cfr, clast }); continue; }
       let known = 0;
       for (const o of c.nodes || []) {
