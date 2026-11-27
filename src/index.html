@@ -221,10 +221,10 @@
 
 
 <div class="btns">
+  <button id="btnCommunity" class="sec" data-i18n-title="communityTitle">🗺️ <span data-i18n="communityBtn">Coverage map</span></button>
   <button id="btnOpen" class="sec" data-i18n-title="openTitle">📂 <span data-i18n="open">Add Logs</span></button>
   <button id="btnClear" class="sec" data-i18n-title="clearTitle">🗑 <span data-i18n="clear">Clear</span></button>
   <button id="btnExport" class="sec" data-i18n-title="exportTitle">⬆️ <span data-i18n="exportBtn">Export coverage</span></button>
-  <button id="btnCommunity" class="sec" data-i18n-title="communityTitle">🗺️ <span data-i18n="communityBtn">Coverage map</span></button>
   <input type="file" id="fileAny" accept=".csv,.gpx,.txt,.json,text/csv,text/plain,application/gpx+xml,application/xml,text/xml,application/json" multiple hidden>
 </div>
 <div id="toast" hidden role="alert"></div>
@@ -646,7 +646,7 @@ const I18N = {
     directPl: "directos", lastPos: "Última posición", lastHeard: "Último paquete", relayedWord: "con saltos", maxDist: "Distancia máxima"
   }
 };
-let lang = "en";
+let lang = "es";   // español por defecto; el selector guarda la elección
 try { const l = localStorage.getItem("meshtastic_lang"); if (l === "es" || l === "en") lang = l; } catch (e) {}
 function t(key, ...args) {
   const v = (I18N[lang] && I18N[lang][key] !== undefined) ? I18N[lang][key] : I18N.en[key];
@@ -661,7 +661,7 @@ function applyLang() {
   document.querySelectorAll("[data-i18n-aria]").forEach(el => { el.setAttribute("aria-label", t(el.dataset.i18nAria)); });
 }
 function setLang(l) {
-  lang = l === "es" ? "es" : "en";
+  lang = l === "en" ? "en" : "es";
   try { localStorage.setItem("meshtastic_lang", lang); } catch (e) {}
   applyLang(); drawLegendScale(null);
   if (typeof showHelpPage === "function") showHelpPage(helpPage);
@@ -1452,7 +1452,8 @@ function drawMap(fit, fromZoom) {
   pendingRedraw = false;
   mapDirty = false;
   mapLayer.clearLayers();
-  const rows = mapRows(), tracks = mapTracks(), pts = [];
+  // ownPts: lo propio (registros abiertos); si hay, el mapa se centra en ello y no en todo el mapa de cobertura
+  const rows = mapRows(), tracks = mapTracks(), pts = [], ownPts = [];
   const heard = heardMode(), best = selFrom === "h*";
   // «Comparar» solo si lo visible tiene al menos dos SF; si no, se ve como cuadrícula
   const sfList = cmpSfList(rows, tracks);
@@ -1487,7 +1488,7 @@ function drawMap(fit, fromZoom) {
           .bindPopup(txPopup(c))
           .addTo(mapLayer);
         if (lowRel(c)) hatch(tr, TX_COLORS[st]);
-        pts.push(c.bounds[0], c.bounds[1]);
+        pts.push(c.bounds[0], c.bounds[1]); if (c.own) ownPts.push(c.bounds[0], c.bounds[1]);
         continue;
       }
       nCells++;
@@ -1521,7 +1522,7 @@ function drawMap(fit, fromZoom) {
       // el gris solo dentro del borde: así el borde se ve sobre el mapa con el mismo tono que las celdas en directo
       if (onlyRelay) L.rectangle(insetBounds(c.bounds, RELAY_BORDER), { stroke: false, fillColor: "#2b2f36", fillOpacity: .6, interactive: false }).addTo(mapLayer);
       if (onlyRelay) L.rectangle(insetBounds(c.bounds, RELAY_BORDER / 2), { color: sigColor(median(c.snrRelay)), weight: RELAY_BORDER, opacity: .65, fill: false, interactive: false }).addTo(mapLayer);
-      pts.push(c.bounds[0], c.bounds[1]);
+      pts.push(c.bounds[0], c.bounds[1]); if (c.own) ownPts.push(c.bounds[0], c.bounds[1]);
     }
   }
 
@@ -1536,7 +1537,7 @@ function drawMap(fit, fromZoom) {
     for (const p of tr.pts)
       L.circleMarker([p.lat, p.lon], { radius: 3, color: "#ffffff", weight: 1, fillColor: "#2f7df6", fillOpacity: 1 })
         .bindPopup(t("gpsPos") + (p.ms ? " · " + RT.fmtDate(p.ms) + " " + RT.fmtTime(p.ms) : "")).addTo(mapLayer);
-    for (const p of tr.pts) pts.push([p.lat, p.lon]);
+    for (const p of tr.pts) { pts.push([p.lat, p.lon]); ownPts.push([p.lat, p.lon]); }
   }
 
   // mensajes enviados: ✓ la red lo oyó, ✗ nadie lo retransmitió
@@ -1545,7 +1546,7 @@ function drawMap(fit, fromZoom) {
       html: '<div class="txm ' + (x.ok ? "ok" : "ko") + '">' + (x.ok ? "✓" : "✗") + "</div>" }), pane: txPane() })
       .bindPopup("<b>📤 " + t("txMsg") + " · " + RT.fmtDate(x.ms) + " " + RT.fmtTime(x.ms) + "</b><br>" + t(x.ok ? "txOk" : "txKo") +
         (x.sf ? "<br>SF" + x.sf : "")).addTo(mapLayer);
-    pts.push([x.lat, x.lon]);
+    pts.push([x.lat, x.lon]); ownPts.push([x.lat, x.lon]);
   }
   $("lgTx").hidden = cmp || !txVisible().length;
 
@@ -1569,7 +1570,7 @@ function drawMap(fit, fromZoom) {
   for (const r of rows) {
     if (r.rxLat == null || r.rxLon == null || isNaN(r.rxLat)) { sinGps++; continue; }
     n++;
-    pts.push([r.rxLat, r.rxLon]);
+    pts.push([r.rxLat, r.rxLon]); if (!r.community) ownPts.push([r.rxLat, r.rxLon]);
     if (grid || cmp) continue;
     const relayed = r.hops != null && r.hops > 0, square = relayed && !heard, v = sigOf(r);
     if (relayed) nRelay++;
@@ -1592,9 +1593,10 @@ function drawMap(fit, fromZoom) {
   if (!fileRows && !fileTracks.length) { $("lgRelay").hidden = maxHops === 0 || heard || cmp; return; }
   $("lgRelay").hidden = maxHops === 0 || heard || cmp;
 
-  if (pts.length && (fit || !mapFitted) && !keepUrlView) {
-    if (pts.length === 1) map.flyTo(pts[0], 15, { duration: 0.8 });
-    else map.flyToBounds(L.latLngBounds(pts).pad(0.15), { maxZoom: 16, duration: 0.8 });
+  const fp = ownPts.length ? ownPts : pts;
+  if (fp.length && (fit || !mapFitted) && !keepUrlView) {
+    if (fp.length === 1) map.flyTo(fp[0], 15, { duration: 0.8 });
+    else map.flyToBounds(L.latLngBounds(fp).pad(0.15), { maxZoom: 16, duration: 0.8 });
     mapFitted = true;
   }
 }
@@ -1844,7 +1846,7 @@ function debugTxtToRows(text) {
 async function openDebugTxt(file) {
   try {
     const r = debugTxtToRows(await file.text());
-    const first = !(fileRows && fileRows.length) && !fileVisited.length;
+    const first = !(fileRows || []).some(x => !x.community) && !fileVisited.some(v => !v.community);
     for (const x of r.rows) x.file = file.name;
     fileRows = (fileRows || []).concat(r.rows); fileNames.push(file.name);
     for (const x of r.tx) fileTx.push(Object.assign(x, { file: file.name }));
@@ -2357,7 +2359,8 @@ linkScroll($("tblWrap"), $("tblTop")); linkScroll($("tblTop"), $("tblWrap"));
 window.addEventListener("resize", syncTopScroll);
 $("selFrom").addEventListener("change", e => { selFrom = e.target.value; mapDirty = true; mapFitted = false; dirtyRender = true; if (mapOn) setTimeout(() => drawMap(true), 0); });
 render();
-startMap();
+// al arrancar se carga el mapa de cobertura (botón 🗺️ hundido); se quita volviéndolo a pulsar
+startMap().then(() => { if (map) loadCommunity(); });
 setInterval(() => { if (dirtyRender) { dirtyRender = false; render(); } }, 600);
 </script>
 </body>
