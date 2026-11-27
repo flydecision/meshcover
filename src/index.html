@@ -29,7 +29,7 @@
   hr.hsep { border:0; border-top:1px solid #2a3340; margin:14px 0 4px; }
   .colon::after { content:":"; }
   .hdr .tools { display:flex; align-items:center; gap:8px; flex:none; }
-  #selLang { padding:6px 8px; font-size:16px; border-radius:8px; }
+  #selLang { box-sizing:border-box; height:29px; padding:0 6px; font-size:16px; border-radius:8px; }
   /* el mapa usa todo el ancho de la ventana (16 px de margen a cada lado) */
   #mapBox:not(.max) { margin-inline:calc((100% - (var(--vw, 100%) - 32px)) / 2); }
   .tblinfo { margin:8px 0; font-size:16px; color:#9aa4b2; }
@@ -89,7 +89,7 @@
             font-size:2rem; font-weight:600; }
   .hdr .logo { width:44px; height:44px; flex:none; }
   @media (max-width:480px) { .hdr { flex-wrap:wrap; gap:8px; } .hdr h1 { font-size:1.3rem; gap:8px; } .hdr .logo { width:36px; height:36px; } }
-  #btnHelp { height:40px; padding:0 14px; flex:none; }
+  #btnHelp { box-sizing:border-box; height:29px; padding:0 11px; flex:none; }
   /* ayuda: ventana con páginas, como máximo la altura disponible */
   .modal { position:fixed; inset:0; z-index:3000; background:#000b; display:flex; align-items:center; justify-content:center; padding:12px; }
   .modal[hidden] { display:none; }
@@ -201,7 +201,8 @@
   .leaflet-touch .leaflet-control-layers { border:2px solid rgba(0,0,0,.2); }
   .leaflet-control-layers-expanded { font-size:16px; }
   .leaflet-control-max a { display:flex !important; align-items:center; justify-content:center; color:#222 !important; }
-  #map.leaflet-container, #map .leaflet-control-scale-line, #map .leaflet-control-attribution { font-size:16px; }
+  #map.leaflet-container { font-size:16px; }
+  #map .leaflet-control-scale-line, #map .leaflet-control-attribution { font-size:10px; }
   .leaflet-popup-content { font-size:16px; line-height:1.45; color:#111; }
 .txm{width:18px;height:18px;border-radius:50%;border:2px solid #fff;color:#fff;font:700 12px/1 system-ui,sans-serif;display:flex;align-items:center;justify-content:center;box-shadow:0 0 3px rgba(0,0,0,.7);box-sizing:border-box}
 .txm.ok{background:#1fa64a}.txm.ko{background:#d93025}
