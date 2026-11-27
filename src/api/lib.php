@@ -2,7 +2,7 @@
 // Mapa comunitario de cobertura: utilidades comunes a upload.php y community.php.
 // Los datos se guardan en ../data (fuera del alcance de la web gracias a su .htaccess).
 
-const BUILD = 8;
+const BUILD = 9;
 const MIN_FILES_INFO = 5;        // con menos subidas en total, no se publican pasadas ni recepción por celda (privacidad)                  // versión de community.json: al cambiarla se rehace
 const CELL_SIZE = 250;            // tamaño fijo de celda de los archivos exportados por la página
 const MAX_BYTES = 524288;         // 512 KB por subida
@@ -129,8 +129,10 @@ function build_community(string $dir, int $months = 0): array {
     }
     $o = ['lat' => $c['lat'], 'lon' => $c['lon'], 'n' => $c['n']];
     if ($info) { $o['f'] = $c['f'] >= 5 ? 5 : ($c['f'] >= 2 ? 2 : 1); $o['rx'] = $c['fr'] == 0 ? 0 : ($c['fr'] >= $c['f'] ? 2 : 1); }
-    // transmisión: solo la franja (0 nunca llegó a la red, 1 a veces, 2 siempre), nunca los números
+    // transmisión: la franja (0 nunca llegó a la red, 1 a veces, 2 siempre), nunca los números exactos
     if ($c['txn'] > 0) $o['tx'] = $c['txo'] == 0 ? 0 : ($c['txo'] >= $c['txn'] ? 2 : 1);
+    // y el porcentaje de mensajes que llegaron, redondeado a decenas (aproximado, sin números exactos)
+    if ($c['txn'] > 0) $o['txp'] = (int)(round($c['txo'] * 10 / $c['txn']) * 10);
     $o['last'] = $c['last']; $o['nodes'] = $nodes;
     $out[] = $o;
   }
