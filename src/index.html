@@ -12,7 +12,9 @@
   h1 { font-size:1.15rem; margin:0 0 4px; }
   .sub { color:#9aa4b2; font-size:16px; margin-bottom:12px; }
   .btns { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0; }
-  button { background:#23456e; color:#fff; border:0; border-radius:10px; padding:11px 14px; font-size:16px; font-weight:600; }
+  button { background:#23456e; color:#fff; border:0; border-radius:10px; padding:11px 14px; font-size:16px; font-weight:400; }
+  button.on { font-weight:700; }
+  .filt.hops[hidden] { display:none; }
   button.sec { background:#2a3340; }
   button.danger { background:#5e2620; }
   button:disabled { opacity:.45; }
@@ -21,7 +23,7 @@
   .sfask { display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:6px 0; padding:6px 10px; border:1px solid #2a3340; border-radius:10px; background:#1a2029; font-size:16px; color:#9aa4b2; }
   .sfask b { color:#e6e9ee; overflow-wrap:anywhere; }
   .sfask select { height:29px; padding:0 6px; font-size:16px; }
-  #toast { position:fixed; left:50%; bottom:18px; transform:translateX(-50%); z-index:2000; max-width:min(92vw,560px);
+  #toast { position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:2000; max-width:min(92vw,560px);
     background:#5e2620; color:#fff; border-radius:10px; padding:10px 14px; font-size:16px; box-shadow:0 4px 18px #0008; white-space:pre-wrap; }
   #toast[hidden] { display:none; }
   .colon::after { content:":"; }
@@ -222,8 +224,8 @@
 
 <div class="btns">
   <button id="btnCommunity" class="sec" data-i18n-title="communityTitle">🗺️ <span data-i18n="communityBtn">Coverage map</span></button>
-  <button id="btnOpen" class="sec" data-i18n-title="openTitle">📂 <span data-i18n="open">Add Logs</span></button>
   <button id="btnClear" class="sec" data-i18n-title="clearTitle">🗑 <span data-i18n="clear">Clear</span></button>
+  <button id="btnOpen" class="sec" data-i18n-title="openTitle">📂 <span data-i18n="open">Add Logs</span></button>
   <button id="btnExport" class="sec" data-i18n-title="exportTitle">⬆️ <span data-i18n="exportBtn">Export coverage</span></button>
   <input type="file" id="fileAny" accept=".csv,.gpx,.txt,.json,text/csv,text/plain,application/gpx+xml,application/xml,text/xml,application/json" multiple hidden>
 </div>
@@ -336,7 +338,7 @@
       <h3>Controles</h3>
       <ul>
         <li><b>Nodo</b>: «Mejor señal de cualquier nodo» es la cobertura de la red; elige un nodo para ver solo la suya.</li>
-        <li><b>Saltos</b>: 0–0 = solo lo recibido directo.</li>
+        <li><b>Saltos</b> (al medir un nodo con «Enviado por»): 0–0 = solo lo recibido directo.</li>
         <li><b>⚖️ Comparar</b>: sale si abres rutas con distinto SF; compara celda a celda.</li>
       </ul>
     </div>
@@ -411,7 +413,7 @@
       <h3>Controls</h3>
       <ul>
         <li><b>Node</b>: «Best signal of any node» is the mesh coverage; pick a node to see only its own.</li>
-        <li><b>Hops</b>: 0–0 = only what was received directly.</li>
+        <li><b>Hops</b> (when measuring a node with «Sent by»): 0–0 = only what was received directly.</li>
         <li><b>⚖️ Compare</b>: shows up when you open routes with different SF; compares cell by cell.</li>
       </ul>
     </div>
@@ -711,10 +713,15 @@ let nodeMqtt = new Map();
 function optedOut(n) { const v = nodeMqtt.get(n); return !!v && !v.ok; }
 function relays(n) { return n != null && !NO_RELAY_ROLES.has(nodeRoles.get(n)); }
 function covRow(r) { return r.community || relays(r.heard); }
+// El deslizador de saltos solo tiene sentido al medir un nodo concreto («Enviado por» o «Todos los nodos») con
+// registros propios: ahí distingue lo que llegó directo de lo repetido. En «Oído directamente» la señal ya es la del
+// nodo oído y en el mapa de cobertura todo cuenta como directo, así que se oculta y no filtra nada.
+function hopsShown() { return !heardMode() && (fileRows || []).some(r => !r.community); }
+function showHopsCtl() { const h = document.querySelector(".filt.hops"); if (h) h.hidden = !hopsShown(); }
 function rowsView() {
   const all = fileRows || [];
-  if (selFrom === "h*") return all.filter(r => r.heard != null && covRow(r) && passHops(r));
-  if (heardMode()) { const h = Number(selFrom.slice(1)); return all.filter(r => r.heard === h && covRow(r) && passHops(r)); }
+  if (selFrom === "h*") return all.filter(r => r.heard != null && covRow(r));
+  if (heardMode()) { const h = Number(selFrom.slice(1)); return all.filter(r => r.heard === h && covRow(r)); }
   const f = selFrom ? Number(selFrom) : null;
   return all.filter(r => (f === null || r.from === f) && passHops(r));
 }
@@ -1445,7 +1452,7 @@ let pendingRedraw = false;
 // Si cambias un filtro o la vista con un popup abierto, se cierra y se redibuja al momento.
 // Solo el redibujo por zoom (bordes de la cuadrícula) espera a que cierres el popup.
 function drawMap(fit, fromZoom) {
-  showView();
+  showView(); showHopsCtl();
   if (!map || !mapOn) return;
   if (!mapDirty && !fit) return;
   if (fromZoom && map._popup && map.hasLayer(map._popup)) { pendingRedraw = true; return; }
