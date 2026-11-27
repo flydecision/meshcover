@@ -26,6 +26,7 @@
   #toast { position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:2000; max-width:min(92vw,560px);
     background:#5e2620; color:#fff; border-radius:10px; padding:10px 14px; font-size:16px; box-shadow:0 4px 18px #0008; white-space:pre-wrap; }
   #toast[hidden] { display:none; }
+  hr.hsep { border:0; border-top:1px solid #2a3340; margin:14px 0 4px; }
   .colon::after { content:":"; }
   .hdr .tools { display:flex; align-items:center; gap:8px; flex:none; }
   #selLang { padding:6px 8px; font-size:16px; border-radius:8px; }
@@ -356,12 +357,17 @@
     <div class="page" data-p="3" data-lang="es" hidden>
       <h3>📥 Cobertura de recepción</h3>
       <ol>
-        <li>Configura tu nodo con la app Meshtastic: Ajustes › Configuración del dispositivo › Posición:
+        <li>Configura tu nodo con la app Meshtastic:
           <ul>
-            <li>Intervalo de transmisión: <b>5 min o más</b> (necesario para que la posición quede en el registro).</li>
-            <li>Ubicación inteligente: <b>desactivada</b>. Posición fija: <b>desactivada</b>.</li>
-            <li>Modo GPS: <b>habilitado</b>, con intervalo de actualización de <b>20 s</b>.</li>
-            <li>Marcas de posición: <b>todas desactivadas</b>.</li>
+            <li>Si no lo tienes ya, crea un <b>canal privado con PSK</b> y configúralo para que sea el único que reciba la posición (la PSK es necesaria para que la precisión de ubicación sea máxima): Ajustes › Canales › Nombre del canal: el que quieras; PSK: botón «recargar» para que genere una; MQTT Uplink y Downlink <b>desactivados</b>; Posición <b>activada</b> y Ubicación precisa <b>activada</b>.</li>
+            <li>Ajustes › Configuración del dispositivo › Posición:
+              <ul>
+                <li>Intervalo de transmisión: <b>5 min o más</b> (no es necesario transmitir, pero sí es necesario para que la posición quede en el registro).</li>
+                <li>Ubicación inteligente: <b>desactivada</b>. Posición fija: <b>desactivada</b>.</li>
+                <li>Modo GPS: <b>habilitado</b>, con intervalo de actualización de <b>20 s</b>.</li>
+                <li>Marcas de posición: <b>todas desactivadas</b>.</li>
+              </ul>
+            </li>
           </ul>
         </li>
         <li>Borra el registro previo en la app: Ajustes › Panel de depuración › botón 🗑️ (Limpiar los registros).</li>
@@ -371,8 +377,9 @@
         <li>Pulsa <b>⬆️ Exportar cobertura</b> y, si quieres, sube el deslizador para quitar las celdas de tu zona privada.</li>
         <li>Pulsa <b>☁️ Subir al mapa de cobertura</b>.</li>
       </ol>
+      <hr class="hsep">
       <h3>📤 Cobertura de transmisión</h3>
-      <div>Lo mismo que antes, pero además, en cada zona que quieras analizar, manda un <b>mensaje corto</b> con cualquier texto a un <b>canal privado con PSK</b> que hayas creado (el PSK hace falta para que la precisión de la posición sea máxima).</div>
+      <div>Lo mismo que antes, pero además, en cada zona que quieras analizar, manda un <b>mensaje corto</b> con cualquier texto a <b>tu canal privado</b>.</div>
       <div style="margin-top:6px">La app registra si algún nodo lo retransmitió, y se sube junto con la recepción. Cuantas más pasadas por una zona, más fiable el mapa.</div>
     </div>
 
@@ -451,12 +458,17 @@
     <div class="page" data-p="3" data-lang="en" hidden>
       <h3>📥 Reception coverage</h3>
       <ol>
-        <li>Set up your node with the Meshtastic app: Settings › Device configuration › Position:
+        <li>Set up your node with the Meshtastic app:
           <ul>
-            <li>Broadcast interval: <b>5 min or more</b> (needed so the position is stored in the log).</li>
-            <li>Smart position: <b>off</b>. Fixed position: <b>off</b>.</li>
-            <li>GPS mode: <b>enabled</b>, with an update interval of <b>20 s</b>.</li>
-            <li>Position flags: <b>all off</b>.</li>
+            <li>If you don't have one yet, create a <b>private channel with a PSK</b> and set it as the only one that gets the position (the PSK is needed for maximum location precision): Settings › Channels › Channel name: any; PSK: «reload» button to generate one; MQTT Uplink and Downlink <b>off</b>; Position <b>on</b> and Precise location <b>on</b>.</li>
+            <li>Settings › Device configuration › Position:
+              <ul>
+                <li>Broadcast interval: <b>5 min or more</b> (broadcasting is not needed, but it is needed so the position is stored in the log).</li>
+                <li>Smart position: <b>off</b>. Fixed position: <b>off</b>.</li>
+                <li>GPS mode: <b>enabled</b>, with an update interval of <b>20 s</b>.</li>
+                <li>Position flags: <b>all off</b>.</li>
+              </ul>
+            </li>
           </ul>
         </li>
         <li>Clear the previous log in the app: Settings › Debug panel › 🗑️ button (Clear logs).</li>
@@ -466,8 +478,9 @@
         <li>Press <b>⬆️ Export coverage</b> and, if you like, raise the slider to remove the cells of your private area.</li>
         <li>Press <b>☁️ Upload to coverage map</b>.</li>
       </ol>
+      <hr class="hsep">
       <h3>📤 Transmission coverage</h3>
-      <div>Same as above, but also, in each area you want to analyse, send a <b>short message</b> with any text to a <b>private channel with a PSK</b> you have created (the PSK is needed so the position precision is maximum).</div>
+      <div>Same as above, but also, in each area you want to analyse, send a <b>short message</b> with any text to <b>your private channel</b>.</div>
       <div style="margin-top:6px">The app records whether any node relayed it, and it is uploaded with the reception. The more passes over an area, the more reliable the map.</div>
     </div>
 
