@@ -185,7 +185,9 @@
   .filt .dual-fill { background:#2f7df6; }
   .seg { display:inline-flex; border-radius:10px; overflow:hidden; border:1px solid #2a3340; }
   .seg button { box-sizing:border-box; height:27px; display:inline-flex; align-items:center; gap:5px; border-radius:0; padding:0 11px; font-size:16px; background:#1a2029; }
-  .seg button.on { background:#23456e; }
+  /* botones que se quedan pulsados (vista y mapa comunitario): hundidos, con borde azul por dentro */
+  .seg button.on, #btnCommunity.on { background:#123760; color:#fff; box-shadow:inset 0 3px 6px #000c, inset 0 0 0 2px #4c9bff; }
+  .seg button:not(.on) { color:#c9d1db; background:#2a3340; }
   /* deslizador de celda con el mismo aspecto que el de saltos (un solo botón) */
   .filt.cellf { margin:0; gap:6px; }
   .filt.cellf .dual { flex:0 0 110px; width:110px; min-width:0; }
@@ -199,8 +201,8 @@
   .leaflet-popup-content { font-size:16px; line-height:1.45; color:#111; }
 .txm{width:18px;height:18px;border-radius:50%;border:2px solid #fff;color:#fff;font:700 12px/1 system-ui,sans-serif;display:flex;align-items:center;justify-content:center;box-shadow:0 0 3px rgba(0,0,0,.7);box-sizing:border-box}
 .txm.ok{background:#1fa64a}.txm.ko{background:#d93025}
-.leaflet-popup-content .phead{margin-bottom:2px}.leaflet-popup-content .pmuted{opacity:.7;font-weight:400}
-.leaflet-popup-content .psec{border-top:1px solid #8884;margin-top:6px;padding-top:5px}
+.leaflet-popup-content .plist{margin:4px 0 0;padding-left:18px}.leaflet-popup-content .plist li{margin:2px 0}
+.leaflet-popup-content .plist li:has(>.pdot:first-child){list-style:none}.leaflet-popup-content .plist li>.pdot:first-child{margin-left:-17px;margin-right:7px}
 .leaflet-popup-content .ptitle{font-weight:700;margin-bottom:1px}
 .leaflet-popup-content .pdot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:0;border:1px solid #0006}
 </style>
@@ -217,7 +219,7 @@
 
 
 <div class="btns">
-  <button id="btnOpen" data-i18n-title="openTitle">📂 <span data-i18n="open">Add Logs</span></button>
+  <button id="btnOpen" class="sec" data-i18n-title="openTitle">📂 <span data-i18n="open">Add Logs</span></button>
   <button id="btnClear" class="sec" data-i18n-title="clearTitle">🗑 <span data-i18n="clear">Clear</span></button>
   <button id="btnExport" class="sec" data-i18n-title="exportTitle">📤 <span data-i18n="exportBtn">Export coverage</span></button>
   <button id="btnCommunity" class="sec" data-i18n-title="communityTitle">🌍 <span data-i18n="communityBtn">Community map</span></button>
@@ -390,7 +392,7 @@
       <div>Un mapa común de la <b>cobertura real de la red</b>, hecho entre todas/os: cada persona que hace un recorrido con su nodo suma sus celdas, y el mapa se va completando zona a zona.</div>
       <h3>👀 Verlo</h3>
       <div>Pulsa <b>🌍 Mapa comunitario</b>. Se carga en <b>cuadrícula de 250 m</b>: cada celda sale del color del nodo que mejor se oye allí. Las celdas grises son sitios por los que alguien pasó <b>sin recibir nada</b>. Puedes sumarle tus propios registros con <b>📂 Añadir registros</b> sin subirlos.</div>
-      <div>Cada nuevo recorrido que pasa por una celda se suma a su media, así que su color se va afinando con cada pase. Al <b>tocar una celda</b> se ven sus pasadas (1, 2–4 o 5 o más), si se recibió siempre, a veces o nunca, la fiabilidad (baja, media o buena) y el mes del dato más reciente. Con el selector <b>🌍 Todos los datos / Últimos 12, 6 o 3 meses</b> se quitan los datos antiguos, por si la red ha cambiado (cuenta el mes en que se grabó el registro).</div>
+      <div>Cada nuevo recorrido que pasa por una celda se suma a su media, así que su color se va afinando con cada pase. Al <b>tocar una celda</b> se ven los paquetes, la mediana de SNR y de RSSI y la fiabilidad (baja, media o alta), con las pasadas (1, 2–4 o 5+) y el mes del último dato. En 📤 Transmisión se ve si los mensajes llegaron a la red siempre, a veces o nunca. Con el selector <b>🌍 Todos los datos / Últimos 12, 6 o 3 meses</b> se quitan los datos antiguos, por si la red ha cambiado (cuenta el mes en que se grabó el registro).</div>
       <h3>🚶 Aportar tu recorrido</h3>
       <ol>
         <li>Prepara el nodo de ruta como en «Cómo usar → Cobertura general de la red»: <b>mismos ajustes de radio que la red</b>, GPS activado con actualización cada 20–30 s y «posición inteligente» desactivada. El intervalo de difusión puede quedar en «unset» o largo: así tampoco emites tu recorrido en directo.</li>
@@ -524,7 +526,7 @@
       <div>A shared map of the <b>real coverage of the network</b>, built by everyone: each person who does a route with their node adds their cells, and the map fills in area by area.</div>
       <h3>👀 Viewing it</h3>
       <div>Press <b>🌍 Community map</b>. It loads as a <b>250 m grid</b>: each cell takes the colour of the node heard best there. Grey cells are places someone passed <b>without receiving anything</b>. You can add your own logs on top with <b>📂 Add Logs</b> without uploading them.</div>
-      <div>Each new route through a cell adds to its average, so its colour gets more accurate with every pass. <b>Tap a cell</b> to see its passes (1, 2–4 or 5 or more), whether reception was always, sometimes or never, the reliability (low, medium or good) and the month of the newest data. The <b>🌍 All data / Last 12, 6 or 3 months</b> selector removes old data, in case the mesh has changed (it uses the month the log was recorded).</div>
+      <div>Each new route through a cell adds to its average, so its colour gets more accurate with every pass. <b>Tap a cell</b> to see its packets, median SNR and RSSI and the reliability (low, medium or high), with the passes (1, 2–4 or 5+) and the month of the last data. In 📤 Transmission it shows whether messages reached the mesh always, sometimes or never. The <b>🌍 All data / Last 12, 6 or 3 months</b> selector removes old data, in case the mesh has changed (it uses the month the log was recorded).</div>
       <h3>🚶 Contributing your route</h3>
       <ol>
         <li>Set up the route node as in «How to use → General coverage of the mesh»: <b>same radio settings as the network</b>, GPS on with updates every 20–30 s and «smart position» off. The broadcast interval can stay «unset» or long: that way you do not broadcast your route live either.</li>
@@ -652,7 +654,8 @@ const I18N = {
     txTitle: "Transmission", txCell: (a, n) => a + " of " + n + " messages reached the mesh", txMsg: "Message sent",
     txOk: "✓ The mesh heard it: a node relayed or acknowledged it.", txKo: "✗ Nobody relayed it after 3 tries.", lgTx: "Message sent: mesh heard it / nobody",
     commFew: "There are still few uploads: passes and reliability will show when there are more.", commPass1: "1 pass", commPass2: "2–4 passes", commPass5: "5 or more passes", commRx: "reception", rxNever: "never", rxSome: "sometimes", rxAll: "always", reliability: "Reliability",
-    relLow: "low, just a hint", relMid: "medium", relHigh: "good", lastData: "Newest data", expected: n => "About " + n + " packets were expected",
+    relLow: "Low", relMid: "Medium", relHigh: "High", passes: "Passes", lastShort: "Last data", relFew: "not enough uploads yet",
+    pSnr: m => "Median SNR: " + m + " dB", pMargin: m => "Median margin: " + m + " dB", pRssi: m => "Median RSSI: " + m + " dBm", pTx: (a, n) => "Messages that reached the mesh: " + a + " of " + n, pTxBand: b => "Messages reached the mesh: " + b, lastData: "Newest data", expected: n => "About " + n + " packets were expected",
     gpsPos: "GPS position", lastHop: "from the last hop, not the origin node", distance: "distance",
     direct: "direct", nHops: n => n + (n === 1 ? " hop" : " hops"), routePos: "position of the route node",
     errEmpty: "the file is empty", errCsv: "it does not look like a CSV from this page",
@@ -727,7 +730,8 @@ const I18N = {
     txTitle: "Transmisión", txCell: (a, n) => a + " de " + n + " mensajes llegaron a la red", txMsg: "Mensaje enviado",
     txOk: "✓ La red lo oyó: un nodo lo retransmitió o lo confirmó.", txKo: "✗ Nadie lo retransmitió tras 3 intentos.", lgTx: "Mensaje enviado: la red lo oyó / nadie",
     commFew: "Aún hay pocas subidas: las pasadas y la fiabilidad se mostrarán cuando haya más.", commPass1: "1 pasada", commPass2: "2–4 pasadas", commPass5: "5 pasadas o más", commRx: "recepción", rxNever: "nunca", rxSome: "a veces", rxAll: "siempre", reliability: "Fiabilidad",
-    relLow: "baja, solo orientativo", relMid: "media", relHigh: "buena", lastData: "Dato más reciente", expected: n => "Se esperaban ≈ " + n + " paquetes",
+    relLow: "Baja", relMid: "Media", relHigh: "Alta", passes: "Pasadas", lastShort: "Último dato", relFew: "aún hay pocas subidas",
+    pSnr: m => "Mediana de SNR: " + m + " dB", pMargin: m => "Mediana del margen: " + m + " dB", pRssi: m => "Mediana de RSSI: " + m + " dBm", pTx: (a, n) => "Mensajes que llegaron a la red: " + a + " de " + n, pTxBand: b => "Mensajes que llegaron a la red: " + b, lastData: "Dato más reciente", expected: n => "Se esperaban ≈ " + n + " paquetes",
     gpsPos: "Posición GPS", lastHop: "del último salto, no del nodo de origen", distance: "distancia",
     direct: "directo", nHops: n => n + (n === 1 ? " salto" : " saltos"), routePos: "posición del nodo de ruta",
     errEmpty: "el archivo está vacío", errCsv: "no parece un CSV de esta página",
@@ -1037,7 +1041,7 @@ function clearAll() {
   fileRows = null; fileNames = []; fileTracks = []; fileVisited = []; fileTx = []; fileTxCells = [];
   nodeRoles = new Map();
   $("sfAsk").innerHTML = "";
-  $("ageWrap").hidden = true;
+  $("ageWrap").hidden = true; setCommBtn(false);
   closeExport();
   mapFitted = false; mapDirty = true; dirtyRender = true;
 }
@@ -1378,20 +1382,25 @@ function commCell(c, r) {
 }
 // mensajes enviados que se ven: con posición y fuera de la vista previa de exportación (no se exportan)
 function txVisible() { return exportPreviewOn() ? [] : fileTx.filter(x => x.lat != null && !isNaN(x.lat)); }
-// Popup de celda: cabecera y secciones con título e icono (las líneas vacías se omiten)
-function cellHead(c) {
-  return '<div class="phead"><b>' + t("cellOf", cellSize + " m") + "</b>" + (c.ms ? '<span class="pmuted"> · ⏱ ' + fmtDur(c.ms) + "</span>" : "") + "</div>";
+// Popup de celda: título (📥 Recepción o 📤 Transmisión, según la vista) y una lista con viñetas (las vacías se omiten)
+function popList(title, items) {
+  return '<div class="ptitle">' + title + '</div><ul class="plist">' + items.filter(Boolean).map(l => "<li>" + l + "</li>").join("") + "</ul>";
 }
-function popSec(icon, title, lines) {
-  return '<div class="psec"><div class="ptitle">' + icon + " " + title + "</div>" + lines.filter(Boolean).map(l => "<div>" + l + "</div>").join("") + "</div>";
+const RX_BANDS = ["rxNever", "rxSome", "rxAll"];
+// fiabilidad de la celda en el mapa comunitario: por número de pasadas (franjas 1 / 2–4 / 5+)
+function relLine(c) {
+  if (!c.comm) return "";
+  const last = c.clast ? t("lastShort") + ": " + c.clast : "";
+  if (!c.cf) return t("reliability") + ": " + t("relFew") + (last ? " (" + last + ")" : "");
+  const lvl = c.cf >= 5 ? "relHigh" : c.cf >= 2 ? "relMid" : "relLow";
+  return t("reliability") + ": <b>" + t(lvl) + "</b> (" + t("passes") + ": " + (c.cf >= 5 ? "5+" : c.cf >= 2 ? "2–4" : "1") + (last ? ", " + last : "") + ")";
 }
-// En el mapa comunitario la recepción y la transmisión llegan solo como franja (siempre / a veces / nunca):
-// van todas juntas en la sección 🌍 (una sola línea con 📥 y 📤), para no repetir «mapa comunitario»
-function commBand(icon, b) { return b == null ? "" : icon + " <b>" + t(["rxNever", "rxSome", "rxAll"][b]) + "</b>"; }
-function txInfo(c) {
+function txPopup(c) {
   const n = c.txOk + c.txFail;
-  if (!n) return "";
-  return popSec("📤", t("txTitle"), ['<i class="pdot" style="background:' + TX_COLORS[c.txOk === n ? 2 : c.txOk ? 1 : 0] + '"></i>' + t("txCell", c.txOk, n)]);
+  return popList("📤 " + t("txTitle"), [
+    n ? '<i class="pdot" style="background:' + TX_COLORS[c.txOk === n ? 2 : c.txOk ? 1 : 0] + '"></i>' + t("pTx", c.txOk, n)
+      : c.txb != null ? '<i class="pdot" style="background:' + TX_COLORS[c.txb] + '"></i>' + t("pTxBand", "<b>" + t(RX_BANDS[c.txb]) + "</b>") : "",
+    relLine(c)]);
 }
 // estado de transmisión de una celda: 2 siempre llegó, 1 a veces, 0 nunca, null sin mensajes
 function txState(c) {
@@ -1400,17 +1409,6 @@ function txState(c) {
   return c.txb == null || c.txb === own ? own : 1;
 }
 const TX_COLORS = ["#d93025", "#e6b31e", "#1fa64a"];
-function commInfo(c) {
-  if (!c.comm) return "";
-  // con pocas subidas en total el servidor no publica pasadas ni recepción (privacidad)
-  const bands = [commBand("📥", c.cfr), commBand("📤", c.txb)].filter(Boolean).join(" · ");
-  if (!c.cf) return popSec("🌍", t("commName"), [bands, t("commFew")]);
-  const lvl = c.cf >= 5 ? "relHigh" : c.cf >= 2 ? "relMid" : "relLow";
-  return popSec("🌍", t("commName"), [
-    bands,
-    t(c.cf >= 5 ? "commPass5" : c.cf >= 2 ? "commPass2" : "commPass1") + " · " + t("reliability").toLowerCase() + " <b>" + t(lvl) + "</b>",
-    c.clast ? t("lastData") + ": " + c.clast : ""]);
-}
 
 /* ---------- comparar dos SF ---------- */
 let cmpPick = { cmpA: null, cmpB: null };
@@ -1555,7 +1553,7 @@ function drawMap(fit, fromZoom) {
         if (st == null) continue;
         nCells++;
         L.rectangle(c.bounds, { color: "#0b0d10", weight: .5, fillColor: TX_COLORS[st], fillOpacity: .65 })
-          .bindPopup(cellHead(c) + txInfo(c) + commInfo(c))
+          .bindPopup(txPopup(c))
           .addTo(mapLayer);
         pts.push(c.bounds[0], c.bounds[1]);
         continue;
@@ -1567,7 +1565,6 @@ function drawMap(fit, fromZoom) {
       const has = c.n > 0, med = median(vals), onlyRelay = has && !c.snr.length;
       if (!has) nEmpty++;
       const expected = (iv && c.ms) ? c.ms / iv : null;
-      const pct = (expected && expected >= 1) ? Math.min(100, Math.round(100 * c.n / expected)) : null;
       const sorted = vals.slice().sort((a, b) => a - b);
       // solo repetidos: gris con borde grueso del color de su señal (la del último salto)
       // sin nada recibido: gris oscuro translúcido, sin borde (se ve el mapa debajo)
@@ -1577,16 +1574,16 @@ function drawMap(fit, fromZoom) {
         : has
         ? { color: "#0b0d10", weight: .5, fillColor: sigColor(med), fillOpacity: .65 }
         : { stroke: false, fillColor: "#1a1d22", fillOpacity: .45 }));
-      // popup en secciones: cabecera, 📥 recepción, 📤 transmisión y 🌍 mapa comunitario
+      // popup: 📥 Recepción con viñetas (paquetes, SNR, RSSI y fiabilidad comunitaria)
       const rxLines = !has
         ? ["<b>" + t("noRx") + "</b>. " + t(c.own ? "noRxText" : "noRxComm"), expected && expected >= 1 ? t("expected", Math.round(expected)) : ""]
-        : [t("pktsRx") + ": <b>" + c.n + "</b>" + (c.nRelay ? " (" + t("byOther", c.nRelay) + ")" : "") + (pct !== null ? " · ≈ " + pct + " % " + t("ofExpected") : ""),
+        : [t("pktsRx") + ": <b>" + c.n + "</b>" + (c.nRelay ? " (" + t("byOther", c.nRelay) + ")" : ""),
            ...(onlyRelay
              ? [t("onlyRelay", fmtN(median(c.snrRelay), 1))]
              : [best && bestNode !== null ? t("bestNode", esc(bestNames.get(bestNode) || hexId(bestNode))) + (c.by.size > 1 ? " · " + t("nNodes", c.by.size) : "") : "",
-                '<i class="pdot" style="background:' + sigColor(med) + '"></i>' + t(useMargin ? "medMargin" : "medSnr", fmtN(med, 1), fmtN(sorted[0], 1), fmtN(sorted[sorted.length - 1], 1)),
-                c.rssi.length ? t("medRssi", fmtN(median(c.rssi))) + (c.nRelay ? " <i>(" + t("directOnly") + ")</i>" : "") : ""])];
-      rect.bindPopup(cellHead(c) + popSec("📥", t("rxTitle"), rxLines) + txInfo(c) + commInfo(c));
+                '<i class="pdot" style="background:' + sigColor(med) + '"></i>' + t(useMargin ? "pMargin" : "pSnr", fmtN(med, 1)),
+                c.rssi.length ? t("pRssi", fmtN(median(c.rssi))) + (c.nRelay ? " <i>(" + t("directOnly") + ")</i>" : "") : ""])];
+      rect.bindPopup(popList("📥 " + t("rxTitle"), rxLines.concat(relLine(c))));
       rect.addTo(mapLayer);
       // el gris solo dentro del borde: así el borde se ve sobre el mapa con el mismo tono que las celdas en directo
       if (onlyRelay) L.rectangle(insetBounds(c.bounds, RELAY_BORDER), { stroke: false, fillColor: "#2b2f36", fillOpacity: .6, interactive: false }).addTo(mapLayer);
@@ -2147,16 +2144,25 @@ async function loadCommunity() {
     if (!r.ok) throw new Error("HTTP " + r.status);
     const data = await r.json();
     dropCommunity();
-    $("ageWrap").hidden = false;
+    $("ageWrap").hidden = false; setCommBtn(true);
     if (!data || !Array.isArray(data.cells) || !data.cells.length) { say(t("commEmpty")); mapDirty = true; dirtyRender = true; refreshFromSelect(); if (map) drawMap(true); return; }
     await addCoverage(data, t("commName"), true);
-  } catch (e) { say(t("commErr", e.message)); }
+  } catch (e) { say(t("commErr", e.message)); setCommBtn(hasCommunity()); }
 }
 function dropCommunity() {
   if (fileRows) { fileRows = fileRows.filter(r => !r.community); if (!fileRows.length) fileRows = null; }
   fileVisited = fileVisited.filter(v => !v.community);
   fileTxCells = fileTxCells.filter(v => !v.community);
   fileNames = fileNames.filter(n => n !== t("commName"));
+}
+// el botón 🌍 se queda hundido mientras el mapa comunitario está en el mapa; al volver a pulsarlo se quita
+let commOn = false;
+function setCommBtn(on) { commOn = on; $("btnCommunity").classList.toggle("on", on); $("btnCommunity").setAttribute("aria-pressed", on); }
+function toggleCommunity() {
+  if (!commOn) return loadCommunity();
+  dropCommunity(); setCommBtn(false);
+  $("ageWrap").hidden = true;
+  mapDirty = true; dirtyRender = true; refreshFromSelect(); if (map) drawMap(true);
 }
 function hasCommunity() { return (fileRows || []).some(r => r.community) || fileVisited.some(v => v.community); }
 function downloadCoverage() {
@@ -2332,7 +2338,7 @@ $("btnExpClose").addEventListener("click", closeExport);
 $("rngPriv").addEventListener("input", () => { updateExport(); mapDirty = true; if (map) drawMap(false); });
 $("btnExpGo").addEventListener("click", downloadCoverage);
 $("btnExpUp").addEventListener("click", uploadCoverage);
-$("btnCommunity").addEventListener("click", loadCommunity);
+$("btnCommunity").addEventListener("click", toggleCommunity);
 $("selAge").addEventListener("change", e => { commAge = Number(e.target.value) || 0; loadCommunity(); });
 $("btnHelp").addEventListener("click", () => openHelp());
 $("btnHelpClose").addEventListener("click", closeHelp);
