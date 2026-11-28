@@ -142,18 +142,19 @@
   .combo { position:relative; flex:1 1 auto; min-width:0; max-width:200px; width:200px; display:inline-flex; }
   .combo input { width:100%; min-width:0; height:29px; box-sizing:border-box; padding:5px 26px 5px 30px; font-size:16px; color:#e6e9ee;
                  background:#34465c; border:1px solid #34465c; border-radius:8px; text-overflow:ellipsis; }
-  .combo .cicon { position:absolute; left:8px; top:50%; transform:translateY(-50%); pointer-events:none; font-size:15px; }
+  .combo .cicon { position:absolute; left:8px; top:50%; transform:translateY(-50%); pointer-events:none; font-size:16px; line-height:1; }
   /* desplegables con el fondo de los botones; en negrita si no es «todos…» */
   .filt.agef select { background:#34465c; border-color:#34465c; color:#e6e9ee; }
   .combo input.chosen, .filt.agef select.chosen { font-weight:700; }
   .filt.agef select option { font-weight:400; }
   .btns.viewrow { margin:10px 0 0; }
+  .em { font-size:16px; }   /* emojis siempre a 16 px, aunque el texto del botón sea más pequeño */
   .btns.actrow { margin:8px 0 10px; }
   #mapBox.max .btns.actrow { display:none; }
   /* móvil: las dos vistas y los dos desplegables caben en una fila cada uno */
   @media (max-width:480px) {
     .btns.viewrow .seg { display:flex; width:100%; }
-    .btns.viewrow .seg button { flex:1 1 0; min-width:0; justify-content:center; padding:0 4px; font-size:14px; gap:3px; }
+    .btns.viewrow .seg button { flex:1 1 0; min-width:0; justify-content:center; padding:0 4px; font-size:13px; gap:3px; }
     .mapopts .filt.nodesel, .mapopts #ageWrap { flex:1 1 0; min-width:0; }
     .mapopts .combo { width:100%; max-width:none; }
     .mapopts #selAge { width:100%; min-width:0; }
@@ -211,7 +212,7 @@
   .seg { display:inline-flex; border-radius:10px; overflow:hidden; border:1px solid #2a3340; }
   .seg button { box-sizing:border-box; height:27px; display:inline-flex; align-items:center; gap:5px; border-radius:0; padding:0 11px; font-size:16px; background:#1a2029; }
   /* botones que se quedan pulsados (vista y mapa de cobertura): hundidos, con borde azul por dentro */
-  .seg button.on, #btnCommunity.on { background:#123760; color:#fff; box-shadow:inset 0 3px 6px #000c, inset 0 0 0 2px #4c9bff; }
+  .seg button.on, #btnCommunity.on { background:#2f7df6; color:#fff; font-weight:700; }
   .seg button:not(.on) { color:#c9d1db; background:#34465c; }
   /* deslizador de celda con el mismo aspecto que el de saltos (un solo botón) */
   .filt.cellf { margin:0; gap:6px; }
@@ -254,9 +255,9 @@
   <!-- fila 1: las dos vistas de cobertura -->
   <div class="btns viewrow">
     <span class="seg" role="group" data-i18n-aria="view">
-      <button id="vGrid" data-i18n-title="gridTitle">⬇️ <span data-i18n="grid">Reception coverage</span></button>
-      <button id="vTx" data-i18n-title="txViewTitle">⬆️ <span data-i18n="txView">Transmission coverage</span></button>
-      <button id="vCmp" data-i18n-title="cmpTitle" hidden>⚖️ <span data-i18n="cmp">Compare</span></button>
+      <button id="vGrid" data-i18n-title="gridTitle"><span class="em">⬇️</span> <span data-i18n="grid">Reception coverage</span></button>
+      <button id="vTx" data-i18n-title="txViewTitle"><span class="em">⬆️</span> <span data-i18n="txView">Transmission coverage</span></button>
+      <button id="vCmp" data-i18n-title="cmpTitle" hidden><span class="em">⚖️</span> <span data-i18n="cmp">Compare</span></button>
     </span>
     <!-- el mapa de cobertura se carga siempre; el botón ya no se muestra -->
     <button id="btnCommunity" class="sec" hidden></button>
@@ -628,7 +629,7 @@ const I18N = {
     medRssi: m => "Median RSSI " + m + " dBm", directOnly: "direct only", timeInCell: "Time in cell",
     noRxText: "You passed here and no packet arrived.", noRxComm: "Routes passed here and nothing was heard directly from a relaying node.",
     txView: "Transmission coverage", txViewTitle: "Transmission: did the mesh hear the messages you sent? (cells by messages sent)",
-    txLgHead: "Transmission (% acks ok):", txLgAll: "≥ 75 %", txLgSome: "25–75 %", txLgNever: "< 25 %",
+    txLgHead: "Transmission (confirmed sends):", txLgAll: "≥ 75 %", txLgSome: "25–75 %", txLgNever: "< 25 %",
     txTitle: "Transmission", txCell: (a, n) => a + " of " + n + " messages reached the mesh", txMsg: "Message sent",
     txOk: "✓ The mesh heard it: a node relayed or acknowledged it.", txKo: "✗ Nobody relayed it after 3 tries.", lgTx: "Message sent: mesh heard it / nobody",
     commFew: "There are still few uploads: passes and reliability will show when there are more.", commPass1: "1 pass", commPass2: "2–4 passes", commPass5: "5 or more passes", commRx: "reception", rxNever: "never", rxSome: "sometimes", rxAll: "always", reliability: "Reliability",
@@ -704,7 +705,7 @@ const I18N = {
     medRssi: m => "RSSI mediano " + m + " dBm", directOnly: "solo directos", timeInCell: "Tiempo en la celda",
     noRxText: "Pasaste por aquí y no llegó ningún paquete.", noRxComm: "Han pasado recorridos por aquí y no se oyó directamente a ningún nodo que repita.",
     txView: "Cobertura transmisión", txViewTitle: "Transmisión: ¿la red oyó los mensajes que enviaste? (celdas según los mensajes enviados)",
-    txLgHead: "Transmisión (% acuses ok):", txLgAll: "≥ 75 %", txLgSome: "25–75 %", txLgNever: "< 25 %",
+    txLgHead: "Transmisión (envíos confirmados):", txLgAll: "≥ 75 %", txLgSome: "25–75 %", txLgNever: "< 25 %",
     txTitle: "Transmisión", txCell: (a, n) => a + " de " + n + " mensajes llegaron a la red", txMsg: "Mensaje enviado",
     txOk: "✓ La red lo oyó: un nodo lo retransmitió o lo confirmó.", txKo: "✗ Nadie lo retransmitió tras 3 intentos.", lgTx: "Mensaje enviado: la red lo oyó / nadie",
     commFew: "Aún hay pocas subidas: las pasadas y la fiabilidad se mostrarán cuando haya más.", commPass1: "1 pasada", commPass2: "2–4 pasadas", commPass5: "5 pasadas o más", commRx: "recepción", rxNever: "nunca", rxSome: "a veces", rxAll: "siempre", reliability: "Fiabilidad",
@@ -847,9 +848,9 @@ function drawLegendScale(sfs, sq = true) {
   const to = " " + esc(t("to")) + " ", sw = c => '<span><i style="background:' + c + (sq ? ';border-radius:1px' : '') + '"></i>';
   const minus = v => String(v).replace("-", "−");
   $("lgScale").innerHTML = sfs
-    ? '<span>' + esc(t("lgMargin")) + "</span>" + sw(SIG_COLORS[2]) + "≥ 6 dB</span>" + sw(SIG_COLORS[1]) + "0" + to + "6</span>" + sw(SIG_COLORS[0]) + "&lt; 0</span>" + (sq ? LG_LOW() : "") +
+    ? '<span>' + esc(t("lgMargin")) + "</span>" + sw(SIG_COLORS[2]) + "≥ 6 dB</span>" + sw(SIG_COLORS[1]) + "0" + to + "6 dB</span>" + sw(SIG_COLORS[0]) + "&lt; 0 dB</span>" + (sq ? LG_LOW() : "") +
       '<span class="lgsf">(' + sfs.map(sf => esc(t("sfLimitTxt", sf, minus(sfLimit(sf))))).join(", ") + ")</span>"
-    : '<span>' + esc(t("lgSnr")) + "</span>" + sw(SIG_COLORS[2]) + "≥ 0</span>" + sw(SIG_COLORS[1]) + "−10" + to + "0</span>" + sw(SIG_COLORS[0]) + "&lt; −10</span>" + (sq ? LG_LOW() : "");
+    : '<span>' + esc(t("lgSnr")) + "</span>" + sw(SIG_COLORS[2]) + "≥ 0 dB</span>" + sw(SIG_COLORS[1]) + "−10" + to + "0 dB</span>" + sw(SIG_COLORS[0]) + "&lt; −10 dB</span>" + (sq ? LG_LOW() : "");
 }
 function fmtDist(d) { return d == null || isNaN(d) ? "—" : (d >= 1000 ? (d / 1000).toFixed(2) + " km" : Math.round(d) + " m"); }
 let bestNames = new Map();   // nodo → mejor nombre conocido (para tabla y popups)
