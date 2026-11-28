@@ -630,7 +630,7 @@ const I18N = {
     medRssi: m => "Median RSSI " + m + " dBm", directOnly: "direct only", timeInCell: "Time in cell",
     noRxText: "You passed here and no packet arrived.", noRxComm: "Routes passed here and nothing was heard directly from a relaying node.",
     txView: "Transmission coverage", txViewTitle: "Transmission: did the mesh hear the messages you sent? (cells by messages sent)",
-    txLgHead: "Transmission (confirmed sends):", txLgAll: "≥ 75 %", txLgSome: "25–75 %", txLgNever: "< 25 %", txLgNone: "0 %",
+    txLgHead: "Transmission (confirmed sends):", txLgAll: "≥ 75 %", txLgSome: "25–75 %", txLgNever: "< 25 %", txLgNone: "None",
     txTitle: "Transmission", txCell: (a, n) => a + " of " + n + " messages reached the mesh", txMsg: "Message sent",
     txOk: "✓ The mesh heard it: a node relayed or acknowledged it.", txKo: "✗ Nobody relayed it after 3 tries.", lgTx: "Message sent: mesh heard it / nobody",
     commFew: "There are still few uploads: passes and reliability will show when there are more.", commPass1: "1 pass", commPass2: "2–4 passes", commPass5: "5 or more passes", commRx: "reception", rxNever: "never", rxSome: "sometimes", rxAll: "always", reliability: "Reliability",
@@ -706,7 +706,7 @@ const I18N = {
     medRssi: m => "RSSI mediano " + m + " dBm", directOnly: "solo directos", timeInCell: "Tiempo en la celda",
     noRxText: "Pasaste por aquí y no llegó ningún paquete.", noRxComm: "Han pasado recorridos por aquí y no se oyó directamente a ningún nodo que repita.",
     txView: "Cobertura transmisión", txViewTitle: "Transmisión: ¿la red oyó los mensajes que enviaste? (celdas según los mensajes enviados)",
-    txLgHead: "Transmisión (envíos confirmados):", txLgAll: "≥ 75 %", txLgSome: "25–75 %", txLgNever: "< 25 %", txLgNone: "0 %",
+    txLgHead: "Transmisión (envíos confirmados):", txLgAll: "≥ 75 %", txLgSome: "25–75 %", txLgNever: "< 25 %", txLgNone: "Ninguno",
     txTitle: "Transmisión", txCell: (a, n) => a + " de " + n + " mensajes llegaron a la red", txMsg: "Mensaje enviado",
     txOk: "✓ La red lo oyó: un nodo lo retransmitió o lo confirmó.", txKo: "✗ Nadie lo retransmitió tras 3 intentos.", lgTx: "Mensaje enviado: la red lo oyó / nadie",
     commFew: "Aún hay pocas subidas: las pasadas y la fiabilidad se mostrarán cuando haya más.", commPass1: "1 pasada", commPass2: "2–4 pasadas", commPass5: "5 pasadas o más", commRx: "recepción", rxNever: "nunca", rxSome: "a veces", rxAll: "siempre", reliability: "Fiabilidad",
@@ -1490,13 +1490,17 @@ function txPopup(c) {
     relLine(c)]);
 }
 // estado de transmisión de una celda según el % de mensajes que llegaron a la red:
-// 2 = 75 % o más, 1 = entre 25 y 75 %, 0 = menos del 25 %, 3 = ninguno (menos del 5 %, gris), null sin mensajes
+// 2 = 75 % o más, 1 = entre 25 y 75 %, 0 = menos del 25 %, 3 = ninguno (gris: no llegó ni un mensaje), null sin mensajes
 function txState(c) {
   const n = c.txOk + c.txFail, own = n ? 100 * c.txOk / n : null;
   // mapa de cobertura: el % redondeado a decenas; los datos antiguos sin % solo traen la franja
   const comm = c.txp != null ? c.txp : c.txb == null ? null : [0, 50, 100][c.txb];
   const p = own == null ? comm : comm == null ? own : (own + comm) / 2;
-  return p == null ? null : p >= 75 ? 2 : p < 5 ? 3 : p < 25 ? 0 : 1;
+  if (p == null) return null;
+  // «ninguno» solo si de verdad no llegó ninguno (propios: 0 ok; mapa de cobertura: franja «nunca»).
+  // Con que llegue uno solo, ya hay posibilidades (mejorando antena, posición…): va con los de menos del 25 %
+  const none = (!n || c.txOk === 0) && (comm == null || (c.txb != null ? c.txb === 0 : comm === 0));
+  return none ? 3 : p >= 75 ? 2 : p < 25 ? 0 : 1;
 }
 const TX_COLORS = SIG_COLORS;
 
