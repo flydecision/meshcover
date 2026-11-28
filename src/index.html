@@ -14,7 +14,6 @@
   .btns { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0; }
   button { background:#23456e; color:#fff; border:0; border-radius:10px; padding:11px 14px; font-size:16px; font-weight:400; }
   button.on { font-weight:700; }
-  .filt.hops[hidden] { display:none; }
   button.sec { background:#34465c; }
   button.danger { background:#5e2620; }
   button:disabled { opacity:.45; }
@@ -136,7 +135,6 @@
   /* Deslizador doble (mínimo y máximo de saltos): dos «range» superpuestos */
   .filt .dual { position:relative; flex:1 1 140px; min-width:80px; max-width:170px; height:29px; }
   /* anchos fijos para que el deslizador no cambie de tamaño mientras se arrastra */
-  #hopsVal { min-width:2.4em; }
   .filt.nodesel { display:inline-flex; margin:0; gap:6px; flex:0 1 auto; min-width:0; }
   /* selector de nodo con buscador: campo de texto + lista desplegable filtrada */
   .combo { position:relative; flex:1 1 auto; min-width:0; max-width:200px; width:200px; display:inline-flex; }
@@ -177,9 +175,6 @@
   .expbtns button { height:29px; padding:0 11px; display:inline-flex; align-items:center; gap:5px; }
   #tblNote { color:#9aa4b2; margin:10px 0 6px; line-height:1.4; }
   .combo-list .none { padding:8px 10px; color:#9aa4b2; }
-  .filt.hops { display:inline-flex; margin:0; gap:6px; flex:1 1 100px; min-width:max-content; max-width:280px; }
-  .filt.hops .dual { min-width:60px; }
-  @media (max-width:380px) { .filt.hops { gap:4px; } .filt.hops .lbl { display:none; } }
   .filt .dual input[type=range] { position:absolute; left:0; top:0; width:100%; min-width:0; height:29px; margin:0; background:none;
     pointer-events:none; -webkit-appearance:none; appearance:none; }
   .filt .dual input[type=range]::-webkit-slider-runnable-track { background:none; }
@@ -206,7 +201,7 @@
      con borde azul cuando es la vista activa solo con tus registros */
   .seg { display:inline-flex; flex-wrap:wrap; gap:8px; }
   /* botones que se quedan pulsados (vista y mapa de cobertura): hundidos, con borde azul por dentro */
-  .seg button.on, #btnCommunity.on { background:#2f7df6; color:#fff; font-weight:400; }
+  .seg button.on, #btnCommunity.on { background:#2f7df6; color:#fff; font-weight:400; box-shadow:inset 0 2px 4px #0008; }
   .seg button:not(.on) { background:#34465c; }
   .seg button.cur:not(.on) { box-shadow:inset 0 0 0 2px #2f7df6; }
   /* deslizador de celda con el mismo aspecto que el de saltos (un solo botón) */
@@ -259,8 +254,8 @@
   </div>
   <!-- fila 2: registros propios -->
   <div class="btns actrow">
-    <button id="btnClear" class="sec" data-i18n-title="clearTitle" hidden>🗑 <span data-i18n="clear">Clear</span></button>
     <button id="btnOpen" class="sec" data-i18n-title="openTitle">📂 <span data-i18n="open">Add Logs</span></button>
+    <button id="btnClear" class="sec" data-i18n-title="clearTitle" hidden>🗑 <span data-i18n="clear">Clear</span></button>
     <button id="btnExport" class="sec" data-i18n-title="exportTitle" hidden>💾 <span data-i18n="exportBtn">Export coverage</span></button>
     <input type="file" id="fileAny" accept=".csv,.gpx,.txt,.json,text/csv,text/plain,application/gpx+xml,application/xml,text/xml,application/json" multiple hidden>
   </div>
@@ -269,18 +264,10 @@
     <span class="filt nodesel"><span class="combo"><span class="cicon">📡</span><input id="nodeSearch" type="text" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="false" aria-controls="nodeList" data-i18n-aria="nodeSearch"><span class="caret">▼</span><div id="nodeList" class="combo-list" role="listbox" hidden></div></span><select id="selFrom" hidden><option value="" data-i18n="allNodes">All nodes</option></select></span>
     <span id="cmpWrap" class="filt cmpf" hidden>SF <select id="cmpA" data-i18n-aria="cmpA"></select> <span data-i18n="vs">vs</span> SF <select id="cmpB" data-i18n-aria="cmpB"></select></span>
     <span id="ageWrap" class="filt agef" hidden data-i18n-title="ageTitle"><select id="selAge" data-i18n-aria="ageTitle"><option value="0" data-i18n="ageAll">All data</option><option value="12" data-i18n="age12">Last 12 months</option><option value="6" data-i18n="age6">Last 6 months</option><option value="3" data-i18n="age3">Last 3 months</option></select></span>
-    <span class="filt hops" data-i18n-title="hopsTitle">
-      <span class="lbl"><span data-i18n="hops">Hops</span>:</span> <span class="hv" id="hopsVal">0–7</span>
-      <span class="dual" id="hopsDual">
-        <span class="dual-track"></span><span class="dual-fill" id="hopsFill"></span>
-        <input type="range" id="rngHopsMin" min="0" max="7" step="1" value="0" data-i18n-aria="hopsMin">
-        <input type="range" id="rngHops" min="0" max="7" step="1" value="7" data-i18n-aria="hopsMax">
-      </span>
-    </span>
   </div>
   <div id="expPanel" class="exppanel" hidden>
     <!-- solo los dos botones y cerrar: el mapa ya muestra lo que se exporta -->
-    <div class="expbtns"><button id="btnExpGo">💾 <span data-i18n="expGo">Download file</span></button><button id="btnExpUp">☁️ <span data-i18n="expUp">Upload to coverage map</span></button><button id="btnExpClose" class="sec" data-i18n-aria="close">✕</button></div>
+    <div class="expbtns"><button id="btnExpGo">💾 <span data-i18n="expGo">Download file</span></button><button id="btnExpUp">☁️ <span data-i18n="expUp">Upload to MeshCover map</span></button><button id="btnExpClose" class="sec" data-i18n-aria="close">✕</button></div>
     <div id="expInfo" hidden></div>
     <div id="expUpMsg" hidden></div>
   </div>
@@ -369,7 +356,6 @@
       <h3>Controles</h3>
       <ul>
         <li><b>Nodo</b>: «Mejor señal de cualquier nodo» es la cobertura de la red; elige un nodo para ver solo la suya.</li>
-        <li><b>Saltos</b> (al medir un nodo con «Enviado por»): 0–0 = solo lo recibido directo.</li>
         <li><b>⚖️ Comparar</b>: sale si abres rutas con distinto SF; compara celda a celda.</li>
       </ul>
     </div>
@@ -407,7 +393,7 @@
         <li>Al terminar, exporta el registro: Ajustes › Panel de depuración › botón ⬇️ (Exportar registros), y guárdalo en una carpeta del móvil (por ejemplo, Download).</li>
         <li>En MeshCover, abre el <code>.txt</code> del registro con <b>📂 Añadir registros</b>. Si grabaste el track del recorrido con otra app, abre a la vez o después el <code>.gpx</code> (MeshCover une los dos archivos).</li>
         <li>Pulsa <b>💾 Exportar cobertura</b>.</li>
-        <li>Pulsa <b>☁️ Subir al mapa de cobertura</b>.</li>
+        <li>Pulsa <b>☁️ Subir al mapa MeshCover</b>.</li>
       </ol>
       <hr class="hsep">
       <h3>⬆️ Cobertura de transmisión</h3>
@@ -426,7 +412,7 @@
 
     <div class="page" data-p="5" data-lang="es" hidden>
       <h3>🔒 Privacidad</h3>
-      <div>Tus registros <b>no salen de tu dispositivo</b>. Solo se envía algo si pulsas <b>💾 Exportar cobertura</b> y luego <b>☁️ Subir al mapa de cobertura</b>.</div>
+      <div>Tus registros <b>no salen de tu dispositivo</b>. Solo se envía algo si pulsas <b>💾 Exportar cobertura</b> y luego <b>☁️ Subir al mapa MeshCover</b>.</div>
       <h3>📦 Qué se sube</h3>
       <ul>
         <li>Celdas de 250 m con los paquetes recibidos y, por nodo oído, su id (sin nombre), SNR, RSSI y SF. Los nodos con «OK to MQTT» desactivado van sin id.</li>
@@ -474,7 +460,6 @@
       <h3>Controls</h3>
       <ul>
         <li><b>Node</b>: «Best signal of any node» is the mesh coverage; pick a node to see only its own.</li>
-        <li><b>Hops</b> (when measuring a node with «Sent by»): 0–0 = only what was received directly.</li>
         <li><b>⚖️ Compare</b>: shows up when you open routes with different SF; compares cell by cell.</li>
       </ul>
     </div>
@@ -512,7 +497,7 @@
         <li>When you finish, export the log: Settings › Debug panel › ⬇️ button (Export logs), and save it to a phone folder (for example, Download).</li>
         <li>In MeshCover, open the log <code>.txt</code> with <b>📂 Add Logs</b>. If you recorded the route track with another app, open the <code>.gpx</code> at the same time or afterwards (MeshCover joins both files).</li>
         <li>Press <b>💾 Export coverage</b>.</li>
-        <li>Press <b>☁️ Upload to coverage map</b>.</li>
+        <li>Press <b>☁️ Upload to MeshCover map</b>.</li>
       </ol>
       <hr class="hsep">
       <h3>⬆️ Transmission coverage</h3>
@@ -531,7 +516,7 @@
 
     <div class="page" data-p="5" data-lang="en" hidden>
       <h3>🔒 Privacy</h3>
-      <div>Your logs <b>never leave your device</b>. Something is sent only if you press <b>💾 Export coverage</b> and then <b>☁️ Upload to coverage map</b>.</div>
+      <div>Your logs <b>never leave your device</b>. Something is sent only if you press <b>💾 Export coverage</b> and then <b>☁️ Upload to MeshCover map</b>.</div>
       <h3>📦 What is uploaded</h3>
       <ul>
         <li>250 m cells with the packets received and, per node heard, its id (no name), SNR, RSSI and SF. Nodes with «OK to MQTT» off go without id.</li>
@@ -601,8 +586,7 @@ const I18N = {
     cmpGain: (b, d, a) => d > 0 ? "SF" + b + " receives in " + d + (d === 1 ? " more cell" : " more cells") + " than SF" + a + "." : d < 0 ? "SF" + b + " receives in " + (-d) + (d === -1 ? " fewer cell" : " fewer cells") + " than SF" + a + "." : "Both receive in the same number of cells.",
     cmpNoCommon: "No cell was travelled with both SF: do the same route with each one.",
     cmpCell: (sf, n, m) => "SF" + sf + ": " + (n ? n + (n === 1 ? " packet" : " packets") + (m !== null ? " · margin " + m + " dB" : "") : "nothing received"), dotsTitle: "Detail: each received packet as a dot (time, SNR, hops, node)", gridTitle: "Reception: what your node heard from the mesh, in 250 m cells",
-    hops: "Hops", hopsMin: "Minimum hops", hopsMax: "Maximum hops",
-    hopsTitle: "Hops. 0 = received directly; 1, 2… = relayed by other nodes. Drag both ends to pick a minimum and a maximum",
+    hops: "Hops",
     to: "to", track: "Track", noRx: "No reception", nodeIcon: "Node",
     statRows: "Records", statDur: "Duration",
     thDate: "Date and time", thType: "Type",
@@ -640,7 +624,7 @@ const I18N = {
     nodeSearch: "Search node", noMatch: "No node matches",
     ageTitle: "Age of the coverage map data", ageAll: "📅 All data", age12: "📅 Last 12 months", age6: "📅 Last 6 months", age3: "📅 Last 3 months",
     communityBtn: "Coverage map", communityTitle: "Add the shared coverage map uploaded by everyone",
-    expUp: "Upload to coverage map", upConfirm: n => "Upload these " + n + " cells to the public coverage map? They are added for everyone.\n\nPrivacy: the uploaded file contains no personal data, but you can check it first by downloading it with the «Download file» button and opening it with any text editor, or by reviewing the open source code, yourself or with an AI, at https://github.com/flydecision/meshcover",
+    expUp: "Upload to MeshCover map", upConfirm: n => "Upload these " + n + " cells to the public coverage map? They are added for everyone.\n\nPrivacy: the uploaded file contains no personal data, but you can check it first by downloading it with the «Download file» button and opening it with any text editor, or by reviewing the open source code, yourself or with an AI, at https://github.com/flydecision/meshcover",
     upOk: n => "✅ Uploaded: " + n + " cells added to the coverage map. Thanks!", upBusy: "Uploading…",
     upErr: m => "Could not upload (" + m + ").", upRate: "too many uploads from your connection, try again in an hour", upDup: "this file is already on the coverage map",
     commEmpty: "The coverage map is still empty.", commErr: m => "Could not load the coverage map (" + m + ").", commName: "Coverage map",
@@ -674,8 +658,7 @@ const I18N = {
     cmpGain: (b, d, a) => d > 0 ? "SF" + b + " recibe en " + d + (d === 1 ? " celda" : " celdas") + " más que SF" + a + "." : d < 0 ? "SF" + b + " recibe en " + (-d) + (d === -1 ? " celda" : " celdas") + " menos que SF" + a + "." : "Los dos reciben en el mismo número de celdas.",
     cmpNoCommon: "Ninguna celda se recorrió con los dos SF: haz la misma ruta con cada uno.",
     cmpCell: (sf, n, m) => "SF" + sf + ": " + (n ? n + (n === 1 ? " paquete" : " paquetes") + (m !== null ? " · margen " + m + " dB" : "") : "nada recibido"), dotsTitle: "Detalle: cada paquete recibido como un punto (hora, SNR, saltos, nodo)", gridTitle: "Recepción: lo que tu nodo oyó de la red, en celdas de 250 m",
-    hops: "Saltos", hopsMin: "Saltos mínimos", hopsMax: "Saltos máximos",
-    hopsTitle: "Saltos. 0 = recibido en directo; 1, 2… = llegó repetido por otros nodos. Mueve los dos extremos para elegir un mínimo y un máximo",
+    hops: "Saltos",
     to: "a", track: "Recorrido", noRx: "Sin recepción", nodeIcon: "Nodo",
     statRows: "Registros", statDur: "Duración",
     thDate: "Fecha y hora", thType: "Tipo",
@@ -713,7 +696,7 @@ const I18N = {
     nodeSearch: "Buscar nodo", noMatch: "Ningún nodo coincide",
     ageTitle: "Antigüedad de los datos del mapa de cobertura", ageAll: "📅 Todos los datos", age12: "📅 Últimos 12 meses", age6: "📅 Últimos 6 meses", age3: "📅 Últimos 3 meses",
     communityBtn: "Mapa de cobertura", communityTitle: "Añadir el mapa de cobertura compartido que ha subido todo el mundo",
-    expUp: "Subir al mapa de cobertura", upConfirm: n => "¿Subir estas " + n + " celdas al mapa de cobertura público? Se suman para todo el mundo.\n\nPrivacidad: el archivo que se sube no lleva ningún dato personal, pero puedes revisarlo antes descargándolo con el botón «Descargar archivo» y abriéndolo con cualquier editor de texto, o consultando el código abierto, por tu cuenta o con una IA, en https://github.com/flydecision/meshcover",
+    expUp: "Subir al mapa MeshCover", upConfirm: n => "¿Subir estas " + n + " celdas al mapa de cobertura público? Se suman para todo el mundo.\n\nPrivacidad: el archivo que se sube no lleva ningún dato personal, pero puedes revisarlo antes descargándolo con el botón «Descargar archivo» y abriéndolo con cualquier editor de texto, o consultando el código abierto, por tu cuenta o con una IA, en https://github.com/flydecision/meshcover",
     upOk: n => "✅ Subido: " + n + " celdas añadidas al mapa de cobertura. ¡Gracias!", upBusy: "Subiendo…",
     upErr: m => "No se pudo subir (" + m + ").", upRate: "demasiadas subidas desde tu conexión, prueba dentro de una hora", upDup: "este archivo ya está en el mapa de cobertura",
     commEmpty: "El mapa de cobertura aún está vacío.", commErr: m => "No se pudo cargar el mapa de cobertura (" + m + ").", commName: "Mapa de cobertura",
@@ -797,11 +780,7 @@ let nodeMqtt = new Map();
 function optedOut(n) { const v = nodeMqtt.get(n); return !!v && !v.ok; }
 function relays(n) { return n != null && !NO_RELAY_ROLES.has(nodeRoles.get(n)); }
 function covRow(r) { return r.community || relays(r.heard); }
-// El deslizador de saltos solo tiene sentido al medir un nodo concreto («Enviado por» o «Todos los nodos») con
-// registros propios: ahí distingue lo que llegó directo de lo repetido. En «Oído directamente» la señal ya es la del
-// nodo oído y en el mapa de cobertura todo cuenta como directo, así que se oculta y no filtra nada.
-function hopsShown() { return !heardMode() && (fileRows || []).some(r => !r.community); }
-function showHopsCtl() { const h = document.querySelector(".filt.hops"); if (h) h.hidden = !hopsShown(); }
+function showHopsCtl() {}
 function rowsView() {
   const all = fileRows || [];
   if (selFrom === "h*") return all.filter(r => r.heard != null && covRow(r));
@@ -974,7 +953,10 @@ async function openFiles(list) {
     else await openCsvFile(f);
   }
   const placed = placeFromGpx();
-  if (placed) { mapDirty = true; dirtyRender = true; refreshFromSelect(); drawMap(true); }
+  // al añadir registros propios se quita el mapa de cobertura: se ven limpios; los botones de cobertura lo vuelven a mostrar
+  const hideComm = commOn && hasOwnData();
+  if (hideComm) { dropCommunity(); setCommBtn(false); $("ageWrap").hidden = true; if (expPreview) expPreview.comm = false; }
+  if (placed || hideComm) { mapDirty = true; dirtyRender = true; refreshFromSelect(); drawMap(true); }
   // registro sin posiciones propias: solo se avisa si no hay un GPX que haya colocado lo recibido
   if (pendingNoOwn && !placed && !(fileRows || []).some(r => !r.community && r.rxSrc === "gpx")) say(t("noOwnPos"), 25000);
   pendingNoOwn = false;
@@ -1079,11 +1061,10 @@ function viewCell() {
 function saveMapPrefs() { try { localStorage.setItem("rangetest_mapprefs_v1", JSON.stringify({ mapView })); } catch (e) {} }
 function loadMapPrefs() {
   try {
-    const p = JSON.parse(localStorage.getItem("rangetest_mapprefs_v1") || "{}");
-    if (["grid", "cmp", "tx"].includes(p.mapView)) mapView = p.mapView;
+    // al arrancar, siempre «Cobertura recepción» (la vista guardada ya no se usa)
+    localStorage.removeItem("rangetest_mapprefs_v1");
   } catch (e) {}
   showView();
-  $("rngHops").value = String(maxHops); $("rngHopsMin").value = String(minHops); showHops();
 }
 // los botones de vista solo se ven hundidos cuando hay algo en el mapa
 function hasMapData() { return !!(fileRows || fileTracks.length || fileVisited.length || fileTx.length || fileTxCells.length); }
@@ -1097,7 +1078,7 @@ function showView() {
   }
   // sin registros propios: ni exportar ni tabla (con solo el mapa de cobertura no hay nada que listar)
   $("btnExport").hidden = !own;
-  $("btnClear").hidden = !own && !commOn;
+  $("btnClear").hidden = !own;
   $("tblBox").hidden = !own;
   $("selAge").classList.toggle("chosen", $("selAge").value !== "0");
   $("nodeSearch").classList.toggle("chosen", selFrom !== "");
@@ -2213,7 +2194,6 @@ function openExport() {
   $("expPanel").hidden = false; $("mapBox").classList.add("exporting");
   if ([...$("selFrom").options].some(o => o.value === "h*")) selFrom = "h*";
   minHops = 0; maxHops = 7;
-  $("rngHopsMin").value = "0"; $("rngHops").value = "7"; showHops();
   mapView = "grid"; showView();
   updateExport();
   mapDirty = true; mapFitted = true; dirtyRender = true; render(); if (map) drawMap(false);
@@ -2225,7 +2205,6 @@ function closeExport() {
   if (!expPreview) return;
   const p = expPreview; expPreview = null;
   selFrom = p.selFrom; mapView = p.mapView; minHops = p.minHops; maxHops = p.maxHops;
-  $("rngHopsMin").value = String(minHops); $("rngHops").value = String(maxHops); showHops();
   showView();
   mapDirty = true; mapFitted = true; dirtyRender = true; render(); if (map) drawMap(false);
   if (p.comm) loadCommunity();
@@ -2522,24 +2501,8 @@ $("vGrid").addEventListener("click", () => viewBtn("grid"));
 $("vCmp").addEventListener("click", () => setView("cmp"));
 $("vTx").addEventListener("click", () => viewBtn("tx"));
 for (const id of ["cmpA", "cmpB"]) $(id).addEventListener("change", e => { cmpPick[id] = Number(e.target.value); mapDirty = true; dirtyRender = true; if (map) drawMap(false); });
-function showHops() {
-  $("hopsVal").textContent = minHops === maxHops ? String(maxHops) : minHops + "–" + maxHops;
-  // franja azul entre los dos extremos (los 12 px son medio botón)
-  const f = $("hopsFill"), pct = v => v / 7;
-  f.style.left = "calc(12px + (100% - 24px) * " + pct(minHops) + ")";
-  f.style.width = "calc((100% - 24px) * " + (pct(maxHops) - pct(minHops)) + ")";
-  // el botón de mínimo encima cuando los dos están arriba del todo, para poder bajarlo
-  $("rngHopsMin").style.zIndex = minHops >= 7 ? "3" : "1";
-  $("rngHops").style.zIndex = "2";
-}
-$("rngHops").addEventListener("input", e => {
-  maxHops = Math.max(Number(e.target.value), minHops); e.target.value = String(maxHops);
-  showHops(); saveMapPrefs(); mapDirty = true; dirtyRender = true;
-});
-$("rngHopsMin").addEventListener("input", e => {
-  minHops = Math.min(Number(e.target.value), maxHops); e.target.value = String(minHops);
-  showHops(); saveMapPrefs(); mapDirty = true; dirtyRender = true;
-});
+// sin deslizador de saltos: siempre se cuentan todos
+function showHops() {}
 loadMapPrefs();
 $("selLang").value = lang; applyLang(); drawLegendScale(null);
 $("selLang").addEventListener("change", e => setLang(e.target.value));
