@@ -21,7 +21,8 @@
   button:not(:disabled):hover { filter:brightness(1.25); }
   .btns button { box-sizing:border-box; height:29px; padding:0 11px; font-size:16px; display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
   .btns button[hidden] { display:none; }
-  .sfask { display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:6px 0; padding:6px 10px; border:1px solid #2a3340; border-radius:10px; background:#1a2029; font-size:16px; color:#9aa4b2; }
+  .sfask { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:6px 0; padding:8px 10px; border:1px solid #3a4c64; border-radius:10px; background:#26344a; font-size:16px; color:#c9d1db; box-shadow:0 4px 12px #0006; }
+  .sfask .sfx { margin-left:auto; width:29px; height:29px; padding:0; display:inline-flex; align-items:center; justify-content:center; }
   .sfask b { color:#e6e9ee; overflow-wrap:anywhere; }
   .sfask select { height:29px; padding:0 6px; font-size:16px; }
   #toast { position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:2000; max-width:min(92vw,560px);
@@ -621,7 +622,7 @@ const I18N = {
     errNoPkts: "there are no packets received over the radio in the file",
     noOwnPos: "⚠️ Your node did not send a single position of its own in this log, so what was received cannot be placed on the map. Usually the node's GPS had no signal (indoors or in a pocket): before setting off, leave it under open sky until its position updates in the app. If you recorded the route with a phone app, open its GPX together with the log.",
     lowPrecSome: (n, tot, m) => "⚠️ " + n + " of " + tot + " positions of your node came with reduced precision (~" + m + ", probably while position was shared on the public channel). They have been discarded, and the packets received at those times are left off the map.",
-    sfAskTxt: "has no LoRa settings. Which SF was it recorded with?",
+    sfAskTxt: "has no LoRa settings. Which SF was it recorded with?", sfAskN: n => n + " logs have no LoRa settings. Which SF were they recorded with?",
     dropHere: "📂 Drop the files here", lowPrec: m => "⚠️ Your node's positions come with reduced precision (~" + m + "), so they are not used for the route or the cells. In the app, turn on position with full precision only on a channel of your own with a key (primary or secondary), and turn it off on the public channel.", errGpx: "the file is not a valid GPX",
     errNoTrack: "it has no track points", errOpen: (f, m) => "Could not open " + f + ": " + m,
     nodeSearch: "Search node", noMatch: "No node matches",
@@ -693,7 +694,7 @@ const I18N = {
     errNoPkts: "no hay paquetes recibidos por radio en el archivo",
     noOwnPos: "⚠️ Tu nodo no ha mandado ni una posición propia en este registro, así que lo recibido no se puede colocar en el mapa. Casi siempre es que el GPS del nodo no tenía señal (dentro de un edificio o en el bolsillo): antes de salir, déjalo a cielo abierto hasta que en la app se actualice su posición. Si grabaste el recorrido con una app del móvil, abre su GPX junto con el registro.",
     lowPrecSome: (n, tot, m) => "⚠️ " + n + " de " + tot + " posiciones de tu nodo venían con precisión reducida (~" + m + ", seguramente de ratos en que la posición se compartía por el canal público). Se han descartado, y los paquetes recibidos en esos ratos no salen en el mapa.",
-    sfAskTxt: "no trae los ajustes LoRa. ¿Con qué SF se grabó?",
+    sfAskTxt: "no trae los ajustes LoRa. ¿Con qué SF se grabó?", sfAskN: n => n + " registros no traen los ajustes LoRa. ¿Con qué SF se grabaron?",
     dropHere: "📂 Suelta aquí los archivos", lowPrec: m => "⚠️ Las posiciones de tu nodo vienen con precisión reducida (~" + m + "), así que no se usan para el recorrido ni para las celdas. En la app, activa la posición con precisión completa solo en un canal propio con clave (primario o secundario), y desactívala en el público.", errGpx: "el archivo no es un GPX válido",
     errNoTrack: "no tiene puntos de recorrido", errOpen: (f, m) => "No se pudo abrir " + f + ": " + m,
     nodeSearch: "Buscar nodo", noMatch: "Ningún nodo coincide",
@@ -1000,15 +1001,24 @@ function placeFromGpx() {
 }
 // Registro sin bloque de configuración LoRa (p. ej. exportado solo con «Packets», o vaciado después de
 // conectar): no se sabe su SF. Se pregunta, para que el color por margen y «⚖️ Comparar SF» funcionen.
+// Varios registros sin SF: una sola pregunta para todos, en un recuadro que se cierra con ✕,
+// tocando fuera o con cualquier otro botón (el SF elegido ya queda aplicado)
+let sfPending = [];
+function closeSfAsk() { sfPending = []; $("sfAsk").innerHTML = ""; }
 function askSf(name) {
+  sfPending.push(name);
+  const names = sfPending.slice(), n = names.length;
   const d = document.createElement("div");
   d.className = "sfask";
-  d.innerHTML = "📻 <b>" + esc(name) + "</b> <span>" + esc(t("sfAskTxt")) + "</span> <label>SF <select>" +
-    '<option value="">?</option>' + [7, 8, 9, 10, 11, 12].map(v => '<option value="' + v + '">' + v + "</option>").join("") + "</select></label>";
+  d.innerHTML = "<span>📻 " + (n === 1 ? "<b>" + esc(name) + "</b> " + esc(t("sfAskTxt")) : esc(t("sfAskN", n))) + "</span> <label>SF <select>" +
+    '<option value="">?</option>' + [7, 8, 9, 10, 11, 12].map(v => '<option value="' + v + '">' + v + "</option>").join("") + "</select></label>" +
+    '<button type="button" class="sec sfx" aria-label="' + esc(t("close")) + '">✕</button>';
   const selSf = d.querySelector("select");
   const apply = v => {
-    for (const r of fileRows || []) if (r.file === name) r.sf = v;
-    for (const tr of fileTracks) if (tr.name === name) for (const sg of tr.segs) for (const q of sg) q.sf = v;
+    const set = new Set(names);
+    for (const r of fileRows || []) if (set.has(r.file)) r.sf = v;
+    for (const x of fileTx) if (set.has(x.file)) x.sf = v;
+    for (const tr of fileTracks) if (set.has(tr.name)) for (const sg of tr.segs) for (const q of sg) q.sf = v;
     mapDirty = true; dirtyRender = true; render(); if (map) drawMap(false);
   };
   selSf.addEventListener("change", e => {
@@ -1016,18 +1026,21 @@ function askSf(name) {
     try { if (v) localStorage.setItem("meshcover_last_sf", String(v)); else localStorage.removeItem("meshcover_last_sf"); } catch (err) {}
     apply(v);
   });
-  $("sfAsk").appendChild(d);
+  d.querySelector(".sfx").addEventListener("click", closeSfAsk);
+  $("sfAsk").innerHTML = ""; $("sfAsk").appendChild(d);
   // el último SF elegido queda preseleccionado (casi siempre se graba con el mismo)
   let last = null;
   try { last = Number(localStorage.getItem("meshcover_last_sf")) || null; } catch (err) {}
   if (last >= 7 && last <= 12) { selSf.value = String(last); apply(last); }
 }
+// tocar fuera del recuadro (o cualquier otro botón) lo cierra
+document.addEventListener("click", e => { if (sfPending.length && !$("sfAsk").contains(e.target)) closeSfAsk(); }, true);
 // «🗑 Limpiar»: quita del mapa todo lo abierto
 function clearAll() {
   if (!fileRows && !fileTracks.length && !fileVisited.length && !commOn) return;
   fileRows = null; fileNames = []; fileTracks = []; fileVisited = []; fileTx = []; fileTxCells = [];
   nodeRoles = new Map(); nodeMqtt = new Map();
-  $("sfAsk").innerHTML = "";
+  closeSfAsk();
   $("ageWrap").hidden = true; setCommBtn(false);
   if (expPreview) expPreview.comm = false;
   closeExport();
