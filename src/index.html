@@ -169,7 +169,7 @@
   .combo-list .ci.top { padding-left:10px; }
   .combo-list .ci.act { background:#23456e; }
   .combo-list .ci.sel { color:#7fb2ff; font-weight:600; }
-  .exppanel { background:#1a2029; border:1px solid #2a3340; border-radius:10px; padding:10px 12px; margin:0 0 8px; line-height:1.4; color:#c9d1db; }
+  .exppanel { background:#26344a; border:1px solid #3a4c64; border-radius:10px; padding:10px 12px; margin:0 0 8px; line-height:1.4; color:#c9d1db; }
   .exphead { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; }
   .exphead button { width:32px; height:32px; padding:0; border-radius:50%; flex:none; }
   .exprow { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin:10px 0 6px; }
@@ -629,7 +629,7 @@ const I18N = {
     medRssi: m => "Median RSSI " + m + " dBm", directOnly: "direct only", timeInCell: "Time in cell",
     noRxText: "You passed here and no packet arrived.", noRxComm: "Routes passed here and nothing was heard directly from a relaying node.",
     txView: "Transmission coverage", txViewTitle: "Transmission: did the mesh hear the messages you sent? (cells by messages sent)",
-    txLgHead: "Transmission (confirmed sends):", txLgAll: "≥ 75 %", txLgSome: "25–75 %", txLgNever: "< 25 %",
+    txLgHead: "Transmission (confirmed sends):", txLgAll: "≥ 75 %", txLgSome: "25–75 %", txLgNever: "< 25 %", txLgNone: "None (0 %)",
     txTitle: "Transmission", txCell: (a, n) => a + " of " + n + " messages reached the mesh", txMsg: "Message sent",
     txOk: "✓ The mesh heard it: a node relayed or acknowledged it.", txKo: "✗ Nobody relayed it after 3 tries.", lgTx: "Message sent: mesh heard it / nobody",
     commFew: "There are still few uploads: passes and reliability will show when there are more.", commPass1: "1 pass", commPass2: "2–4 passes", commPass5: "5 or more passes", commRx: "reception", rxNever: "never", rxSome: "sometimes", rxAll: "always", reliability: "Reliability",
@@ -705,7 +705,7 @@ const I18N = {
     medRssi: m => "RSSI mediano " + m + " dBm", directOnly: "solo directos", timeInCell: "Tiempo en la celda",
     noRxText: "Pasaste por aquí y no llegó ningún paquete.", noRxComm: "Han pasado recorridos por aquí y no se oyó directamente a ningún nodo que repita.",
     txView: "Cobertura transmisión", txViewTitle: "Transmisión: ¿la red oyó los mensajes que enviaste? (celdas según los mensajes enviados)",
-    txLgHead: "Transmisión (envíos confirmados):", txLgAll: "≥ 75 %", txLgSome: "25–75 %", txLgNever: "< 25 %",
+    txLgHead: "Transmisión (envíos confirmados):", txLgAll: "≥ 75 %", txLgSome: "25–75 %", txLgNever: "< 25 %", txLgNone: "Ninguno (0 %)",
     txTitle: "Transmisión", txCell: (a, n) => a + " de " + n + " mensajes llegaron a la red", txMsg: "Mensaje enviado",
     txOk: "✓ La red lo oyó: un nodo lo retransmitió o lo confirmó.", txKo: "✗ Nadie lo retransmitió tras 3 intentos.", lgTx: "Mensaje enviado: la red lo oyó / nadie",
     commFew: "Aún hay pocas subidas: las pasadas y la fiabilidad se mostrarán cuando haya más.", commPass1: "1 pasada", commPass2: "2–4 pasadas", commPass5: "5 pasadas o más", commRx: "recepción", rxNever: "nunca", rxSome: "a veces", rxAll: "siempre", reliability: "Fiabilidad",
@@ -1490,13 +1490,13 @@ function txPopup(c) {
     relLine(c)]);
 }
 // estado de transmisión de una celda según el % de mensajes que llegaron a la red:
-// 2 = 75 % o más, 1 = entre 25 y 75 %, 0 = menos del 25 %, null sin mensajes
+// 2 = 75 % o más, 1 = entre 25 y 75 %, 0 = menos del 25 %, 3 = ninguno (menos del 5 %, gris), null sin mensajes
 function txState(c) {
   const n = c.txOk + c.txFail, own = n ? 100 * c.txOk / n : null;
   // mapa de cobertura: el % redondeado a decenas; los datos antiguos sin % solo traen la franja
   const comm = c.txp != null ? c.txp : c.txb == null ? null : [0, 50, 100][c.txb];
   const p = own == null ? comm : comm == null ? own : (own + comm) / 2;
-  return p == null ? null : p >= 75 ? 2 : p < 25 ? 0 : 1;
+  return p == null ? null : p >= 75 ? 2 : p < 5 ? 3 : p < 25 ? 0 : 1;
 }
 const TX_COLORS = SIG_COLORS;
 
@@ -1623,7 +1623,8 @@ function drawMap(fit, fromZoom) {
   useMargin = withSnr.length > 0 && withSnr.every(r => r.sf);
   drawLegendScale(useMargin ? [...new Set(withSnr.map(r => r.sf))].sort((a, b) => a - b) : null, grid || cmp);
   // vista «Tx»: la leyenda es la de la transmisión
-  if (txv) $("lgScale").innerHTML = "<span>" + esc(t("txLgHead")) + "</span>" + [2, 1, 0].map(i => '<span><i style="background:' + TX_COLORS[i] + ';border-radius:1px"></i>' + esc(t(["txLgNever", "txLgSome", "txLgAll"][i])) + "</span>").join("") + LG_LOW();
+  if (txv) $("lgScale").innerHTML = "<span>" + esc(t("txLgHead")) + "</span>" + [2, 1, 0].map(i => '<span><i style="background:' + TX_COLORS[i] + ';border-radius:1px"></i>' + esc(t(["txLgNever", "txLgSome", "txLgAll"][i])) + "</span>").join("") +
+    '<span><i style="background:rgba(26,29,34,.6);border-radius:1px;border:1px solid #555"></i>' + esc(t("txLgNone")) + "</span>" + LG_LOW();
   showView();
   if (mapView === "cmp" && !cmp) $("vGrid").classList.add("on");
   $("lgNone").hidden = !grid || txv;
@@ -1644,10 +1645,11 @@ function drawMap(fit, fromZoom) {
         const st = txState(c);
         if (st == null) continue;
         nCells++;
-        const tr = L.rectangle(c.bounds, { color: "#0b0d10", weight: .5, fillColor: TX_COLORS[st], fillOpacity: .65 })
+        // ningún mensaje confirmado: gris, como las celdas «sin recepción»
+        const tr = L.rectangle(c.bounds, st === 3 ? { color: "#555", weight: .5, fillColor: "#1a1d22", fillOpacity: .6 } : { color: "#0b0d10", weight: .5, fillColor: TX_COLORS[st], fillOpacity: .65 })
           .bindPopup(txPopup(c))
           .addTo(mapLayer);
-        if (lowRel(c)) hatch(tr, TX_COLORS[st]);
+        if (lowRel(c)) hatch(tr, st === 3 ? "#8a8f98" : TX_COLORS[st]);
         pts.push(c.bounds[0], c.bounds[1]); if (c.own) ownPts.push(c.bounds[0], c.bounds[1]);
         continue;
       }
