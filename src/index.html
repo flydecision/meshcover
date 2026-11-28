@@ -22,7 +22,7 @@
   .btns button { box-sizing:border-box; height:29px; padding:0 11px; font-size:16px; display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
   .btns button[hidden] { display:none; }
   .sfask { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:6px 0; padding:8px 10px; border:1px solid #3a4c64; border-radius:10px; background:#26344a; font-size:16px; color:#c9d1db; box-shadow:0 4px 12px #0006; }
-  .sfask .sfx { margin-left:auto; width:29px; height:29px; padding:0; display:inline-flex; align-items:center; justify-content:center; }
+  .sfask .sfx { margin-left:auto; height:29px; padding:0 14px; display:inline-flex; align-items:center; background:#2f7df6; }
   .sfask b { color:#e6e9ee; overflow-wrap:anywhere; }
   .sfask select { height:29px; padding:0 6px; font-size:16px; }
   #toast { position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:2000; max-width:min(92vw,560px);
@@ -574,7 +574,7 @@ const $ = id => document.getElementById(id);
 /* ---------- idioma (inglés por defecto, español opcional) ---------- */
 const I18N = {
   en: {
-    appTitle: "MeshCover", help: "Help", close: "Close", open: "Add Logs", clear: "Clear", seeRx: "See ⬇️ Rx", seeTx: "See ⬆️ Tx", noTxData: "Your logs have no sent messages. To measure transmission, send a short message to your private channel now and then during the route.", noTxPos: "Your sent messages have no position. Open the GPX of the route too.",
+    appTitle: "MeshCover", help: "Help", close: "Close", open: "Add Logs", clear: "Clear", ok: "OK", seeRx: "See ⬇️ Rx", seeTx: "See ⬆️ Tx", noTxData: "Your logs have no sent messages. To measure transmission, send a short message to your private channel now and then during the route.", noTxPos: "Your sent messages have no position. Open the GPX of the route too.",
     openTitle: "Add the packet log exported from the Meshtastic app (.txt), or CSV and GPX files. Each file adds to what is already on the map",
     clearTitle: "Remove everything opened from the map",
     node: "Node", allNodes: "All nodes", view: "View",
@@ -646,7 +646,7 @@ const I18N = {
     directPl: "direct", lastPos: "Last position", lastHeard: "Last heard", relayedWord: "relayed", maxDist: "Max distance"
   },
   es: {
-    appTitle: "MeshCover", help: "Ayuda", close: "Cerrar", open: "Añadir registros", clear: "Limpiar", seeRx: "Ver ⬇️ Rx", seeTx: "Ver ⬆️ Tx", noTxData: "Tus registros no tienen mensajes enviados. Para medir la transmisión, manda de vez en cuando un mensaje corto a tu canal privado durante el recorrido.", noTxPos: "Tus mensajes enviados no tienen posición. Abre también el GPX del recorrido.",
+    appTitle: "MeshCover", help: "Ayuda", close: "Cerrar", open: "Añadir registros", clear: "Limpiar", ok: "Aceptar", seeRx: "Ver ⬇️ Rx", seeTx: "Ver ⬆️ Tx", noTxData: "Tus registros no tienen mensajes enviados. Para medir la transmisión, manda de vez en cuando un mensaje corto a tu canal privado durante el recorrido.", noTxPos: "Tus mensajes enviados no tienen posición. Abre también el GPX del recorrido.",
     openTitle: "Añadir el registro de paquetes exportado de la app Meshtastic (.txt), o CSV y GPX. Cada archivo se suma a lo que ya hay en el mapa",
     clearTitle: "Quitar del mapa todo lo abierto",
     node: "Nodo", allNodes: "Todos los nodos", view: "Vista",
@@ -1012,7 +1012,7 @@ function askSf(name) {
   d.className = "sfask";
   d.innerHTML = "<span>📻 " + (n === 1 ? "<b>" + esc(name) + "</b> " + esc(t("sfAskTxt")) : esc(t("sfAskN", n))) + "</span> <label>SF <select>" +
     '<option value="">?</option>' + [7, 8, 9, 10, 11, 12].map(v => '<option value="' + v + '">' + v + "</option>").join("") + "</select></label>" +
-    '<button type="button" class="sec sfx" aria-label="' + esc(t("close")) + '">✕</button>';
+    '<button type="button" class="sfx">' + esc(t("ok")) + "</button>";
   const selSf = d.querySelector("select");
   const apply = v => {
     const set = new Set(names);
