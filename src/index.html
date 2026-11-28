@@ -294,9 +294,10 @@
   <div id="map"></div>
   <div class="legend">
     <span id="lgScale" style="display:contents"></span>
+    <span id="lgNone" hidden><i style="background:rgba(26,29,34,.6);border-radius:1px;border:1px solid #555"></i><span data-i18n="noRx">No reception</span></span>
+    <span id="lgLow"><i class="lglow"></i><span data-i18n="lgLowRel">Low reliability</span></span>
     <span id="lgTrack"><i style="background:#2f7df6;border-radius:2px;height:4px;width:16px;vertical-align:3px;border:0"></i><span data-i18n="track">Track</span></span>
     <span id="lgGpx" hidden><i style="background:#e5484d;border-radius:2px;height:4px;width:16px;vertical-align:3px;border:0"></i><span data-i18n="trackGpx">Track (GPX)</span></span>
-    <span id="lgNone" hidden><i style="background:rgba(26,29,34,.6);border-radius:1px;border:1px solid #555"></i><span data-i18n="noRx">No reception</span></span>
     <span id="lgRelay" hidden></span>
     <span id="lgTx" hidden><span class="txm ok lgm">✓</span><span class="txm ko lgm" style="margin-left:2px">✗</span> <span data-i18n="lgTx">Message sent: network heard it / nobody</span></span>
     <span id="lgNode">📡 <span data-i18n="nodeIcon">Node</span></span>
@@ -629,7 +630,7 @@ const I18N = {
     medRssi: m => "Median RSSI " + m + " dBm", directOnly: "direct only", timeInCell: "Time in cell",
     noRxText: "You passed here and no packet arrived.", noRxComm: "Routes passed here and nothing was heard directly from a relaying node.",
     txView: "Transmission coverage", txViewTitle: "Transmission: did the mesh hear the messages you sent? (cells by messages sent)",
-    txLgHead: "Transmission (confirmed sends):", txLgAll: "≥ 75 %", txLgSome: "25–75 %", txLgNever: "< 25 %", txLgNone: "None (0 %)",
+    txLgHead: "Transmission (confirmed sends):", txLgAll: "≥ 75 %", txLgSome: "25–75 %", txLgNever: "< 25 %", txLgNone: "0 %",
     txTitle: "Transmission", txCell: (a, n) => a + " of " + n + " messages reached the mesh", txMsg: "Message sent",
     txOk: "✓ The mesh heard it: a node relayed or acknowledged it.", txKo: "✗ Nobody relayed it after 3 tries.", lgTx: "Message sent: mesh heard it / nobody",
     commFew: "There are still few uploads: passes and reliability will show when there are more.", commPass1: "1 pass", commPass2: "2–4 passes", commPass5: "5 or more passes", commRx: "reception", rxNever: "never", rxSome: "sometimes", rxAll: "always", reliability: "Reliability",
@@ -705,7 +706,7 @@ const I18N = {
     medRssi: m => "RSSI mediano " + m + " dBm", directOnly: "solo directos", timeInCell: "Tiempo en la celda",
     noRxText: "Pasaste por aquí y no llegó ningún paquete.", noRxComm: "Han pasado recorridos por aquí y no se oyó directamente a ningún nodo que repita.",
     txView: "Cobertura transmisión", txViewTitle: "Transmisión: ¿la red oyó los mensajes que enviaste? (celdas según los mensajes enviados)",
-    txLgHead: "Transmisión (envíos confirmados):", txLgAll: "≥ 75 %", txLgSome: "25–75 %", txLgNever: "< 25 %", txLgNone: "Ninguno (0 %)",
+    txLgHead: "Transmisión (envíos confirmados):", txLgAll: "≥ 75 %", txLgSome: "25–75 %", txLgNever: "< 25 %", txLgNone: "0 %",
     txTitle: "Transmisión", txCell: (a, n) => a + " de " + n + " mensajes llegaron a la red", txMsg: "Mensaje enviado",
     txOk: "✓ La red lo oyó: un nodo lo retransmitió o lo confirmó.", txKo: "✗ Nadie lo retransmitió tras 3 intentos.", lgTx: "Mensaje enviado: la red lo oyó / nadie",
     commFew: "Aún hay pocas subidas: las pasadas y la fiabilidad se mostrarán cuando haya más.", commPass1: "1 pasada", commPass2: "2–4 pasadas", commPass5: "5 pasadas o más", commRx: "recepción", rxNever: "nunca", rxSome: "a veces", rxAll: "siempre", reliability: "Fiabilidad",
@@ -842,15 +843,14 @@ function distFor(r) {
 }
 // Leyenda de colores: por SNR, o por margen sobre el límite del SF (sfs = SF presentes)
 // muestra rayada: celdas con pocos datos (una sola pasada)
-const LG_LOW = () => '<span><i class="lglow"></i>' + esc(t("lgLowRel")) + "</span>";
 // sq: celdas (cuadrados, con la muestra de «fiabilidad baja» al final); si no, puntos (círculos)
 function drawLegendScale(sfs, sq = true) {
   const to = " " + esc(t("to")) + " ", sw = c => '<span><i style="background:' + c + (sq ? ';border-radius:1px' : '') + '"></i>';
   const minus = v => String(v).replace("-", "−");
   $("lgScale").innerHTML = sfs
-    ? '<span>' + esc(t("lgMargin")) + "</span>" + sw(SIG_COLORS[2]) + "≥ 6 dB</span>" + sw(SIG_COLORS[1]) + "0" + to + "6 dB</span>" + sw(SIG_COLORS[0]) + "&lt; 0 dB</span>" + (sq ? LG_LOW() : "") +
+    ? '<span>' + esc(t("lgMargin")) + "</span>" + sw(SIG_COLORS[2]) + "≥ 6 dB</span>" + sw(SIG_COLORS[1]) + "0" + to + "6 dB</span>" + sw(SIG_COLORS[0]) + "&lt; 0 dB</span>" +
       '<span class="lgsf">(' + sfs.map(sf => esc(t("sfLimitTxt", sf, minus(sfLimit(sf))))).join(", ") + ")</span>"
-    : '<span>' + esc(t("lgSnr")) + "</span>" + sw(SIG_COLORS[2]) + "≥ 0 dB</span>" + sw(SIG_COLORS[1]) + "−10" + to + "0 dB</span>" + sw(SIG_COLORS[0]) + "&lt; −10 dB</span>" + (sq ? LG_LOW() : "");
+    : '<span>' + esc(t("lgSnr")) + "</span>" + sw(SIG_COLORS[2]) + "≥ 0 dB</span>" + sw(SIG_COLORS[1]) + "−10" + to + "0 dB</span>" + sw(SIG_COLORS[0]) + "&lt; −10 dB</span>";
 }
 function fmtDist(d) { return d == null || isNaN(d) ? "—" : (d >= 1000 ? (d / 1000).toFixed(2) + " km" : Math.round(d) + " m"); }
 let bestNames = new Map();   // nodo → mejor nombre conocido (para tabla y popups)
@@ -1624,10 +1624,12 @@ function drawMap(fit, fromZoom) {
   drawLegendScale(useMargin ? [...new Set(withSnr.map(r => r.sf))].sort((a, b) => a - b) : null, grid || cmp);
   // vista «Tx»: la leyenda es la de la transmisión
   if (txv) $("lgScale").innerHTML = "<span>" + esc(t("txLgHead")) + "</span>" + [2, 1, 0].map(i => '<span><i style="background:' + TX_COLORS[i] + ';border-radius:1px"></i>' + esc(t(["txLgNever", "txLgSome", "txLgAll"][i])) + "</span>").join("") +
-    '<span><i style="background:rgba(26,29,34,.6);border-radius:1px;border:1px solid #555"></i>' + esc(t("txLgNone")) + "</span>" + LG_LOW();
+    '<span><i style="background:rgba(26,29,34,.6);border-radius:1px;border:1px solid #555"></i>' + esc(t("txLgNone")) + "</span>";
   showView();
   if (mapView === "cmp" && !cmp) $("vGrid").classList.add("on");
   $("lgNone").hidden = !grid || txv;
+  // «fiabilidad baja» siempre al final de las muestras de celdas
+  $("lgLow").hidden = !(grid || cmp);
   $("cmpBox").hidden = !cmp;
   if (cmp) pts.push(...drawCompare(rows, tracks, sfList));
   $("lgRelay").innerHTML = grid || cmp
@@ -1646,7 +1648,7 @@ function drawMap(fit, fromZoom) {
         if (st == null) continue;
         nCells++;
         // ningún mensaje confirmado: gris, como las celdas «sin recepción»
-        const tr = L.rectangle(c.bounds, st === 3 ? { color: "#555", weight: .5, fillColor: "#1a1d22", fillOpacity: .6 } : { color: "#0b0d10", weight: .5, fillColor: TX_COLORS[st], fillOpacity: .65 })
+        const tr = L.rectangle(c.bounds, st === 3 ? { stroke: false, fillColor: "#1a1d22", fillOpacity: .45 } : { color: "#0b0d10", weight: .5, fillColor: TX_COLORS[st], fillOpacity: .65 })
           .bindPopup(txPopup(c))
           .addTo(mapLayer);
         if (lowRel(c)) hatch(tr, st === 3 ? "#8a8f98" : TX_COLORS[st]);
