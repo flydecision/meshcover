@@ -263,9 +263,9 @@
   </div>
   <!-- fila 2: registros propios -->
   <div class="btns actrow">
-    <button id="btnClear" class="sec" data-i18n-title="clearTitle">🗑 <span data-i18n="clear">Clear</span></button>
+    <button id="btnClear" class="sec" data-i18n-title="clearTitle" hidden>🗑 <span data-i18n="clear">Clear</span></button>
     <button id="btnOpen" class="sec" data-i18n-title="openTitle">📂 <span data-i18n="open">Add Logs</span></button>
-    <button id="btnExport" class="sec" data-i18n-title="exportTitle" hidden>⬆️ <span data-i18n="exportBtn">Export coverage</span></button>
+    <button id="btnExport" class="sec" data-i18n-title="exportTitle" hidden>💾 <span data-i18n="exportBtn">Export coverage</span></button>
     <input type="file" id="fileAny" accept=".csv,.gpx,.txt,.json,text/csv,text/plain,application/gpx+xml,application/xml,text/xml,application/json" multiple hidden>
   </div>
   <!-- fila 3: nodo y antigüedad, uno al lado del otro -->
@@ -283,7 +283,7 @@
     </span>
   </div>
   <div id="expPanel" class="exppanel" hidden>
-    <div class="exphead"><b>⬆️ <span data-i18n="expTitle">Export anonymous coverage</span></b><button id="btnExpClose" class="sec" data-i18n-aria="close">✕</button></div>
+    <div class="exphead"><b>💾 <span data-i18n="expTitle">Export anonymous coverage</span></b><button id="btnExpClose" class="sec" data-i18n-aria="close">✕</button></div>
     <div><span data-i18n="expWhat"></span> <a href="#" id="lnkPriv" data-i18n="expPrivLink">What is uploaded?</a></div>
     <div class="exprow"><span data-i18n="expRadius">Remove around start and end</span> <span class="filt privf"><span class="dual single"><span class="dual-track"></span><span class="dual-fill" id="privFill"></span><input type="range" id="rngPriv" min="0" max="2000" step="50" value="0" data-i18n-aria="expRadius"></span></span> <b id="privVal">0 m</b></div>
     <div id="expInfo"></div>
@@ -410,7 +410,7 @@
         <li>Haz el recorrido que quieras mapear con el móvil conectado al nodo. Puedes llevar la pantalla apagada si la app no tiene restricciones de batería. Aunque no es necesario, si quieres, empieza y acaba fuera de tu zona privada.</li>
         <li>Al terminar, exporta el registro: Ajustes › Panel de depuración › botón ⬇️ (Exportar registros), y guárdalo en una carpeta del móvil (por ejemplo, Download).</li>
         <li>En MeshCover, ábrelo con <b>📂 Añadir registros</b> (junto con el GPX, si lo grabaste: MeshCover une los dos archivos).</li>
-        <li>Pulsa <b>⬆️ Exportar cobertura</b> y, si quieres, sube el deslizador para quitar las celdas de tu zona privada.</li>
+        <li>Pulsa <b>💾 Exportar cobertura</b> y, si quieres, sube el deslizador para quitar las celdas de tu zona privada.</li>
         <li>Pulsa <b>☁️ Subir al mapa de cobertura</b>.</li>
       </ol>
       <hr class="hsep">
@@ -430,7 +430,7 @@
 
     <div class="page" data-p="5" data-lang="es" hidden>
       <h3>🔒 Privacidad</h3>
-      <div>Tus registros <b>no salen de tu dispositivo</b>. Solo se envía algo si pulsas <b>⬆️ Exportar cobertura</b> y luego <b>☁️ Subir al mapa de cobertura</b>.</div>
+      <div>Tus registros <b>no salen de tu dispositivo</b>. Solo se envía algo si pulsas <b>💾 Exportar cobertura</b> y luego <b>☁️ Subir al mapa de cobertura</b>.</div>
       <h3>📦 Qué se sube</h3>
       <ul>
         <li>Celdas de 250 m con los paquetes recibidos y, por nodo oído, su id (sin nombre), SNR, RSSI y SF. Los nodos con «OK to MQTT» desactivado van sin id.</li>
@@ -515,7 +515,7 @@
         <li>Do the route you want to map with the phone connected to the node. You can keep the screen off if the app has no battery restrictions. It is not required but, if you like, start and end outside your private area.</li>
         <li>When you finish, export the log: Settings › Debug panel › ⬇️ button (Export logs), and save it to a phone folder (for example, Download).</li>
         <li>In MeshCover, open it with <b>📂 Add Logs</b> (together with the GPX, if you recorded one: MeshCover joins both files).</li>
-        <li>Press <b>⬆️ Export coverage</b> and, if you like, raise the slider to remove the cells of your private area.</li>
+        <li>Press <b>💾 Export coverage</b> and, if you like, raise the slider to remove the cells of your private area.</li>
         <li>Press <b>☁️ Upload to coverage map</b>.</li>
       </ol>
       <hr class="hsep">
@@ -535,7 +535,7 @@
 
     <div class="page" data-p="5" data-lang="en" hidden>
       <h3>🔒 Privacy</h3>
-      <div>Your logs <b>never leave your device</b>. Something is sent only if you press <b>⬆️ Export coverage</b> and then <b>☁️ Upload to coverage map</b>.</div>
+      <div>Your logs <b>never leave your device</b>. Something is sent only if you press <b>💾 Export coverage</b> and then <b>☁️ Upload to coverage map</b>.</div>
       <h3>📦 What is uploaded</h3>
       <ul>
         <li>250 m cells with the packets received and, per node heard, its id (no name), SNR, RSSI and SF. Nodes with «OK to MQTT» off go without id.</li>
@@ -614,7 +614,7 @@ const I18N = {
     tabWhat: "What for", tabHow: "How to use", tabFix: "Troubleshooting", tabComm: "Coverage map", tabCollab: "How to contribute", noShow: "Don't show again", cancel: "Cancel",
     introOpenTitle: "📂 Add Logs", introOpenGo: "Choose file",
     introOpenBody: "<div>Open the <code>.txt</code> log exported from the official <b>Meshtastic</b> app:</div><div style=\"margin:8px 0\"><b>Settings › Debug panel › Packets › «Export logs»</b> button.</div><div>Each file is added to what is already on the map. You can also open coverage files (<code>.json</code>) shared by other people, and CSV/GPX from older versions of this page. Nothing leaves your device: the file is read in the browser.</div>",
-    introExpTitle: "⬆️ Export coverage", introExpGo: "Continue",
+    introExpTitle: "💾 Export coverage", introExpGo: "Continue",
     introExpBody: "<ol><li>The map will show <b>exactly what will be shared</b>: best signal of any node, in 250 m cells.</li><li>Move the <b>«Remove around start and end»</b> slider until no cell is left near your home (red circles).</li><li>Then <b>💾 Download file</b> to share it yourself, or <b>☁️ Upload to coverage map</b> to add it to the shared map.</li></ol><div>Only cells are saved: no track, no times and no node names.</div>", tabPriv: "Privacy", prev: "Previous", next: "Next",
     packets: n => n === 1 ? "packet" : "packets",
     offline: "no connection",
@@ -628,7 +628,7 @@ const I18N = {
     medRssi: m => "Median RSSI " + m + " dBm", directOnly: "direct only", timeInCell: "Time in cell",
     noRxText: "You passed here and no packet arrived.", noRxComm: "Routes passed here and nothing was heard directly from a relaying node.",
     txView: "Transmission coverage", txViewTitle: "Transmission: did the mesh hear the messages you sent? (cells by messages sent)",
-    txLgHead: "Transmission:", txLgAll: "≥ 75 %", txLgSome: "25–75 %", txLgNever: "< 25 %",
+    txLgHead: "Transmission (% acks ok):", txLgAll: "≥ 75 %", txLgSome: "25–75 %", txLgNever: "< 25 %",
     txTitle: "Transmission", txCell: (a, n) => a + " of " + n + " messages reached the mesh", txMsg: "Message sent",
     txOk: "✓ The mesh heard it: a node relayed or acknowledged it.", txKo: "✗ Nobody relayed it after 3 tries.", lgTx: "Message sent: mesh heard it / nobody",
     commFew: "There are still few uploads: passes and reliability will show when there are more.", commPass1: "1 pass", commPass2: "2–4 passes", commPass5: "5 or more passes", commRx: "reception", rxNever: "never", rxSome: "sometimes", rxAll: "always", reliability: "Reliability",
@@ -690,7 +690,7 @@ const I18N = {
     tabWhat: "Para qué", tabHow: "Cómo usar", tabFix: "Soluciones", tabComm: "Mapa de cobertura", tabCollab: "Cómo colaborar", noShow: "No volver a mostrar", cancel: "Cancelar",
     introOpenTitle: "📂 Añadir registros", introOpenGo: "Elegir archivo",
     introOpenBody: "<div>Abre el registro <code>.txt</code> exportado desde la app oficial de <b>Meshtastic</b>:</div><div style=\"margin:8px 0\"><b>Configuración › Panel de depuración › Packets ›</b> botón <b>«Exportar registros»</b>.</div><div>Cada archivo se suma a lo que ya hay en el mapa. También puedes abrir archivos de cobertura (<code>.json</code>) compartidos por otras personas, y CSV/GPX de versiones anteriores de esta página. Nada sale de tu dispositivo: el archivo se lee en el navegador.</div>",
-    introExpTitle: "⬆️ Exportar cobertura", introExpGo: "Continuar",
+    introExpTitle: "💾 Exportar cobertura", introExpGo: "Continuar",
     introExpBody: "<ol><li>El mapa mostrará <b>exactamente lo que se va a compartir</b>: la mejor señal de cualquier nodo, en celdas de 250 m.</li><li>Mueve el deslizador <b>«Quitar alrededor del inicio y del final»</b> hasta que no quede ninguna celda cerca de tu casa (círculos rojos).</li><li>Después, <b>💾 Descargar archivo</b> para compartirlo tú, o <b>☁️ Subir al mapa de cobertura</b> para sumarlo al mapa común.</li></ol><div>Solo se guardan celdas: sin recorrido, sin horas y sin nombres de nodos.</div>", tabPriv: "Privacidad", prev: "Anterior", next: "Siguiente",
     packets: n => n === 1 ? "packet" : "packets",
     offline: "sin conexión",
@@ -704,7 +704,7 @@ const I18N = {
     medRssi: m => "RSSI mediano " + m + " dBm", directOnly: "solo directos", timeInCell: "Tiempo en la celda",
     noRxText: "Pasaste por aquí y no llegó ningún paquete.", noRxComm: "Han pasado recorridos por aquí y no se oyó directamente a ningún nodo que repita.",
     txView: "Cobertura transmisión", txViewTitle: "Transmisión: ¿la red oyó los mensajes que enviaste? (celdas según los mensajes enviados)",
-    txLgHead: "Transmisión:", txLgAll: "≥ 75 %", txLgSome: "25–75 %", txLgNever: "< 25 %",
+    txLgHead: "Transmisión (% acuses ok):", txLgAll: "≥ 75 %", txLgSome: "25–75 %", txLgNever: "< 25 %",
     txTitle: "Transmisión", txCell: (a, n) => a + " de " + n + " mensajes llegaron a la red", txMsg: "Mensaje enviado",
     txOk: "✓ La red lo oyó: un nodo lo retransmitió o lo confirmó.", txKo: "✗ Nadie lo retransmitió tras 3 intentos.", lgTx: "Mensaje enviado: la red lo oyó / nadie",
     commFew: "Aún hay pocas subidas: las pasadas y la fiabilidad se mostrarán cuando haya más.", commPass1: "1 pasada", commPass2: "2–4 pasadas", commPass5: "5 pasadas o más", commRx: "recepción", rxNever: "nunca", rxSome: "a veces", rxAll: "siempre", reliability: "Fiabilidad",
@@ -1093,7 +1093,7 @@ function showView() {
   $("vTx").classList.toggle("on", mapView === "tx");
   // sin registros propios: ni exportar ni tabla (con solo el mapa de cobertura no hay nada que listar)
   const own = hasOwnData();
-  $("btnExport").hidden = !own;
+  $("btnExport").hidden = $("btnClear").hidden = !own;
   $("tblBox").hidden = !own;
   $("selAge").classList.toggle("chosen", $("selAge").value !== "0");
   $("nodeSearch").classList.toggle("chosen", selFrom !== "");
