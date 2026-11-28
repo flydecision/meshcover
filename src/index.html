@@ -72,7 +72,7 @@
   #dropZone { position:fixed; inset:0; z-index:3000; display:flex; align-items:center; justify-content:center; background:rgba(15,20,27,.82); border:4px dashed #2f7df6; color:#e8edf3; font-size:24px; font-weight:600; text-align:center; padding:16px; pointer-events:none; }
   #dropZone[hidden] { display:none; }
   #map { height:62vh; min-height:320px; border:1px solid #2a3340; border-radius:10px; background:#1a2029; }
-  #vCmp[hidden], #cmpWrap[hidden], #ageWrap[hidden] { display:none; }
+  #vCmp[hidden], #cmpWrap[hidden], #ageWrap[hidden], #tblBox[hidden] { display:none; }
   .filt.cmpf, .filt.agef { margin:0; gap:6px; }
   .filt.cmpf select, .filt.agef select { height:29px; padding:0 6px; font-size:16px; }
   #cmpBox { margin:8px 0; font-size:16px; color:#c9d1db; }
@@ -140,10 +140,26 @@
   .filt.nodesel { display:inline-flex; margin:0; gap:6px; flex:0 1 auto; min-width:0; }
   /* selector de nodo con buscador: campo de texto + lista desplegable filtrada */
   .combo { position:relative; flex:1 1 auto; min-width:0; max-width:200px; width:200px; display:inline-flex; }
-  .combo input { width:100%; min-width:0; height:29px; box-sizing:border-box; padding:5px 26px 5px 8px; font-size:16px; color:#e6e9ee;
-                 background:#1a2029; border:1px solid #2a3340; border-radius:8px; text-overflow:ellipsis; }
+  .combo input { width:100%; min-width:0; height:29px; box-sizing:border-box; padding:5px 26px 5px 30px; font-size:16px; color:#e6e9ee;
+                 background:#34465c; border:1px solid #34465c; border-radius:8px; text-overflow:ellipsis; }
+  .combo .cicon { position:absolute; left:8px; top:50%; transform:translateY(-50%); pointer-events:none; font-size:15px; }
+  /* desplegables con el fondo de los botones; en negrita si no es «todos…» */
+  .filt.agef select { background:#34465c; border-color:#34465c; color:#e6e9ee; }
+  .combo input.chosen, .filt.agef select.chosen { font-weight:700; }
+  .filt.agef select option { font-weight:400; }
+  .btns.viewrow { margin:10px 0 0; }
+  .btns.actrow { margin:8px 0 10px; }
+  #mapBox.max .btns.actrow { display:none; }
+  /* móvil: las dos vistas y los dos desplegables caben en una fila cada uno */
+  @media (max-width:480px) {
+    .btns.viewrow .seg { display:flex; width:100%; }
+    .btns.viewrow .seg button { flex:1 1 0; min-width:0; justify-content:center; padding:0 4px; font-size:14px; gap:3px; }
+    .mapopts .filt.nodesel, .mapopts #ageWrap { flex:1 1 0; min-width:0; }
+    .mapopts .combo { width:100%; max-width:none; }
+    .mapopts #selAge { width:100%; min-width:0; }
+  }
   .combo input:focus { outline:none; border-color:#2f7df6; }
-  .combo .caret { position:absolute; right:8px; top:50%; transform:translateY(-50%); color:#9aa4b2; pointer-events:none; font-size:12px; }
+  .combo .caret { position:absolute; right:8px; top:50%; transform:translateY(-50%); color:#c9d1db; pointer-events:none; font-size:12px; }
   .combo-list { position:absolute; left:0; top:calc(100% + 4px); z-index:3000; max-height:min(60vh, 420px);
                 overflow-y:auto; background:#1a2029; border:1px solid #2a3340; border-radius:8px; box-shadow:0 6px 22px #000a; padding:4px 0;
                 overscroll-behavior:contain; color:#e6e9ee; }
@@ -231,24 +247,30 @@
 </div>
 
 
-<div class="btns">
-  <button id="btnCommunity" class="sec" data-i18n-title="communityTitle">🗺️ <span data-i18n="communityBtn">Coverage map</span></button>
-  <button id="btnClear" class="sec" data-i18n-title="clearTitle">🗑 <span data-i18n="clear">Clear</span></button>
-  <button id="btnOpen" class="sec" data-i18n-title="openTitle">📂 <span data-i18n="open">Add Logs</span></button>
-  <button id="btnExport" class="sec" data-i18n-title="exportTitle">⬆️ <span data-i18n="exportBtn">Export coverage</span></button>
-  <input type="file" id="fileAny" accept=".csv,.gpx,.txt,.json,text/csv,text/plain,application/gpx+xml,application/xml,text/xml,application/json" multiple hidden>
-</div>
 <div id="toast" hidden role="alert"><span id="toastMsg"></span><button id="toastX" type="button" data-i18n-aria="close" aria-label="Close">×</button></div>
 <div id="sfAsk"></div>
 
 <div id="mapBox">
-  <div class="mapopts">
-    <span class="filt nodesel">📡 <span class="colon" data-i18n="node">Node</span> <span class="combo"><input id="nodeSearch" type="text" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="false" aria-controls="nodeList" data-i18n-aria="nodeSearch"><span class="caret">▼</span><div id="nodeList" class="combo-list" role="listbox" hidden></div></span><select id="selFrom" hidden><option value="" data-i18n="allNodes">All nodes</option></select></span>
+  <!-- fila 1: las dos vistas de cobertura -->
+  <div class="btns viewrow">
     <span class="seg" role="group" data-i18n-aria="view">
-      <button id="vGrid" data-i18n-title="gridTitle">📥 <span data-i18n="grid">Reception</span></button>
-      <button id="vTx" data-i18n-title="txViewTitle">📤 <span data-i18n="txView">Transmission</span></button>
+      <button id="vGrid" data-i18n-title="gridTitle">⬇️ <span data-i18n="grid">Reception coverage</span></button>
+      <button id="vTx" data-i18n-title="txViewTitle">⬆️ <span data-i18n="txView">Transmission coverage</span></button>
       <button id="vCmp" data-i18n-title="cmpTitle" hidden>⚖️ <span data-i18n="cmp">Compare</span></button>
     </span>
+    <!-- el mapa de cobertura se carga siempre; el botón ya no se muestra -->
+    <button id="btnCommunity" class="sec" hidden></button>
+  </div>
+  <!-- fila 2: registros propios -->
+  <div class="btns actrow">
+    <button id="btnClear" class="sec" data-i18n-title="clearTitle">🗑 <span data-i18n="clear">Clear</span></button>
+    <button id="btnOpen" class="sec" data-i18n-title="openTitle">📂 <span data-i18n="open">Add Logs</span></button>
+    <button id="btnExport" class="sec" data-i18n-title="exportTitle" hidden>⬆️ <span data-i18n="exportBtn">Export coverage</span></button>
+    <input type="file" id="fileAny" accept=".csv,.gpx,.txt,.json,text/csv,text/plain,application/gpx+xml,application/xml,text/xml,application/json" multiple hidden>
+  </div>
+  <!-- fila 3: nodo y antigüedad, uno al lado del otro -->
+  <div class="mapopts">
+    <span class="filt nodesel"><span class="combo"><span class="cicon">📡</span><input id="nodeSearch" type="text" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="false" aria-controls="nodeList" data-i18n-aria="nodeSearch"><span class="caret">▼</span><div id="nodeList" class="combo-list" role="listbox" hidden></div></span><select id="selFrom" hidden><option value="" data-i18n="allNodes">All nodes</option></select></span>
     <span id="cmpWrap" class="filt cmpf" hidden>SF <select id="cmpA" data-i18n-aria="cmpA"></select> <span data-i18n="vs">vs</span> SF <select id="cmpB" data-i18n-aria="cmpB"></select></span>
     <span id="ageWrap" class="filt agef" hidden data-i18n-title="ageTitle"><select id="selAge" data-i18n-aria="ageTitle"><option value="0" data-i18n="ageAll">All data</option><option value="12" data-i18n="age12">Last 12 months</option><option value="6" data-i18n="age6">Last 6 months</option><option value="3" data-i18n="age3">Last 3 months</option></select></span>
     <span class="filt hops" data-i18n-title="hopsTitle">
@@ -281,6 +303,7 @@
   <div id="cmpBox" hidden></div>
 </div>
 
+<div id="tblBox">
 <div class="tblinfo"><span data-i18n="statRows">Records</span>: <b id="sReg">0</b> · <span data-i18n="statDur">Duration</span>: <b id="sDur">0m</b></div>
 
 <div id="tblNote" hidden></div>
@@ -290,6 +313,7 @@
   <thead><tr><th data-i18n="thDate">Date and time</th><th data-i18n="node">Node</th><th data-i18n="thType">Type</th><th>SNR</th><th>RSSI</th><th>Dist</th><th data-i18n="hops">Hops</th></tr></thead>
   <tbody id="tbody"></tbody>
 </table>
+</div>
 </div>
 
 
@@ -319,7 +343,7 @@
     <div class="mbody" id="helpBody">
     <div class="page" data-p="0" data-lang="es" hidden>
       <h3>🎯 Para qué sirve</h3>
-      <div>Dibuja un <b>mapa de cobertura</b> a partir del registro que exporta la <b>app oficial de Android</b>: dónde oyes a la red (📥 Recepción) y dónde la red te oye a ti (📤 Transmisión). Todo se analiza en tu navegador.</div>
+      <div>Dibuja un <b>mapa de cobertura</b> a partir del registro que exporta la <b>app oficial de Android</b>: dónde oyes a la red (⬇️ Cobertura recepción) y dónde la red te oye a ti (⬆️ Cobertura transmisión). Todo se analiza en tu navegador.</div>
       <h3>📊 Qué ves</h3>
       <ul>
         <li>Celdas de color según la señal: <b>verde</b> buena, <b>amarillo</b> media, <b>rojo</b> mala. <b>Gris</b>: pasaste y no llegó nada.</li>
@@ -345,7 +369,7 @@
       <ol>
         <li>En la app: Ajustes → panel de depuración → <b>exportar</b>.</li>
         <li>Aquí: <b>📂 Añadir registros</b> y elige el <code>.txt</code>, y el GPX si lo tienes (o arrástralos). Puedes sumar varios.</li>
-        <li>Elige la vista: <b>📥 Recepción</b> o <b>📤 Transmisión</b>.</li>
+        <li>Elige la vista: <b>⬇️ Cobertura recepción</b> o <b>⬆️ Cobertura transmisión</b>.</li>
       </ol>
       <h3>Controles</h3>
       <ul>
@@ -357,7 +381,7 @@
 
     <div class="page" data-p="2" data-lang="es" hidden>
       <h3>🗺️ Mapa de cobertura</h3>
-      <div>Un mapa común de la red hecho entre todas/os. Se carga al abrir la página; el botón <b>🗺️ Mapa de cobertura</b> lo quita o lo vuelve a poner.</div>
+      <div>Un mapa común de la red hecho entre todas/os. Se carga siempre al abrir la página, y tus registros se ven encima.</div>
       <ul>
         <li>Toca una celda para ver su recepción o su transmisión y la fiabilidad. Las <b>rayadas</b> tienen una sola pasada.</li>
         <li>Con el selector de meses quitas los datos antiguos.</li>
@@ -365,7 +389,7 @@
     </div>
 
     <div class="page" data-p="3" data-lang="es" hidden>
-      <h3>📥 Cobertura de recepción</h3>
+      <h3>⬇️ Cobertura de recepción</h3>
       <ol>
         <li>Configura tu nodo con la app Meshtastic:
           <ul>
@@ -390,7 +414,7 @@
         <li>Pulsa <b>☁️ Subir al mapa de cobertura</b>.</li>
       </ol>
       <hr class="hsep">
-      <h3>📤 Cobertura de transmisión</h3>
+      <h3>⬆️ Cobertura de transmisión</h3>
       <div>Lo mismo que antes, pero además, en cada zona que quieras analizar, manda un <b>mensaje corto</b> con cualquier texto a <b>tu canal privado</b>.</div>
       <div style="margin-top:6px">La app registra si algún nodo lo retransmitió, y se sube junto con la recepción. Cuantas más pasadas por una zona, más fiable el mapa.</div>
     </div>
@@ -424,7 +448,7 @@
 
     <div class="page" data-p="0" data-lang="en" hidden>
       <h3>🎯 What it is for</h3>
-      <div>Draws a <b>coverage map</b> from the log exported by the <b>official Android app</b>: where you hear the mesh (📥 Reception) and where the mesh hears you (📤 Transmission). Everything is analysed in your browser.</div>
+      <div>Draws a <b>coverage map</b> from the log exported by the <b>official Android app</b>: where you hear the mesh (⬇️ Reception coverage) and where the mesh hears you (⬆️ Transmission coverage). Everything is analysed in your browser.</div>
       <h3>📊 What you see</h3>
       <ul>
         <li>Cells coloured by signal: <b>green</b> good, <b>yellow</b> medium, <b>red</b> bad. <b>Grey</b>: you passed and nothing arrived.</li>
@@ -450,7 +474,7 @@
       <ol>
         <li>In the app: Settings → debug panel → <b>export</b>.</li>
         <li>Here: <b>📂 Add Logs</b> and pick the <code>.txt</code>, plus the GPX if you have one (or drag them in). You can add several.</li>
-        <li>Pick the view: <b>📥 Reception</b> or <b>📤 Transmission</b>.</li>
+        <li>Pick the view: <b>⬇️ Reception coverage</b> or <b>⬆️ Transmission coverage</b>.</li>
       </ol>
       <h3>Controls</h3>
       <ul>
@@ -462,7 +486,7 @@
 
     <div class="page" data-p="2" data-lang="en" hidden>
       <h3>🗺️ Coverage map</h3>
-      <div>A shared map of the mesh made by everyone. It loads when the page opens; the <b>🗺️ Coverage map</b> button removes it or brings it back.</div>
+      <div>A shared map of the mesh made by everyone. It always loads when the page opens, and your logs show on top of it.</div>
       <ul>
         <li>Tap a cell to see its reception or transmission and its reliability. <b>Striped</b> cells have a single pass.</li>
         <li>The months selector removes old data.</li>
@@ -470,7 +494,7 @@
     </div>
 
     <div class="page" data-p="3" data-lang="en" hidden>
-      <h3>📥 Reception coverage</h3>
+      <h3>⬇️ Reception coverage</h3>
       <ol>
         <li>Set up your node with the Meshtastic app:
           <ul>
@@ -495,7 +519,7 @@
         <li>Press <b>☁️ Upload to coverage map</b>.</li>
       </ol>
       <hr class="hsep">
-      <h3>📤 Transmission coverage</h3>
+      <h3>⬆️ Transmission coverage</h3>
       <div>Same as above, but also, in each area you want to analyse, send a <b>short message</b> with any text to <b>your private channel</b>.</div>
       <div style="margin-top:6px">The app records whether any node relayed it, and it is uploaded with the reception. The more passes over an area, the more reliable the map.</div>
     </div>
@@ -570,7 +594,7 @@ const I18N = {
     openTitle: "Add the packet log exported from the Meshtastic app (.txt), or CSV and GPX files. Each file adds to what is already on the map",
     clearTitle: "Remove everything opened from the map",
     node: "Node", allNodes: "All nodes", view: "View",
-    grid: "Reception", cmp: "Compare", cmpTitle: "Compare two spreading factors (SF) cell by cell", vs: "vs", cmpA: "First SF", cmpB: "Second SF",
+    grid: "Reception coverage", cmp: "Compare", cmpTitle: "Compare two spreading factors (SF) cell by cell", vs: "vs", cmpA: "First SF", cmpB: "Second SF",
     cmpBoth: "Both", cmpOnly: sf => "Only SF" + sf, cmpNone: "Neither",
     cmpHead: (a, b) => "SF" + a + " vs SF" + b + " on the same route",
     cmpHeadAll: l => l.map(sf => "SF" + sf).join(" · ") + " on the same route",
@@ -603,7 +627,7 @@ const I18N = {
     medSnr: (m, w, b) => "Median SNR " + m + " dB (worst " + w + ", best " + b + ")",
     medRssi: m => "Median RSSI " + m + " dBm", directOnly: "direct only", timeInCell: "Time in cell",
     noRxText: "You passed here and no packet arrived.", noRxComm: "Routes passed here and nothing was heard directly from a relaying node.",
-    txView: "Transmission", txViewTitle: "Transmission: did the mesh hear the messages you sent? (cells by messages sent)",
+    txView: "Transmission coverage", txViewTitle: "Transmission: did the mesh hear the messages you sent? (cells by messages sent)",
     txLgHead: "Transmission:", txLgAll: "≥ 75 %", txLgSome: "25–75 %", txLgNever: "< 25 %",
     txTitle: "Transmission", txCell: (a, n) => a + " of " + n + " messages reached the mesh", txMsg: "Message sent",
     txOk: "✓ The mesh heard it: a node relayed or acknowledged it.", txKo: "✗ Nobody relayed it after 3 tries.", lgTx: "Message sent: mesh heard it / nobody",
@@ -646,7 +670,7 @@ const I18N = {
     openTitle: "Añadir el registro de paquetes exportado de la app Meshtastic (.txt), o CSV y GPX. Cada archivo se suma a lo que ya hay en el mapa",
     clearTitle: "Quitar del mapa todo lo abierto",
     node: "Nodo", allNodes: "Todos los nodos", view: "Vista",
-    grid: "Recepción", cmp: "Comparar", cmpTitle: "Comparar dos factores de dispersión (SF) celda a celda", vs: "frente a", cmpA: "Primer SF", cmpB: "Segundo SF",
+    grid: "Cobertura recepción", cmp: "Comparar", cmpTitle: "Comparar dos factores de dispersión (SF) celda a celda", vs: "frente a", cmpA: "Primer SF", cmpB: "Segundo SF",
     cmpBoth: "Los dos", cmpOnly: sf => "Solo SF" + sf, cmpNone: "Ninguno",
     cmpHead: (a, b) => "SF" + a + " frente a SF" + b + " en la misma ruta",
     cmpHeadAll: l => l.map(sf => "SF" + sf).join(" · ") + " en la misma ruta",
@@ -679,7 +703,7 @@ const I18N = {
     medSnr: (m, w, b) => "SNR mediano " + m + " dB (peor " + w + ", mejor " + b + ")",
     medRssi: m => "RSSI mediano " + m + " dBm", directOnly: "solo directos", timeInCell: "Tiempo en la celda",
     noRxText: "Pasaste por aquí y no llegó ningún paquete.", noRxComm: "Han pasado recorridos por aquí y no se oyó directamente a ningún nodo que repita.",
-    txView: "Transmisión", txViewTitle: "Transmisión: ¿la red oyó los mensajes que enviaste? (celdas según los mensajes enviados)",
+    txView: "Cobertura transmisión", txViewTitle: "Transmisión: ¿la red oyó los mensajes que enviaste? (celdas según los mensajes enviados)",
     txLgHead: "Transmisión:", txLgAll: "≥ 75 %", txLgSome: "25–75 %", txLgNever: "< 25 %",
     txTitle: "Transmisión", txCell: (a, n) => a + " de " + n + " mensajes llegaron a la red", txMsg: "Mensaje enviado",
     txOk: "✓ La red lo oyó: un nodo lo retransmitió o lo confirmó.", txKo: "✗ Nadie lo retransmitió tras 3 intentos.", lgTx: "Mensaje enviado: la red lo oyó / nadie",
@@ -1024,6 +1048,8 @@ function clearAll() {
   if (expPreview) expPreview.comm = false;
   closeExport();
   mapFitted = false; mapDirty = true; dirtyRender = true;
+  // el mapa de cobertura no se puede quitar: tras limpiar se vuelve a cargar
+  loadCommunity();
 }
 
 
@@ -1062,10 +1088,15 @@ function loadMapPrefs() {
 // los botones de vista solo se ven hundidos cuando hay algo en el mapa
 function hasMapData() { return !!(fileRows || fileTracks.length || fileVisited.length || fileTx.length || fileTxCells.length); }
 function showView() {
-  const d = hasMapData();
-  $("vGrid").classList.toggle("on", d && mapView === "grid");
-  $("vCmp").classList.toggle("on", d && mapView === "cmp");
-  $("vTx").classList.toggle("on", d && mapView === "tx");
+  $("vGrid").classList.toggle("on", mapView === "grid");
+  $("vCmp").classList.toggle("on", mapView === "cmp");
+  $("vTx").classList.toggle("on", mapView === "tx");
+  // sin registros propios: ni exportar ni tabla (con solo el mapa de cobertura no hay nada que listar)
+  const own = hasOwnData();
+  $("btnExport").hidden = !own;
+  $("tblBox").hidden = !own;
+  $("selAge").classList.toggle("chosen", $("selAge").value !== "0");
+  $("nodeSearch").classList.toggle("chosen", selFrom !== "");
   $("cmpWrap").hidden = mapView !== "cmp" || $("vCmp").hidden;
 }
 function setView(v) { mapView = v; showView(); saveMapPrefs(); mapDirty = true; dirtyRender = true; }
@@ -1411,7 +1442,7 @@ function commCell(c, r) {
 }
 // mensajes enviados que se ven: con posición y fuera de la vista previa de exportación (no se exportan)
 function txVisible() { return exportPreviewOn() ? [] : fileTx.filter(x => x.lat != null && !isNaN(x.lat)); }
-// Popup de celda: título (📥 Recepción o 📤 Transmisión, según la vista) y una lista con viñetas (las vacías se omiten)
+// Popup de celda: título (⬇️ Recepción o ⬆️ Transmisión, según la vista) y una lista con viñetas (las vacías se omiten)
 // % redondeado a decenas: si no llegaron todos (o llegó alguno) nunca dice 100 % (o 0 %)
 function txPctTxt(p, band) {
   if (band === 1 && p >= 100) return t("txHi");
@@ -1453,7 +1484,7 @@ function hatch(layer, color) {
 }
 function txPopup(c) {
   const n = c.txOk + c.txFail;
-  return popList("📤 " + t("txTitle"), [
+  return popList("⬆️ " + t("txTitle"), [
     n ? t("pTx", txPctTxt(Math.round(10 * c.txOk / n) * 10, c.txOk === 0 ? 0 : c.txOk >= n ? 2 : 1)) : c.txp != null ? t("pTx", txPctTxt(c.txp, c.txb)) : c.txb != null ? t("pTxBand", "<b>" + t(RX_BANDS[c.txb]) + "</b>") : "",
     relLine(c)]);
 }
@@ -1644,7 +1675,7 @@ function drawMap(fit, fromZoom) {
              : [best && bestNode !== null ? t("bestNode", esc(bestNames.get(bestNode) || hexId(bestNode))) + (c.by.size > 1 ? " · " + t("nNodes", c.by.size) : "") : "",
                 t(useMargin ? "pMargin" : "pSnr", fmtN(med, 1)) + ' (<i class="pdot" style="background:' + sigColor(med) + '"></i>)',
                 c.rssi.length ? t("pRssi", fmtN(median(c.rssi))) + (c.nRelay ? " <i>(" + t("directOnly") + ")</i>" : "") : ""])];
-      rect.bindPopup(popList("📥 " + t("rxTitle"), rxLines.concat(relLine(c))));
+      rect.bindPopup(popList("⬇️ " + t("rxTitle"), rxLines.concat(relLine(c))));
       rect.addTo(mapLayer);
       if (has && !onlyRelay && lowRel(c)) hatch(rect, sigColor(med));
       // el gris solo dentro del borde: así el borde se ve sobre el mapa con el mismo tono que las celdas en directo
@@ -1673,7 +1704,7 @@ function drawMap(fit, fromZoom) {
   if (!cmp) for (const x of txVisible()) {
     L.marker([x.lat, x.lon], { icon: L.divIcon({ className: "", iconSize: [18, 18], iconAnchor: [9, 9], popupAnchor: [0, -9],
       html: '<div class="txm ' + (x.ok ? "ok" : "ko") + '">' + (x.ok ? "✓" : "✗") + "</div>" }), pane: txPane() })
-      .bindPopup("<b>📤 " + t("txMsg") + " · " + RT.fmtDate(x.ms) + " " + RT.fmtTime(x.ms) + "</b><br>" + t(x.ok ? "txOk" : "txKo") +
+      .bindPopup("<b>⬆️ " + t("txMsg") + " · " + RT.fmtDate(x.ms) + " " + RT.fmtTime(x.ms) + "</b><br>" + t(x.ok ? "txOk" : "txKo") +
         (x.sf ? "<br>SF" + x.sf : "")).addTo(mapLayer);
     pts.push([x.lat, x.lon]); ownPts.push([x.lat, x.lon]);
   }
