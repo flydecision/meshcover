@@ -365,7 +365,7 @@
         <li>💡 Consejo: el GPS de los nodos a veces tarda mucho en captar la posición y es menos sensible, así que, si puedes, es mejor grabar el GPX con una app del móvil.</li>
       </ul>
       <h3>2. Haz la ruta</h3>
-      <div>Donde quieras empezar, reinicia el nodo (Ajustes › Administración › Reiniciar) y, si usas su GPS, espera a que tenga posición antes de salir.</div>
+      <div>Si usas el GPS del nodo, espera a que tenga posición antes de salir.</div>
       <div style="margin-top:6px">Móvil conectado al nodo por Bluetooth, con la pantalla apagada. Para medir la <b>transmisión</b>, manda de vez en cuando un mensaje corto a tu canal privado.</div>
       <h3>3. Ábrelo aquí</h3>
       <ol>
@@ -407,7 +407,8 @@
           </ul>
         </li>
         <li>Borra el registro previo en la app: Ajustes › Panel de depuración › botón 🗑️ (Limpiar los registros).</li>
-        <li>En el punto donde quieras empezar a grabar cobertura, conviene <b>reiniciar el nodo</b> (Ajustes › Administración › Reiniciar), para que el registro empiece limpio, con la cabecera de configuración de la red, y el nodo capte posición GPS. Si usas el GPS del nodo, <b>espera a que tenga posición</b> antes de iniciar el recorrido (lo puedes comprobar cuando ves tu nodo en el mapa de la app).</li>
+        <li>Si usas el GPS del nodo, <b>espera a que tenga posición</b> antes de iniciar el recorrido (lo puedes comprobar cuando ves tu nodo en el mapa de la app).</li>
+        <li>No hace falta reiniciar el nodo. Si el registro no trae los ajustes de radio (SF), MeshCover te pregunta con qué SF lo grabaste y recuerda tu respuesta para la próxima vez. Si quieres que el registro los traiga, desconecta y vuelve a conectar el Bluetooth en la app después de borrar el registro.</li>
         <li>Si tu nodo no tiene GPS, graba el recorrido con otra app de GPS en el móvil y, al terminar, expórtalo como <b>GPX</b>. 💡 Consejo: el GPS de los nodos a veces tarda mucho en captar la posición y es menos sensible, así que, si puedes, es mejor usar siempre una app del móvil para el GPX.</li>
         <li>Haz el recorrido que quieras mapear con el móvil conectado al nodo. Puedes llevar la pantalla apagada si la app no tiene restricciones de batería. Aunque no es necesario, si quieres, empieza y acaba fuera de tu zona privada.</li>
         <li>Al terminar, exporta el registro: Ajustes › Panel de depuración › botón ⬇️ (Exportar registros), y guárdalo en una carpeta del móvil (por ejemplo, Download).</li>
@@ -470,7 +471,7 @@
         <li>💡 Tip: node GPS sometimes takes a long time to get a fix and is less sensitive, so, if you can, it is better to record the GPX with a phone app.</li>
       </ul>
       <h3>2. Do the route</h3>
-      <div>Where you want to start, reboot the node (Settings › Administration › Reboot) and, if you use its GPS, wait until it has a position before setting off.</div>
+      <div>If you use the node's GPS, wait until it has a position before setting off.</div>
       <div style="margin-top:6px">Phone connected to the node over Bluetooth, screen off. To measure <b>transmission</b>, send a short message to your private channel now and then.</div>
       <h3>3. Open it here</h3>
       <ol>
@@ -512,7 +513,8 @@
           </ul>
         </li>
         <li>Clear the previous log in the app: Settings › Debug panel › 🗑️ button (Clear logs).</li>
-        <li>At the spot where you want to start recording coverage, it is best to <b>reboot the node</b> (Settings › Administration › Reboot), so the log starts clean, with the mesh settings header, and the node gets a GPS fix. If you use the node's GPS, <b>wait until it has a position</b> before starting the route (you can check it when you see your node on the app map).</li>
+        <li>If you use the node's GPS, <b>wait until it has a position</b> before starting the route (you can check it when you see your node on the app map).</li>
+        <li>There is no need to reboot the node. If the log has no radio settings (SF), MeshCover asks which SF you recorded with and remembers your answer for next time. If you want the log to include them, disconnect and reconnect Bluetooth in the app after clearing the log.</li>
         <li>If your node has no GPS, record the route with a GPS app on the phone and, when you finish, export it as <b>GPX</b>. 💡 Tip: node GPS sometimes takes a long time to get a fix and is less sensitive, so, if you can, it is better to always use a phone app for the GPX.</li>
         <li>Do the route you want to map with the phone connected to the node. You can keep the screen off if the app has no battery restrictions. It is not required but, if you like, start and end outside your private area.</li>
         <li>When you finish, export the log: Settings › Debug panel › ⬇️ button (Export logs), and save it to a phone folder (for example, Download).</li>
@@ -1031,13 +1033,22 @@ function askSf(name) {
   d.className = "sfask";
   d.innerHTML = "📻 <b>" + esc(name) + "</b> <span>" + esc(t("sfAskTxt")) + "</span> <label>SF <select>" +
     '<option value="">?</option>' + [7, 8, 9, 10, 11, 12].map(v => '<option value="' + v + '">' + v + "</option>").join("") + "</select></label>";
-  d.querySelector("select").addEventListener("change", e => {
-    const v = Number(e.target.value) || null;
+  const selSf = d.querySelector("select");
+  const apply = v => {
     for (const r of fileRows || []) if (r.file === name) r.sf = v;
     for (const tr of fileTracks) if (tr.name === name) for (const sg of tr.segs) for (const q of sg) q.sf = v;
     mapDirty = true; dirtyRender = true; render(); if (map) drawMap(false);
+  };
+  selSf.addEventListener("change", e => {
+    const v = Number(e.target.value) || null;
+    try { if (v) localStorage.setItem("meshcover_last_sf", String(v)); else localStorage.removeItem("meshcover_last_sf"); } catch (err) {}
+    apply(v);
   });
   $("sfAsk").appendChild(d);
+  // el último SF elegido queda preseleccionado (casi siempre se graba con el mismo)
+  let last = null;
+  try { last = Number(localStorage.getItem("meshcover_last_sf")) || null; } catch (err) {}
+  if (last >= 7 && last <= 12) { selSf.value = String(last); apply(last); }
 }
 // «🗑 Limpiar»: quita del mapa todo lo abierto
 function clearAll() {
@@ -2026,11 +2037,11 @@ async function openDebugTxt(file) {
     for (const x of r.tx) fileTx.push(Object.assign(x, { file: file.name }));
     for (const [n, role] of r.roles) nodeRoles.set(n, role);
     for (const [n, v] of r.mqttOk) if (!nodeMqtt.has(n) || nodeMqtt.get(n).ms <= v.ms) nodeMqtt.set(n, v);
-    if (!r.hasCfg) askSf(file.name);
     for (const t of r.tracks) {
       const segs = trackSegments(t).map(seg => seg.map(p => ({ lat: p.lat, lon: p.lon, ms: p.ms, sf: p.sf || null })));
       fileTracks.push({ name: file.name, segs });
     }
+    if (!r.hasCfg) askSf(file.name);
     if (!map) await startMap();
     refreshFromSelect();
     if (first && !exportPreviewOn()) autoView(r.rows);
