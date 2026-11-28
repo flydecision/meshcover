@@ -1010,8 +1010,10 @@ function placeFromGpx() {
     return [a, b].filter(q => q && Math.abs(q.ms - ms) <= 120000).sort((x, y) => Math.abs(x.ms - ms) - Math.abs(y.ms - ms))[0] || null;
   };
   let n = 0;
+  // el GPX manda sobre el GPS del nodo propio (el del móvil suele ser más fino); no toca las posiciones
+  // del nodo que se mueve (modo nodo fijo en casa) ni las de archivos CSV
   for (const r of fileRows || []) {
-    if (!r.ms || (r.rxLat != null && !isNaN(r.rxLat))) continue;
+    if (!r.ms || (r.rxLat != null && !isNaN(r.rxLat) && r.rxSrc !== "nodo")) continue;
     const p = at(r.ms);
     if (!p) continue;
     r.rxLat = p.lat; r.rxLon = p.lon; r.rxSrc = "gpx"; n++;
@@ -1019,10 +1021,10 @@ function placeFromGpx() {
   }
   // los mensajes enviados (transmisión) se colocan igual, en la posición del GPX a la hora del resultado
   for (const x of fileTx) {
-    if (!x.ms || (x.lat != null && !isNaN(x.lat))) continue;
+    if (!x.ms || (x.lat != null && !isNaN(x.lat) && x.src !== "nodo")) continue;
     const p = at(x.ms);
     if (!p) continue;
-    x.lat = p.lat; x.lon = p.lon; n++;
+    x.lat = p.lat; x.lon = p.lon; x.src = "gpx"; n++;
   }
   return n;
 }
@@ -2019,7 +2021,7 @@ function debugTxtToRows(text) {
   const tx = [];
   for (const [id, r] of res) {
     const p = posAt(own, r.ms), c = cfgAt(sentMsg.get(id).at);
-    tx.push({ ms: r.ms, ok: r.ok, lat: p ? p.lat : null, lon: p ? p.lon : null, sf: c ? c.sf : null, direct: sentMsg.get(id).to !== 0xffffffff });
+    tx.push({ ms: r.ms, ok: r.ok, lat: p ? p.lat : null, lon: p ? p.lon : null, src: p ? "nodo" : "", sf: c ? c.sf : null, direct: sentMsg.get(id).to !== 0xffffffff });
   }
   tx.sort((a, b) => a.ms - b.ms);
   // Recorrido: el del nodo propio; si no lo hay, el de los emisores que se han movido
