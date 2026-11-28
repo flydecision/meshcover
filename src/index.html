@@ -203,7 +203,7 @@
   /* botones que se quedan pulsados (vista y mapa de cobertura): hundidos, con borde azul por dentro */
   .seg button.on, #btnCommunity.on { background:#2f7df6; color:#fff; font-weight:400; box-shadow:inset 0 2px 4px #0008; }
   .seg button:not(.on) { background:#34465c; }
-  .seg button.cur:not(.on) { box-shadow:inset 0 0 0 2px #2f7df6; }
+  .actrow button.vw.on { background:#2f7df6; color:#fff; font-weight:400; box-shadow:inset 0 2px 4px #0008; }
   /* deslizador de celda con el mismo aspecto que el de saltos (un solo botón) */
   .filt.cellf { margin:0; gap:6px; }
   .filt.cellf .dual { flex:0 0 110px; width:110px; min-width:0; }
@@ -255,6 +255,9 @@
   <!-- fila 2: registros propios -->
   <div class="btns actrow">
     <button id="btnOpen" class="sec" data-i18n-title="openTitle">📂 <span data-i18n="open">Add Logs</span></button>
+    <!-- ver tus registros como recepción o como transmisión (solo con registros propios) -->
+    <button id="oRx" class="sec vw" data-i18n-title="gridTitle" hidden><span data-i18n="seeRx">See ⬇️ Rx</span></button>
+    <button id="oTx" class="sec vw" data-i18n-title="txViewTitle" hidden><span data-i18n="seeTx">See ⬆️ Tx</span></button>
     <button id="btnClear" class="sec" data-i18n-title="clearTitle" hidden>🗑 <span data-i18n="clear">Clear</span></button>
     <button id="btnExport" class="sec" data-i18n-title="exportTitle" hidden>💾 <span data-i18n="exportBtn">Export coverage</span></button>
     <input type="file" id="fileAny" accept=".csv,.gpx,.txt,.json,text/csv,text/plain,application/gpx+xml,application/xml,text/xml,application/json" multiple hidden>
@@ -570,7 +573,7 @@ const $ = id => document.getElementById(id);
 /* ---------- idioma (inglés por defecto, español opcional) ---------- */
 const I18N = {
   en: {
-    appTitle: "MeshCover", help: "Help", close: "Close", open: "Add Logs", clear: "Clear",
+    appTitle: "MeshCover", help: "Help", close: "Close", open: "Add Logs", clear: "Clear", seeRx: "See ⬇️ Rx", seeTx: "See ⬆️ Tx",
     openTitle: "Add the packet log exported from the Meshtastic app (.txt), or CSV and GPX files. Each file adds to what is already on the map",
     clearTitle: "Remove everything opened from the map",
     node: "Node", allNodes: "All nodes", view: "View",
@@ -642,7 +645,7 @@ const I18N = {
     directPl: "direct", lastPos: "Last position", lastHeard: "Last heard", relayedWord: "relayed", maxDist: "Max distance"
   },
   es: {
-    appTitle: "MeshCover", help: "Ayuda", close: "Cerrar", open: "Añadir registros", clear: "Limpiar",
+    appTitle: "MeshCover", help: "Ayuda", close: "Cerrar", open: "Añadir registros", clear: "Limpiar", seeRx: "Ver ⬇️ Rx", seeTx: "Ver ⬆️ Tx",
     openTitle: "Añadir el registro de paquetes exportado de la app Meshtastic (.txt), o CSV y GPX. Cada archivo se suma a lo que ya hay en el mapa",
     clearTitle: "Quitar del mapa todo lo abierto",
     node: "Nodo", allNodes: "Todos los nodos", view: "Vista",
@@ -1069,12 +1072,15 @@ function loadMapPrefs() {
 // los botones de vista solo se ven hundidos cuando hay algo en el mapa
 function hasMapData() { return !!(fileRows || fileTracks.length || fileVisited.length || fileTx.length || fileTxCells.length); }
 function showView() {
-  // hundido (azul): esa vista con el mapa de cobertura; solo borde azul: esa vista solo con tus registros
+  // fila 1 hundida (azul): esa vista con el mapa de cobertura; «Ver Rx / Tx»: la vista de tus registros
   const own = hasOwnData();
   for (const [id, v] of [["vGrid", "grid"], ["vCmp", "cmp"], ["vTx", "tx"]]) {
-    const b = $(id), act = mapView === v, on = act && (id === "vCmp" ? hasMapData() : commOn);
-    b.classList.toggle("on", on); b.classList.toggle("cur", act && !on && own);
-    b.setAttribute("aria-pressed", on);
+    const b = $(id), on = mapView === v && (id === "vCmp" ? hasMapData() : commOn);
+    b.classList.toggle("on", on); b.setAttribute("aria-pressed", on);
+  }
+  for (const [id, v] of [["oRx", "grid"], ["oTx", "tx"]]) {
+    const b = $(id), on = own && (mapView === v || (v === "grid" && mapView === "cmp"));
+    b.hidden = !own; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on);
   }
   // sin registros propios: ni exportar ni tabla (con solo el mapa de cobertura no hay nada que listar)
   $("btnExport").hidden = !own;
@@ -1686,10 +1692,6 @@ function drawMap(fit, fromZoom) {
       L.polyline(tr.pts.map(p => [p.lat, p.lon]), { color: tc, weight: 4, opacity: .85 })
         .bindPopup(t("track") + ": " + esc(tr.name)).addTo(mapLayer);
     }
-    // un puntito en cada posición GPS real del recorrido
-    for (const p of tr.pts)
-      L.circleMarker([p.lat, p.lon], { radius: 3, color: "#ffffff", weight: 1, fillColor: tc, fillOpacity: 1 })
-        .bindPopup(t("gpsPos") + (p.ms ? " · " + RT.fmtDate(p.ms) + " " + RT.fmtTime(p.ms) : "")).addTo(mapLayer);
     for (const p of tr.pts) { pts.push([p.lat, p.lon]); ownPts.push([p.lat, p.lon]); }
   }
 
@@ -2500,6 +2502,9 @@ function viewBtn(v) {
 $("vGrid").addEventListener("click", () => viewBtn("grid"));
 $("vCmp").addEventListener("click", () => setView("cmp"));
 $("vTx").addEventListener("click", () => viewBtn("tx"));
+// «Ver Rx / Tx»: cambian la vista de tus registros sin tocar el mapa de cobertura
+$("oRx").addEventListener("click", () => setView("grid"));
+$("oTx").addEventListener("click", () => setView("tx"));
 for (const id of ["cmpA", "cmpB"]) $(id).addEventListener("change", e => { cmpPick[id] = Number(e.target.value); mapDirty = true; dirtyRender = true; if (map) drawMap(false); });
 // sin deslizador de saltos: siempre se cuentan todos
 function showHops() {}
