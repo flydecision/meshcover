@@ -151,10 +151,9 @@
   .em { font-size:16px; }   /* emojis siempre a 16 px, aunque el texto del botón sea más pequeño */
   .btns.actrow { margin:8px 0 10px; }
   #mapBox.max .btns.actrow { display:none; }
+  #mapBox.exporting .nodesel { display:none; }
   /* móvil: las dos vistas y los dos desplegables caben en una fila cada uno */
   @media (max-width:480px) {
-    .btns.viewrow .seg { display:flex; width:100%; }
-    .btns.viewrow .seg button { flex:1 1 0; min-width:0; justify-content:center; padding:0 4px; font-size:13px; gap:3px; }
     .mapopts .filt.nodesel, .mapopts #ageWrap { flex:1 1 0; min-width:0; }
     .mapopts .combo { width:100%; max-width:none; }
     .mapopts #selAge { width:100%; min-width:0; }
@@ -170,23 +169,17 @@
   .combo-list .ci.act { background:#23456e; }
   .combo-list .ci.sel { color:#7fb2ff; font-weight:600; }
   .exppanel { background:#26344a; border:1px solid #3a4c64; border-radius:10px; padding:10px 12px; margin:0 0 8px; line-height:1.4; color:#c9d1db; }
-  .exphead { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; }
-  .exphead button { width:32px; height:32px; padding:0; border-radius:50%; flex:none; }
-  .exprow { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin:10px 0 6px; }
-  .filt.privf { margin:0; flex:1 1 140px; min-width:120px; max-width:320px; }
-  .filt.privf .dual { max-width:none; }
-  #privFill { background:#d7352b; }
-  #privVal { color:#e6e9ee; min-width:3.6em; }
-  #expInfo { color:#9aa4b2; }
+  #expInfo { color:#9aa4b2; margin-top:8px; }
+  #btnExpClose { margin-left:auto; width:29px; padding:0; justify-content:center; }
   .exppanel a, #helpBody a { color:#7fb8ff; }
-  .expbtns { margin-top:8px; display:flex; flex-wrap:wrap; gap:8px; }
+  .expbtns { display:flex; flex-wrap:wrap; gap:8px; }
   #expUpMsg { margin-top:8px; color:#7fd49a; }
   .expbtns button { height:29px; padding:0 11px; display:inline-flex; align-items:center; gap:5px; }
   #tblNote { color:#9aa4b2; margin:10px 0 6px; line-height:1.4; }
   .combo-list .none { padding:8px 10px; color:#9aa4b2; }
   .filt.hops { display:inline-flex; margin:0; gap:6px; flex:1 1 100px; min-width:max-content; max-width:280px; }
   .filt.hops .dual { min-width:60px; }
-  @media (max-width:380px) { .seg button { padding:0 7px; } .filt.hops { gap:4px; } .filt.hops .lbl { display:none; } }
+  @media (max-width:380px) { .filt.hops { gap:4px; } .filt.hops .lbl { display:none; } }
   .filt .dual input[type=range] { position:absolute; left:0; top:0; width:100%; min-width:0; height:29px; margin:0; background:none;
     pointer-events:none; -webkit-appearance:none; appearance:none; }
   .filt .dual input[type=range]::-webkit-slider-runnable-track { background:none; }
@@ -209,11 +202,13 @@
   .filt .dual-track, .filt .dual-fill { position:absolute; top:9.5px; height:10px; border-radius:5px; box-sizing:border-box; }
   .filt .dual-track { left:12px; right:12px; background:#1a2029; border:1px solid #3a4150; }
   .filt .dual-fill { background:#2f7df6; }
-  .seg { display:inline-flex; border-radius:10px; overflow:hidden; border:1px solid #2a3340; }
-  .seg button { box-sizing:border-box; height:27px; display:inline-flex; align-items:center; gap:5px; border-radius:0; padding:0 11px; font-size:16px; background:#1a2029; }
+  /* botones de cobertura: mismo aspecto que los demás; hundidos (azul) cuando se ven los datos del mapa de cobertura,
+     con borde azul cuando es la vista activa solo con tus registros */
+  .seg { display:inline-flex; flex-wrap:wrap; gap:8px; }
   /* botones que se quedan pulsados (vista y mapa de cobertura): hundidos, con borde azul por dentro */
-  .seg button.on, #btnCommunity.on { background:#2f7df6; color:#fff; font-weight:700; }
-  .seg button:not(.on) { color:#c9d1db; background:#34465c; }
+  .seg button.on, #btnCommunity.on { background:#2f7df6; color:#fff; font-weight:400; }
+  .seg button:not(.on) { background:#34465c; }
+  .seg button.cur:not(.on) { box-shadow:inset 0 0 0 2px #2f7df6; }
   /* deslizador de celda con el mismo aspecto que el de saltos (un solo botón) */
   .filt.cellf { margin:0; gap:6px; }
   .filt.cellf .dual { flex:0 0 110px; width:110px; min-width:0; }
@@ -284,11 +279,9 @@
     </span>
   </div>
   <div id="expPanel" class="exppanel" hidden>
-    <div class="exphead"><b>💾 <span data-i18n="expTitle">Export anonymous coverage</span></b><button id="btnExpClose" class="sec" data-i18n-aria="close">✕</button></div>
-    <div><span data-i18n="expWhat"></span> <a href="#" id="lnkPriv" data-i18n="expPrivLink">What is uploaded?</a></div>
-    <div class="exprow"><span data-i18n="expRadius">Remove around start and end</span> <span class="filt privf"><span class="dual single"><span class="dual-track"></span><span class="dual-fill" id="privFill"></span><input type="range" id="rngPriv" min="0" max="2000" step="50" value="0" data-i18n-aria="expRadius"></span></span> <b id="privVal">0 m</b></div>
-    <div id="expInfo"></div>
-    <div class="expbtns"><button id="btnExpGo">💾 <span data-i18n="expGo">Download file</span></button><button id="btnExpUp">☁️ <span data-i18n="expUp">Upload to coverage map</span></button></div>
+    <!-- solo los dos botones y cerrar: el mapa ya muestra lo que se exporta -->
+    <div class="expbtns"><button id="btnExpGo">💾 <span data-i18n="expGo">Download file</span></button><button id="btnExpUp">☁️ <span data-i18n="expUp">Upload to coverage map</span></button><button id="btnExpClose" class="sec" data-i18n-aria="close">✕</button></div>
+    <div id="expInfo" hidden></div>
     <div id="expUpMsg" hidden></div>
   </div>
   <div id="map"></div>
@@ -413,7 +406,7 @@
         <li>Haz el recorrido que quieras mapear con el móvil conectado al nodo. Puedes llevar la pantalla apagada si la app no tiene restricciones de batería.</li>
         <li>Al terminar, exporta el registro: Ajustes › Panel de depuración › botón ⬇️ (Exportar registros), y guárdalo en una carpeta del móvil (por ejemplo, Download).</li>
         <li>En MeshCover, abre el <code>.txt</code> del registro con <b>📂 Añadir registros</b>. Si grabaste el track del recorrido con otra app, abre a la vez o después el <code>.gpx</code> (MeshCover une los dos archivos).</li>
-        <li>Pulsa <b>💾 Exportar cobertura</b> y, si quieres, sube el deslizador para quitar las celdas de tu zona privada.</li>
+        <li>Pulsa <b>💾 Exportar cobertura</b>.</li>
         <li>Pulsa <b>☁️ Subir al mapa de cobertura</b>.</li>
       </ol>
       <hr class="hsep">
@@ -442,11 +435,10 @@
       <h3>🚫 Qué no se sube</h3>
       <ul>
         <li>Ni el recorrido, ni horas, ni tu nombre o tu nodo.</li>
-        <li>Nada cerca del inicio, el final y las paradas (círculos rojos, desplazados al azar).</li>
         <li>El mapa público solo muestra franjas aproximadas, nunca números exactos.</li>
       </ul>
       <div><b>💾 Descargar archivo</b> guarda exactamente lo que se subiría, para revisarlo antes. Para retirar algo, abre una incidencia en <a href="https://github.com/flydecision/meshcover/issues" target="_blank" rel="noopener">GitHub</a>.</div>
-      <div style="margin-top:6px">Si tienes dudas: borra el registro anterior en la app (Ajustes → panel de depuración → borrar) e inicia y termina el recorrido <b>lejos de tu casa</b> y de tus sitios habituales.</div>
+      <div style="margin-top:6px">Si no quieres que se vea alguna zona, como tu casa, <b>empieza y termina de grabar fuera de ella</b>: borra el registro anterior en la app (Ajustes › Panel de depuración › 🗑️) al salir de esa zona y exporta el registro antes de volver a entrar.</div>
     </div>
 
     <div class="page" data-p="0" data-lang="en" hidden>
@@ -519,7 +511,7 @@
         <li>Do the route you want to map with the phone connected to the node. You can keep the screen off if the app has no battery restrictions.</li>
         <li>When you finish, export the log: Settings › Debug panel › ⬇️ button (Export logs), and save it to a phone folder (for example, Download).</li>
         <li>In MeshCover, open the log <code>.txt</code> with <b>📂 Add Logs</b>. If you recorded the route track with another app, open the <code>.gpx</code> at the same time or afterwards (MeshCover joins both files).</li>
-        <li>Press <b>💾 Export coverage</b> and, if you like, raise the slider to remove the cells of your private area.</li>
+        <li>Press <b>💾 Export coverage</b>.</li>
         <li>Press <b>☁️ Upload to coverage map</b>.</li>
       </ol>
       <hr class="hsep">
@@ -548,11 +540,10 @@
       <h3>🚫 What is not uploaded</h3>
       <ul>
         <li>Not the route, times, your name or your node.</li>
-        <li>Nothing near the start, the end or stops (red circles, shifted at random).</li>
         <li>The public map only shows approximate ranges, never exact numbers.</li>
       </ul>
       <div><b>💾 Download file</b> saves exactly what would be uploaded, so you can check it first. To have something removed, open an issue on <a href="https://github.com/flydecision/meshcover/issues" target="_blank" rel="noopener">GitHub</a>.</div>
-      <div style="margin-top:6px">If in doubt: clear the previous log in the app (Settings → debug panel → clear) and start and end the route <b>away from your home</b> and your usual places.</div>
+      <div style="margin-top:6px">If you do not want an area to show, such as your home, <b>start and stop recording outside it</b>: clear the previous log in the app (Settings › Debug panel › 🗑️) once you leave that area, and export the log before going back in.</div>
     </div>
     </div>
     <div class="mfoot">
@@ -618,8 +609,7 @@ const I18N = {
     tabWhat: "What for", tabHow: "How to use", tabFix: "Troubleshooting", tabComm: "Coverage map", tabCollab: "How to contribute", noShow: "Don't show again", cancel: "Cancel",
     introOpenTitle: "📂 Add Logs", introOpenGo: "Choose file",
     introOpenBody: "<div>Open the <code>.txt</code> log exported from the official <b>Meshtastic</b> app:</div><div style=\"margin:8px 0\"><b>Settings › Debug panel › Packets › «Export logs»</b> button.</div><div>Each file is added to what is already on the map. You can also open coverage files (<code>.json</code>) shared by other people, and CSV/GPX from older versions of this page. Nothing leaves your device: the file is read in the browser.</div>",
-    introExpTitle: "💾 Export coverage", introExpGo: "Continue",
-    introExpBody: "<ol><li>The map will show <b>exactly what will be shared</b>: best signal of any node, in 250 m cells.</li><li>Move the <b>«Remove around start and end»</b> slider until no cell is left near your home (red circles).</li><li>Then <b>💾 Download file</b> to share it yourself, or <b>☁️ Upload to coverage map</b> to add it to the shared map.</li></ol><div>Only cells are saved: no track, no times and no node names.</div>", tabPriv: "Privacy", prev: "Previous", next: "Next",
+    tabPriv: "Privacy", prev: "Previous", next: "Next",
     packets: n => n === 1 ? "packet" : "packets",
     offline: "no connection",
     mapUnavailable: m => "Map not available (" + m + "): an internet connection is needed to load it. It will appear when the connection is back.",
@@ -650,15 +640,13 @@ const I18N = {
     nodeSearch: "Search node", noMatch: "No node matches",
     ageTitle: "Age of the coverage map data", ageAll: "📅 All data", age12: "📅 Last 12 months", age6: "📅 Last 6 months", age3: "📅 Last 3 months",
     communityBtn: "Coverage map", communityTitle: "Add the shared coverage map uploaded by everyone",
-    expUp: "Upload to coverage map", expPrivLink: "What exactly is saved or uploaded?", upConfirm: n => "Upload these " + n + " cells to the public coverage map? They are added for everyone.\n\nPrivacy: the uploaded file contains no personal data, but you can check it first by downloading it with the «Download file» button and opening it with any text editor, or by reviewing the open source code, yourself or with an AI, at https://github.com/flydecision/meshcover",
+    expUp: "Upload to coverage map", upConfirm: n => "Upload these " + n + " cells to the public coverage map? They are added for everyone.\n\nPrivacy: the uploaded file contains no personal data, but you can check it first by downloading it with the «Download file» button and opening it with any text editor, or by reviewing the open source code, yourself or with an AI, at https://github.com/flydecision/meshcover",
     upOk: n => "✅ Uploaded: " + n + " cells added to the coverage map. Thanks!", upBusy: "Uploading…",
     upErr: m => "Could not upload (" + m + ").", upRate: "too many uploads from your connection, try again in an hour", upDup: "this file is already on the coverage map",
     commEmpty: "The coverage map is still empty.", commErr: m => "Could not load the coverage map (" + m + ").", commName: "Coverage map",
     exportBtn: "Export coverage", exportTitle: "Save the coverage of what is open as an anonymous file to share",
-    expTitle: "Export anonymous coverage", expRadius: "Remove around start and end", expGo: "Download file",
-    expWhat: "Only the grid cells are saved (signal of each node heard and cells with no reception). No track, no times and nothing near where each route starts and ends (or stops for more than 5 min), where your home may be.",
-    expInfo: (c, s, r) => c + " cells of " + s + " will be saved" + (r ? ", " + r + " removed near the start and end (red circles)." : "."),
-    expNoData: "Add a log of your own first (📂 Add Logs): the coverage map you are viewing is not exported.", expEmpty: "No cells are left with that radius.",
+    expGo: "Download file",
+    expNoData: "Add a log of your own first (📂 Add Logs): the coverage map you are viewing is not exported.", expEmpty: "There are no cells to export.",
     errJson: "it is not a coverage file from this page", impCov: n => "Imported coverage · " + n + (n === 1 ? " packet" : " packets"), impCells: n => n + " cells imported",
     heardNote: n => "📶 Packets heard directly from " + n + ": its own and the ones it relayed from other nodes. The Node column is the original sender.",
     heardNoteAll: "📶 Packets heard directly from a node that relays (CLIENT_MUTE nodes, which do not relay, are left out). The Node column is the original sender.",
@@ -694,8 +682,7 @@ const I18N = {
     tabWhat: "Para qué", tabHow: "Cómo usar", tabFix: "Soluciones", tabComm: "Mapa de cobertura", tabCollab: "Cómo colaborar", noShow: "No volver a mostrar", cancel: "Cancelar",
     introOpenTitle: "📂 Añadir registros", introOpenGo: "Elegir archivo",
     introOpenBody: "<div>Abre el registro <code>.txt</code> exportado desde la app oficial de <b>Meshtastic</b>:</div><div style=\"margin:8px 0\"><b>Configuración › Panel de depuración › Packets ›</b> botón <b>«Exportar registros»</b>.</div><div>Cada archivo se suma a lo que ya hay en el mapa. También puedes abrir archivos de cobertura (<code>.json</code>) compartidos por otras personas, y CSV/GPX de versiones anteriores de esta página. Nada sale de tu dispositivo: el archivo se lee en el navegador.</div>",
-    introExpTitle: "💾 Exportar cobertura", introExpGo: "Continuar",
-    introExpBody: "<ol><li>El mapa mostrará <b>exactamente lo que se va a compartir</b>: la mejor señal de cualquier nodo, en celdas de 250 m.</li><li>Mueve el deslizador <b>«Quitar alrededor del inicio y del final»</b> hasta que no quede ninguna celda cerca de tu casa (círculos rojos).</li><li>Después, <b>💾 Descargar archivo</b> para compartirlo tú, o <b>☁️ Subir al mapa de cobertura</b> para sumarlo al mapa común.</li></ol><div>Solo se guardan celdas: sin recorrido, sin horas y sin nombres de nodos.</div>", tabPriv: "Privacidad", prev: "Anterior", next: "Siguiente",
+    tabPriv: "Privacidad", prev: "Anterior", next: "Siguiente",
     packets: n => n === 1 ? "packet" : "packets",
     offline: "sin conexión",
     mapUnavailable: m => "Mapa no disponible (" + m + "): hace falta conexión a internet para cargarlo. Aparecerá solo al volver la conexión.",
@@ -726,15 +713,13 @@ const I18N = {
     nodeSearch: "Buscar nodo", noMatch: "Ningún nodo coincide",
     ageTitle: "Antigüedad de los datos del mapa de cobertura", ageAll: "📅 Todos los datos", age12: "📅 Últimos 12 meses", age6: "📅 Últimos 6 meses", age3: "📅 Últimos 3 meses",
     communityBtn: "Mapa de cobertura", communityTitle: "Añadir el mapa de cobertura compartido que ha subido todo el mundo",
-    expUp: "Subir al mapa de cobertura", expPrivLink: "¿Qué se guarda o sube exactamente?", upConfirm: n => "¿Subir estas " + n + " celdas al mapa de cobertura público? Se suman para todo el mundo.\n\nPrivacidad: el archivo que se sube no lleva ningún dato personal, pero puedes revisarlo antes descargándolo con el botón «Descargar archivo» y abriéndolo con cualquier editor de texto, o consultando el código abierto, por tu cuenta o con una IA, en https://github.com/flydecision/meshcover",
+    expUp: "Subir al mapa de cobertura", upConfirm: n => "¿Subir estas " + n + " celdas al mapa de cobertura público? Se suman para todo el mundo.\n\nPrivacidad: el archivo que se sube no lleva ningún dato personal, pero puedes revisarlo antes descargándolo con el botón «Descargar archivo» y abriéndolo con cualquier editor de texto, o consultando el código abierto, por tu cuenta o con una IA, en https://github.com/flydecision/meshcover",
     upOk: n => "✅ Subido: " + n + " celdas añadidas al mapa de cobertura. ¡Gracias!", upBusy: "Subiendo…",
     upErr: m => "No se pudo subir (" + m + ").", upRate: "demasiadas subidas desde tu conexión, prueba dentro de una hora", upDup: "este archivo ya está en el mapa de cobertura",
     commEmpty: "El mapa de cobertura aún está vacío.", commErr: m => "No se pudo cargar el mapa de cobertura (" + m + ").", commName: "Mapa de cobertura",
     exportBtn: "Exportar cobertura", exportTitle: "Guardar la cobertura de lo abierto en un archivo anónimo para compartir",
-    expTitle: "Exportar cobertura anónima", expRadius: "Quitar alrededor del inicio y del final", expGo: "Descargar archivo",
-    expWhat: "Solo se guardan las celdas de la cuadrícula (señal de cada nodo oído y celdas sin recepción). Sin recorrido, sin horas y sin nada cerca de donde empieza y acaba cada ruta (o se para más de 5 min), donde puede estar tu casa.",
-    expInfo: (c, s, r) => "Se guardarán " + c + " celdas de " + s + (r ? "; se quitan " + r + " cerca del inicio y del final (círculos rojos)." : "."),
-    expNoData: "Añade antes un registro tuyo (📂 Añadir registros): el mapa de cobertura que ves no se exporta.", expEmpty: "Con ese radio no queda ninguna celda.",
+    expGo: "Descargar archivo",
+    expNoData: "Añade antes un registro tuyo (📂 Añadir registros): el mapa de cobertura que ves no se exporta.", expEmpty: "No hay celdas que exportar.",
     errJson: "no es un archivo de cobertura de esta página", impCov: n => "Cobertura importada · " + n + (n === 1 ? " packet" : " packets"), impCells: n => n + " celdas importadas",
     heardNote: n => "📶 Paquetes oídos directamente de " + n + ": los suyos y los que repitió de otros nodos. La columna Nodo es el emisor original.",
     heardNoteAll: "📶 Paquetes oídos directamente de un nodo que repite (se dejan fuera los CLIENT_MUTE, que no repiten). La columna Nodo es el emisor original.",
@@ -1054,7 +1039,7 @@ function askSf(name) {
 }
 // «🗑 Limpiar»: quita del mapa todo lo abierto
 function clearAll() {
-  if (!fileRows && !fileTracks.length && !fileVisited.length) return;
+  if (!fileRows && !fileTracks.length && !fileVisited.length && !commOn) return;
   fileRows = null; fileNames = []; fileTracks = []; fileVisited = []; fileTx = []; fileTxCells = [];
   nodeRoles = new Map(); nodeMqtt = new Map();
   $("sfAsk").innerHTML = "";
@@ -1062,8 +1047,9 @@ function clearAll() {
   if (expPreview) expPreview.comm = false;
   closeExport();
   mapFitted = false; mapDirty = true; dirtyRender = true;
-  // el mapa de cobertura no se puede quitar: tras limpiar se vuelve a cargar
-  loadCommunity();
+  // el mapa queda vacío (también sin el mapa de cobertura): al abrir registros se ven solo los tuyos;
+  // «Cobertura recepción / transmisión» lo vuelven a mostrar para comparar
+  refreshFromSelect(); if (map) drawMap(false);
 }
 
 
@@ -1074,7 +1060,7 @@ const LEAFLET_SRC = [
 ];
 let keepUrlView = false;
 let map = null, mapLayer = null, mapOn = false, mapDirty = true, mapFitted = false;
-const GPX_COLOR = "#e5484d";
+const GPX_COLOR = "#2f7df6";   // el recorrido del GPX del móvil, del mismo azul que el del nodo
 let fileRows = null, fileNames = [], fileTracks = [];
 let fileTxCells = [];   // transmisión por celda de archivos de cobertura (.json propio: {ok, n}; mapa de cobertura: franja b)
 let fileTx = [];        // mensajes enviados con su resultado (transmisión: ¿te oyó la red?)
@@ -1102,12 +1088,16 @@ function loadMapPrefs() {
 // los botones de vista solo se ven hundidos cuando hay algo en el mapa
 function hasMapData() { return !!(fileRows || fileTracks.length || fileVisited.length || fileTx.length || fileTxCells.length); }
 function showView() {
-  $("vGrid").classList.toggle("on", mapView === "grid");
-  $("vCmp").classList.toggle("on", mapView === "cmp");
-  $("vTx").classList.toggle("on", mapView === "tx");
-  // sin registros propios: ni exportar ni tabla (con solo el mapa de cobertura no hay nada que listar)
+  // hundido (azul): esa vista con el mapa de cobertura; solo borde azul: esa vista solo con tus registros
   const own = hasOwnData();
-  $("btnExport").hidden = $("btnClear").hidden = !own;
+  for (const [id, v] of [["vGrid", "grid"], ["vCmp", "cmp"], ["vTx", "tx"]]) {
+    const b = $(id), act = mapView === v, on = act && (id === "vCmp" ? hasMapData() : commOn);
+    b.classList.toggle("on", on); b.classList.toggle("cur", act && !on && own);
+    b.setAttribute("aria-pressed", on);
+  }
+  // sin registros propios: ni exportar ni tabla (con solo el mapa de cobertura no hay nada que listar)
+  $("btnExport").hidden = !own;
+  $("btnClear").hidden = !own && !commOn;
   $("tblBox").hidden = !own;
   $("selAge").classList.toggle("chosen", $("selAge").value !== "0");
   $("nodeSearch").classList.toggle("chosen", selFrom !== "");
@@ -1708,7 +1698,7 @@ function drawMap(fit, fromZoom) {
   }
 
 
-  // recorridos (azul los del nodo, rojo los de un GPX externo)
+  // recorridos (del nodo o de un GPX externo, los dos en azul)
   for (const tr of tracks) {
     const tc = tr.gpx ? GPX_COLOR : "#2f7df6";
     if (tr.pts.length > 1) {
@@ -1734,8 +1724,9 @@ function drawMap(fit, fromZoom) {
   // recorridos, nodos y saltos solo salen con registros propios, y nunca en Transmisión
   const own = hasOwnData();
   $("lgNode").hidden = txv || !own;
-  $("lgTrack").hidden = txv || !tracks.some(tr => !tr.gpx);
-  $("lgGpx").hidden = txv || !tracks.some(tr => tr.gpx);
+  // GPX y nodo van del mismo azul: una sola entrada «Recorrido»
+  $("lgTrack").hidden = txv || !tracks.length;
+  $("lgGpx").hidden = true;
 
   // emisores
   // emisores; en «oído directamente», los nodos oídos (aunque solo repitan)
@@ -2196,14 +2187,12 @@ function privacyCircles(r) {
     return { lat, lon, r: r + d + j.x * r * 0.2 };
   });
 }
-function privRadius() { return Number($("rngPriv").value); }
+// sin recorte alrededor del inicio y del final: quien quiera ocultar una zona empieza y acaba de grabar fuera de ella
+function privRadius() { return 0; }
 function fmtM(m) { return m >= 1000 ? (m / 1000).toFixed(m % 1000 ? 2 : 0).replace(/\.?0+$/, "") + " km" : m + " m"; }
 function updateExport() {
   const r = privRadius(), res = coverageCells(EXPORT_CELL, r);
-  $("privVal").textContent = fmtM(r);
-  $("privFill").style.left = "12px";
-  $("privFill").style.width = "calc((100% - 24px) * " + r / Number($("rngPriv").max) + ")";
-  $("expInfo").textContent = res.cells.length ? t("expInfo", res.cells.length, fmtM(EXPORT_CELL), res.removed) : t("expEmpty");
+  $("expInfo").hidden = res.cells.length > 0; $("expInfo").textContent = t("expEmpty");
   $("btnExpGo").disabled = $("btnExpUp").disabled = !res.cells.length;
   $("expUpMsg").hidden = true;
   if (!map) return;
@@ -2221,7 +2210,7 @@ function openExport() {
   // la vista previa muestra solo lo propio: el mapa de cobertura se quita mientras tanto y vuelve al cerrar
   if (!expPreview) expPreview = { selFrom, mapView, minHops, maxHops, comm: commOn };
   if (commOn) { dropCommunity(); setCommBtn(false); $("ageWrap").hidden = true; refreshFromSelect(); }
-  $("expPanel").hidden = false;
+  $("expPanel").hidden = false; $("mapBox").classList.add("exporting");
   if ([...$("selFrom").options].some(o => o.value === "h*")) selFrom = "h*";
   minHops = 0; maxHops = 7;
   $("rngHopsMin").value = "0"; $("rngHops").value = "7"; showHops();
@@ -2232,7 +2221,7 @@ function openExport() {
   if (map && pts.length && privRadius() > 0) map.flyToBounds(L.latLngBounds(pts.map(p => [p.lat, p.lon])).pad(0.5), { maxZoom: 15, duration: 0.6 });
 }
 function closeExport() {
-  $("expPanel").hidden = true; if (expLayer) expLayer.clearLayers();
+  $("expPanel").hidden = true; $("mapBox").classList.remove("exporting"); if (expLayer) expLayer.clearLayers();
   if (!expPreview) return;
   const p = expPreview; expPreview = null;
   selFrom = p.selFrom; mapView = p.mapView; minHops = p.minHops; maxHops = p.maxHops;
@@ -2349,8 +2338,9 @@ async function addCoverage(data, name, community) {
         hops: 0, hopLimit: null, port: null, kind: "coverage", payload: "" });
     }
     fileRows = (fileRows || []).concat(rows); fileNames.push(name);
-    // la cobertura solo tiene sentido como cuadrícula
-    mapView = "grid"; showView(); saveMapPrefs();
+    // la cobertura solo tiene sentido como cuadrícula (recepción o transmisión)
+    if (mapView !== "tx") mapView = "grid";
+    showView(); saveMapPrefs();
     if (!map) await startMap();
     mapDirty = true; refreshFromSelect(); dirtyRender = true; drawMap(true);
 }
@@ -2469,10 +2459,9 @@ $("btnClear").addEventListener("click", clearAll);
 $("btnExport").addEventListener("click", () => {
   if (!$("expPanel").hidden) { closeExport(); return; }
   if (!hasOwnData()) { say(t("expNoData")); return; }
-  withIntro("Exp", openExport);
+  openExport();   // sin ventana de introducción: el panel ya es solo los dos botones
 });
 $("btnExpClose").addEventListener("click", closeExport);
-$("rngPriv").addEventListener("input", () => { updateExport(); mapDirty = true; if (map) drawMap(false); });
 $("btnExpGo").addEventListener("click", downloadCoverage);
 $("btnExpUp").addEventListener("click", uploadCoverage);
 $("btnCommunity").addEventListener("click", toggleCommunity);
@@ -2480,7 +2469,6 @@ $("selAge").addEventListener("change", e => { commAge = Number(e.target.value) |
 $("btnHelp").addEventListener("click", () => openHelp());
 $("btnHelpClose").addEventListener("click", closeHelp);
 $("help").addEventListener("click", e => { if (e.target === $("help")) closeHelp(); });
-$("lnkPriv").addEventListener("click", e => { e.preventDefault(); openHelp(5); });
 $("hPrev").addEventListener("click", () => showHelpPage(helpPage - 1));
 $("hNext").addEventListener("click", () => showHelpPage(helpPage + 1));
 document.querySelectorAll("#helpTabs button").forEach(b => b.addEventListener("click", () => showHelpPage(Number(b.dataset.p))));
@@ -2522,9 +2510,17 @@ window.addEventListener("drop", async e => {
 });
 $("fileAny").addEventListener("change", async e => { const fs = [...(e.target.files || [])]; e.target.value = ""; await openFiles(fs); });
 
-$("vGrid").addEventListener("click", () => setView("grid"));
+// «Cobertura recepción / transmisión»: muestran esa vista con el mapa de cobertura para comparar;
+// pulsar otra vez el botón hundido quita el mapa de cobertura (quedan solo tus registros)
+function viewBtn(v) {
+  if (exportPreviewOn()) { setView(v); return; }
+  if (mapView === v && commOn) { toggleCommunity(); showView(); return; }
+  setView(v);
+  if (!commOn) loadCommunity();
+}
+$("vGrid").addEventListener("click", () => viewBtn("grid"));
 $("vCmp").addEventListener("click", () => setView("cmp"));
-$("vTx").addEventListener("click", () => setView("tx"));
+$("vTx").addEventListener("click", () => viewBtn("tx"));
 for (const id of ["cmpA", "cmpB"]) $(id).addEventListener("change", e => { cmpPick[id] = Number(e.target.value); mapDirty = true; dirtyRender = true; if (map) drawMap(false); });
 function showHops() {
   $("hopsVal").textContent = minHops === maxHops ? String(maxHops) : minHops + "–" + maxHops;
