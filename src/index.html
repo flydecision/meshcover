@@ -573,7 +573,7 @@ const $ = id => document.getElementById(id);
 /* ---------- idioma (inglés por defecto, español opcional) ---------- */
 const I18N = {
   en: {
-    appTitle: "MeshCover", help: "Help", close: "Close", open: "Add Logs", clear: "Clear", seeRx: "See ⬇️ Rx", seeTx: "See ⬆️ Tx",
+    appTitle: "MeshCover", help: "Help", close: "Close", open: "Add Logs", clear: "Clear", seeRx: "See ⬇️ Rx", seeTx: "See ⬆️ Tx", noTxData: "Your logs have no sent messages. To measure transmission, send a short message to your private channel now and then during the route.", noTxPos: "Your sent messages have no position. Open the GPX of the route too.",
     openTitle: "Add the packet log exported from the Meshtastic app (.txt), or CSV and GPX files. Each file adds to what is already on the map",
     clearTitle: "Remove everything opened from the map",
     node: "Node", allNodes: "All nodes", view: "View",
@@ -645,7 +645,7 @@ const I18N = {
     directPl: "direct", lastPos: "Last position", lastHeard: "Last heard", relayedWord: "relayed", maxDist: "Max distance"
   },
   es: {
-    appTitle: "MeshCover", help: "Ayuda", close: "Cerrar", open: "Añadir registros", clear: "Limpiar", seeRx: "Ver ⬇️ Rx", seeTx: "Ver ⬆️ Tx",
+    appTitle: "MeshCover", help: "Ayuda", close: "Cerrar", open: "Añadir registros", clear: "Limpiar", seeRx: "Ver ⬇️ Rx", seeTx: "Ver ⬆️ Tx", noTxData: "Tus registros no tienen mensajes enviados. Para medir la transmisión, manda de vez en cuando un mensaje corto a tu canal privado durante el recorrido.", noTxPos: "Tus mensajes enviados no tienen posición. Abre también el GPX del recorrido.",
     openTitle: "Añadir el registro de paquetes exportado de la app Meshtastic (.txt), o CSV y GPX. Cada archivo se suma a lo que ya hay en el mapa",
     clearTitle: "Quitar del mapa todo lo abierto",
     node: "Nodo", allNodes: "Todos los nodos", view: "Vista",
@@ -1706,9 +1706,9 @@ function drawMap(fit, fromZoom) {
   $("lgTx").hidden = cmp || !txVisible().length;
   // recorridos, nodos y saltos solo salen con registros propios, y nunca en Transmisión
   const own = hasOwnData();
-  $("lgNode").hidden = txv || !own;
+  $("lgNode").hidden = !own;
   // GPX y nodo van del mismo azul: una sola entrada «Recorrido»
-  $("lgTrack").hidden = txv || !tracks.length;
+  $("lgTrack").hidden = !tracks.length;
   $("lgGpx").hidden = true;
 
   // emisores
@@ -2245,7 +2245,7 @@ async function loadCommunity() {
     const data = await r.json();
     dropCommunity();
     $("ageWrap").hidden = false; setCommBtn(true);
-    if (!data || !Array.isArray(data.cells) || !data.cells.length) { say(t("commEmpty")); mapDirty = true; dirtyRender = true; refreshFromSelect(); if (map) drawMap(true); return; }
+    if (!data || !Array.isArray(data.cells) || !data.cells.length) { say(t("commEmpty")); mapDirty = true; dirtyRender = true; refreshFromSelect(); if (map) drawMap(false); return; }
     await addCoverage(data, t("commName"), true);
   } catch (e) { say(t("commErr", e.message)); setCommBtn(hasCommunity()); }
 }
@@ -2262,7 +2262,7 @@ function toggleCommunity() {
   if (!commOn) return loadCommunity();
   dropCommunity(); setCommBtn(false);
   $("ageWrap").hidden = true;
-  mapDirty = true; dirtyRender = true; refreshFromSelect(); if (map) drawMap(true);
+  mapDirty = true; dirtyRender = true; refreshFromSelect(); if (map) drawMap(false);
 }
 // registros propios abiertos (lo del mapa de cobertura no cuenta: no se vuelve a exportar)
 function hasOwnData() {
@@ -2323,7 +2323,8 @@ async function addCoverage(data, name, community) {
     if (mapView !== "tx") mapView = "grid";
     showView(); saveMapPrefs();
     if (!map) await startMap();
-    mapDirty = true; refreshFromSelect(); dirtyRender = true; drawMap(true);
+    // el mapa de cobertura no mueve el mapa (solo se encuadra la primera vez, al arrancar o tras limpiar)
+    mapDirty = true; refreshFromSelect(); dirtyRender = true; drawMap(community ? !mapFitted : true);
 }
 
 /* ---------- abrir un GPX ---------- */
@@ -2504,7 +2505,11 @@ $("vCmp").addEventListener("click", () => setView("cmp"));
 $("vTx").addEventListener("click", () => viewBtn("tx"));
 // «Ver Rx / Tx»: cambian la vista de tus registros sin tocar el mapa de cobertura
 $("oRx").addEventListener("click", () => setView("grid"));
-$("oTx").addEventListener("click", () => setView("tx"));
+$("oTx").addEventListener("click", () => {
+  setView("tx");
+  // sin mensajes enviados colocados no hay nada que pintar: se explica por qué
+  if (!txVisible().length && !fileTxCells.some(x => !x.community)) say(t(fileTx.length ? "noTxPos" : "noTxData"), 15000);
+});
 for (const id of ["cmpA", "cmpB"]) $(id).addEventListener("change", e => { cmpPick[id] = Number(e.target.value); mapDirty = true; dirtyRender = true; if (map) drawMap(false); });
 // sin deslizador de saltos: siempre se cuentan todos
 function showHops() {}
